@@ -193,7 +193,7 @@ body {
 ======================================== */
 #board-wrap {
   padding: 4px;
-  margin-top: 16px;
+  margin-top: 30px;
 }
 
 #board {
@@ -234,11 +234,18 @@ body {
   border-color: rgba(74,90,170,0.7);
 }
 
+@keyframes selected-pulse {
+  0%   { box-shadow: 0 0 0 2px #f1c40f, 0 0 8px #f1c40f; }
+  50%  { box-shadow: 0 0 0 3px #f1c40f, 0 0 18px #f1c40f; }
+  100% { box-shadow: 0 0 0 2px #f1c40f, 0 0 8px #f1c40f; }
+}
+
 .cell.selected {
   border-color: #f1c40f;
   border-width: 3px;
   box-shadow: 0 0 0 2px #f1c40f, 0 0 14px #f1c40f;
   background: rgba(241, 196, 15, 0.18);
+  animation: selected-pulse 1.2s ease-in-out infinite;
 }
 
 .cell.merge-target {

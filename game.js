@@ -1833,6 +1833,7 @@ let evDrag = {
   fromIdx: null,
   ghost: null,
   tapHandled: false,
+  selectedByDrag: false, // ドラッグ開始時に選択したフラグ（2タップ生成を防ぐ）
 };
 
 let mainGameStarted = false; // チュートリアル → メインゲーム移行済みフラグ
@@ -2707,6 +2708,8 @@ function handleAnyGenTap(i) {
 
   // 2タップ：選択中→生成（選択・ナビヒント維持） / 未選択→選択
   if (eventState.selectedCell === i) {
+    // ドラッグで選択された直後のリリースは生成しない（ドラッグ=選択のみ）
+    if (evDrag.selectedByDrag) { evDrag.selectedByDrag = false; return; }
     // 選択はそのまま・ナビヒントも維持して生成
     if (isFireGen) onEventFireGenTap(i);
     else           onEventGenTap(i);
@@ -3225,6 +3228,25 @@ function startEvDrag(e, fromIdx) {
     if (step.type === 'merge_focus' && item.isEventGen) return;
   }
 
+  // ドラッグ開始時に選択状態にする（まだ選択されていない場合）
+  evDrag.selectedByDrag = false;
+  if (item.isEventGen) {
+    if (eventState.selectedCell !== fromIdx) {
+      evDrag.selectedByDrag = true;
+      eventState.selectedCell = fromIdx;
+      if (item.isFireGen) showNaviHintForFireGen(item, true);
+      else showNaviHintForGen(item.genLevel ?? 0, true);
+      renderEventBoard();
+    }
+  } else if (!item.isFog) {
+    if (eventState.selectedCell !== fromIdx) {
+      evDrag.selectedByDrag = true;
+      eventState.selectedCell = fromIdx;
+      showNaviHintForItem(item, true);
+      renderEventBoard();
+    }
+  }
+
   e.preventDefault();
   evDrag.active = true;
   evDrag.fromIdx = fromIdx;
@@ -3251,6 +3273,25 @@ function startEvDragTouch(e, fromIdx) {
     if (step.type === 'request_focus') return;
     if (step.type === 'gen_focus') return;
     if (step.type === 'merge_focus' && item.isEventGen) return;
+  }
+
+  // ドラッグ開始時に選択状態にする（まだ選択されていない場合）
+  evDrag.selectedByDrag = false;
+  if (item.isEventGen) {
+    if (eventState.selectedCell !== fromIdx) {
+      evDrag.selectedByDrag = true;
+      eventState.selectedCell = fromIdx;
+      if (item.isFireGen) showNaviHintForFireGen(item, true);
+      else showNaviHintForGen(item.genLevel ?? 0, true);
+      renderEventBoard();
+    }
+  } else if (!item.isFog) {
+    if (eventState.selectedCell !== fromIdx) {
+      evDrag.selectedByDrag = true;
+      eventState.selectedCell = fromIdx;
+      showNaviHintForItem(item, true);
+      renderEventBoard();
+    }
   }
 
   e.preventDefault();
@@ -3397,7 +3438,8 @@ function endEvDrag(x, y) {
         return;
       }
       if (eventState.selectedCell === fromIdx) {
-        // 同一アイテム再タップ → 選択・ナビヒント維持
+        // ドラッグで選択された直後のリリース or 同一アイテム再タップ → 選択・ナビヒント維持
+        evDrag.selectedByDrag = false;
         return;
       }
       eventState.selectedCell = fromIdx;
