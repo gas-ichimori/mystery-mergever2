@@ -1833,6 +1833,9 @@ let evDrag = {
   fromIdx: null,
   ghost: null,
   tapHandled: false,
+  startX: 0,
+  startY: 0,
+  hasMoved: false, // 指/マウスが閾値以上動いたか（ドラッグ vs タップ判定）
 };
 
 let mainGameStarted = false; // チュートリアル → メインゲーム移行済みフラグ
@@ -3237,6 +3240,9 @@ function startEvDrag(e, fromIdx) {
   evDrag.active = true;
   evDrag.fromIdx = fromIdx;
   evDrag.tapHandled = false;
+  evDrag.startX = e.clientX;
+  evDrag.startY = e.clientY;
+  evDrag.hasMoved = false;
   createEvGhost(e.clientX, e.clientY, fromIdx);
   document.addEventListener('mousemove', onEvDragMove);
   document.addEventListener('mouseup', onEvDragEnd);
@@ -3274,6 +3280,9 @@ function startEvDragTouch(e, fromIdx) {
   evDrag.fromIdx = fromIdx;
   evDrag.tapHandled = false;
   const t = e.touches[0];
+  evDrag.startX = t.clientX;
+  evDrag.startY = t.clientY;
+  evDrag.hasMoved = false;
   createEvGhost(t.clientX, t.clientY, fromIdx);
   document.addEventListener('touchmove', onEvDragMoveTouch, { passive: false });
   document.addEventListener('touchend', onEvDragEndTouch);
@@ -3323,6 +3332,10 @@ function createEvGhost(x, y, fromIdx) {
 
 function onEvDragMove(e) {
   if (!evDrag.ghost) return;
+  if (!evDrag.hasMoved) {
+    const dx = e.clientX - evDrag.startX, dy = e.clientY - evDrag.startY;
+    if (dx * dx + dy * dy > 25) evDrag.hasMoved = true; // 5px閾値
+  }
   evDrag.ghost.style.left = e.clientX + 'px';
   evDrag.ghost.style.top  = e.clientY + 'px';
   highlightEvDropTarget(e.clientX, e.clientY);
@@ -3332,6 +3345,10 @@ function onEvDragMoveTouch(e) {
   e.preventDefault();
   if (!evDrag.ghost) return;
   const t = e.touches[0];
+  if (!evDrag.hasMoved) {
+    const dx = t.clientX - evDrag.startX, dy = t.clientY - evDrag.startY;
+    if (dx * dx + dy * dy > 25) evDrag.hasMoved = true; // 5px閾値
+  }
   evDrag.ghost.style.left = t.clientX + 'px';
   evDrag.ghost.style.top  = t.clientY + 'px';
   highlightEvDropTarget(t.clientX, t.clientY);
@@ -3397,6 +3414,9 @@ function endEvDrag(x, y) {
 
     // 通常アイテムのタップ（touch では click が来ないためここで処理）
     if (item && !item.isFog) {
+      // 指を動かしていた場合はドラッグ扱い → 選択しない（ナビヒントは startEvDragTouch で表示済み）
+      if (evDrag.hasMoved) { renderEventBoard(); return; }
+
       const tutStep = currentTutStep();
       if (tutStep && tutStep.type !== 'merge_focus') { renderEventBoard(); return; }
       if (isGenMergeTutActive()) { renderEventBoard(); return; }
@@ -3470,21 +3490,10 @@ function endEvDrag(x, y) {
     eventState.board[fromIdx] = toItem;
   }
 
-  // 選択中アイテム/ジェネレーターはドラッグ後も選択を維持
-  // 選択中のタイル自身を移動した場合は新位置を追跡
-  if (eventState.selectedCell === fromIdx) {
-    if (!toItem) {
-      eventState.selectedCell = toIdx; // 空きセルへ移動 → 新位置を選択中に
-    } else {
-      eventState.selectedCell = null;  // マージ or 入れ替え → 選択解除
-      hideNaviHint();
-    }
-  } else {
-    // 別のタイルをドラッグ中 → 選択中タイルが残っていれば維持
-    const _prevSelItem = eventState.selectedCell !== null ? eventState.board[eventState.selectedCell] : null;
-    if (!_prevSelItem) {
-      eventState.selectedCell = null;
-    }
+  // ドラッグ後は選択状態をリセット（残像・誤マージ防止）
+  if (eventState.selectedCell !== null) {
+    eventState.selectedCell = null;
+    hideNaviHint();
   }
   renderEventBoard();
   renderEventRequest(); // 依頼達成可否を更新
