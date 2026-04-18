@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Mystery Merge Puzzle</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ヘッダー UI -->
+  <div id="header">
+    <div id="energy-wrap">
+      <span class="label">⚡</span>
+      <span id="energy-text">100</span>
+      <span id="energy-timer"></span>
+    </div>
+    <div id="currency-wrap">
+      <span id="coin-display">💰 0</span>
+      <span id="diamond-display">💎 0</span>
+    </div>
+  </div>
+
+  <!-- リクエスト表示 -->
+  <div id="request-panel">
+    <div id="request-label">依頼</div>
+  </div>
+
+  <!-- ゲームボード -->
+  <div id="board-wrap">
+    <div id="board"></div>
+  </div>
+
+  <!-- ジェネレーターパネル -->
+  <div id="generator-panel">
+    <div id="generator-label-row">
+      <button id="settings-btn" title="設定">⚙️</button>
+      <span id="generator-label">ジェネレーター</span>
+      <button id="event-btn">🗺️ イベント</button>
+      <button id="catalog-btn" class="hidden-btn">📖 図鑑</button>
+      <button id="shop-btn" class="hidden-btn">🛒 ショップ</button>
+    </div>
+    <div id="generators"></div>
+  </div>
+
+  <!-- 設定ページ -->
+  <div id="settings-screen" class="hidden">
+    <div id="settings-header">
+      <button id="settings-close">✕ 閉じる</button>
+      <span id="settings-title">設定</span>
+    </div>
+    <div id="settings-icons">
+      <button class="settings-icon-btn" id="settings-catalog-btn">
+        <span class="settings-icon-emoji">📖</span>
+        <span class="settings-icon-label">アイテムリスト</span>
+      </button>
+      <button class="settings-icon-btn" id="settings-shop-btn">
+        <span class="settings-icon-emoji">🛒</span>
+        <span class="settings-icon-label">ショップ</span>
+      </button>
+      <button class="settings-icon-btn" id="settings-characters-btn">
+        <span class="settings-icon-emoji">👥</span>
+        <span class="settings-icon-label">登場人物</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- アイテムリストページ -->
+  <div id="catalog-screen" class="hidden">
+    <div id="catalog-header">
+      <button id="catalog-close">✕ 閉じる</button>
+      <span id="catalog-title">アイテムリスト</span>
+    </div>
+    <div id="catalog-gen-tabs"></div>
+    <div id="catalog-list"></div>
+  </div>
+
+  <!-- ショップ画面 -->
+  <div id="shop-screen" class="hidden">
+    <div id="shop-header">
+      <button id="shop-close">✕ 閉じる</button>
+      <span id="shop-title">🛒 ショップ</span>
+    </div>
+    <div id="shop-list"></div>
+  </div>
+
+  <!-- 登場人物ページ -->
+  <div id="characters-screen" class="hidden">
+    <div id="characters-header">
+      <button id="characters-close">✕ 閉じる</button>
+      <span id="characters-title">👥 登場人物</span>
+    </div>
+    <div id="characters-list"></div>
+  </div>
+
+  <!-- アイテム使用モーダル -->
+  <div id="use-modal" class="hidden">
+    <div id="use-modal-box">
+      <div id="use-item-icon"></div>
+      <div id="use-item-name"></div>
+      <div id="use-item-desc"></div>
+      <div id="use-modal-btns">
+        <button id="use-btn">使用する</button>
+        <button id="cancel-btn">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- チュートリアルオーバーレイ（blocking_msgフェーズ時に盤面を覆う） -->
+  <div id="tutorial-overlay" class="hidden"></div>
+  <!-- チュートリアルメッセージパネル -->
+  <div id="tutorial-panel" class="hidden">
+    <div id="tutorial-char-wrap"><img id="tutorial-char" src="img/image_merge_navi_chara.png" alt="ナビキャラ" /></div>
+    <div id="tutorial-panel-text">
+      <div id="tutorial-msg-text"></div>
+      <div id="tutorial-tap-hint">▼ タップで続ける</div>
+    </div>
+  </div>
+
+  <!-- ナビゲーターヒントパネル（非ブロッキング・自動消去） -->
+  <div id="navi-hint-panel" class="hidden">
+    <div id="navi-hint-char-wrap"><img src="img/image_merge_navi_chara.png" alt="ナビ"></div>
+    <div id="navi-hint-body">
+      <div id="navi-hint-text"></div>
+      <button id="navi-lv-btn" class="hidden">
+        <span id="navi-lv-label">1⚡</span>
+        <span id="navi-lv-crown"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- イベントマップ① 画面 -->
+  <div id="event-screen" class="hidden">
+    <div id="event-header-bar">
+      <div id="event-nav">
+        <button id="event-close">← 戻る</button>
+        <span id="event-map-title">🗺️ イベントマップ①</span>
+      </div>
+      <div id="event-currency">
+        <span id="ev-energy">⚡100</span>
+        <span id="ev-coin">💰0</span>
+        <span id="ev-diamond">💎0</span>
+        <button id="ev-settings-btn" title="設定">⚙️</button>
+      </div>
+    </div>
+    <div id="event-req-panel"></div>
+    <div id="event-board-wrap">
+      <div id="event-board"></div>
+    </div>
+    <!-- event-gen-panel は非表示（ジェネレーターはボード上タイルで操作） -->
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
