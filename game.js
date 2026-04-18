@@ -1483,15 +1483,15 @@ document.getElementById('debug-infinite-diamond').addEventListener('change', fun
 });
 
 document.getElementById('debug-gen-lv-up').addEventListener('click', () => {
-  // メモ帳ジェネレーターを1段階Lvアップ（最大Lv=3 genLevel=3まで）
+  // パワーレベルをLv1→Lv2→Lv4→Lv8→Lv16→Lv1とループ
   const genTile = eventState.board.find(c => c && c.isEventGen && !c.isFireGen);
   if (!genTile) { showToast('メモ帳ジェネレーターがありません'); return; }
-  const maxGenLv = EVENT_GEN_IMAGES.length - 1;
-  if ((genTile.genLevel ?? 0) >= maxGenLv) { showToast('最大レベルです'); return; }
-  genTile.genLevel = (genTile.genLevel ?? 0) + 1;
-  eventState.genPowerLevel = getGenMaxAvailablePowerLv(genTile.genLevel);
-  showToast(`メモ帳ジェネレーター Lv${genTile.genLevel + 1} に！`);
+  const next = (eventState.genPowerLevel + 1) % POWER_COSTS.length;
+  eventState.genPowerLevel = next;
+  const cost = POWER_COSTS[next];
+  showToast(`出力Lv → ${cost}⚡`);
   renderEventBoard();
+  renderEventHeader();
 });
 
 document.getElementById('debug-firegen-lv-up').addEventListener('click', () => {
