@@ -1382,10 +1382,11 @@ function showToast(msg) {
   const el = document.createElement('div');
   el.textContent = msg;
   el.style.cssText = `
-    position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
-    background: rgba(0,0,0,0.8); color: #fff; padding: 8px 18px;
-    border-radius: 20px; font-size: 14px; z-index: 100;
-    pointer-events: none; white-space: nowrap;
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.82); color: #fff; padding: 6px 14px;
+    border-radius: 16px; font-size: 12px; z-index: 500;
+    pointer-events: none; max-width: 80vw; text-align: center;
+    white-space: normal; word-break: break-all;
   `;
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 2000);
@@ -1496,9 +1497,13 @@ document.getElementById('debug-gen-lv-up').addEventListener('click', () => {
 
 document.getElementById('debug-firegen-lv-up').addEventListener('click', () => {
   if (!eventState.fireGenUnlocked) { showToast('製造機はまだ解放されていません'); return; }
-  if (eventState.seizoGenLevel >= SEIZO_GEN_IMAGES.length - 1) { showToast('最大レベルです'); return; }
-  eventState.seizoGenLevel++;
-  showToast(`製造機ジェネレーター Lv${eventState.seizoGenLevel + 1} に！`);
+  // 最初の製造機タイルをループLvアップ
+  const fireTile = eventState.board.find(c => c && c.isFireGen);
+  if (!fireTile) { showToast('製造機タイルがありません'); return; }
+  const maxLv = SEIZO_GEN_IMAGES.length - 1;
+  fireTile.seizoLevel = ((fireTile.seizoLevel ?? 0) + 1) % (maxLv + 1);
+  eventState.seizoGenLevel = fireTile.seizoLevel;
+  showToast(`製造機ジェネレーター Lv${fireTile.seizoLevel + 1} に！`);
   renderEventBoard();
 });
 
@@ -2190,14 +2195,22 @@ function renderEventBoard() {
         }).join('');
 
         if (item.isFireGen) {
-          // 製造機ジェネレーター
-          const sLv  = eventState.seizoGenLevel ?? 0;
+          // 製造機ジェネレーター（per-tile seizoLevel）
+          const sLv  = item.seizoLevel ?? eventState.seizoGenLevel ?? 0;
           const sImg = SEIZO_GEN_IMAGES[Math.min(sLv, SEIZO_GEN_IMAGES.length - 1)];
           cell.innerHTML = `
             <img class="item-img item-img-lg" src="${sImg}" alt="製造機">
             <div class="gen-stars">${starsHtml}</div>
             <span class="gen-energy-badge">⚡</span>
           `;
+          // 選択・マージターゲット表示
+          if (!step) {
+            if (i === eventState.selectedCell) cell.classList.add('selected');
+            if (selItem && selItem.isFireGen && i !== eventState.selectedCell &&
+                (selItem.seizoLevel ?? 0) === sLv) {
+              cell.classList.add('merge-target');
+            }
+          }
           if (step) cell.classList.add('tutorial-dim');
           else if (isGenMergeTutActive()) cell.classList.add('tutorial-dim');
           cell.addEventListener('touchstart', (e) => startEvDragTouch(e, i), { passive: false });
@@ -2570,14 +2583,24 @@ function renderEventRequest() {
 // ========================================
 // モバイル用ジェネレーター2タップシステム
 // ========================================
-// モバイル用メモ帳ジェネレータータップ（1タップで生成）
+// 統一ジェネレータータップハンドラー
+// 1回目タップ → 選択、2回目タップ（選択中）→ アイテム生成
+// チュートリアル中・マージ操作は別処理
 // ========================================
-function handleGenTapMobile(i) {
+function handleAnyGenTap(i) {
   const item = eventState.board[i];
-  if (!item || !item.isEventGen || item.isFireGen) return;
+  if (!item || !item.isEventGen) return;
+  const isFireGen = item.isFireGen;
 
-  // ジェネレーターマージチュートリアル中：選択のみ（マージ操作用）
-  if (isGenMergeTutActive()) {
+  // メインチュートリアル中（gen_focus）→ 選択なしで直接生成
+  const step = currentTutStep();
+  if (step) {
+    if (!isFireGen) onEventGenTap(i);
+    return;
+  }
+
+  // ジェネレーターマージチュートリアル中（メモ帳のみ）
+  if (!isFireGen && isGenMergeTutActive()) {
     if (eventState.selectedCell !== null && eventState.selectedCell !== i) {
       const selItem = eventState.board[eventState.selectedCell];
       if (selItem && selItem.isEventGen && !selItem.isFireGen &&
@@ -2592,14 +2615,46 @@ function handleGenTapMobile(i) {
     return;
   }
 
-  // 1タップでアイテム生成
-  onEventGenTap(i);
+  // 他のジェネレーターが選択中 → マージ判定
+  if (eventState.selectedCell !== null && eventState.selectedCell !== i) {
+    const selItem = eventState.board[eventState.selectedCell];
+    if (selItem && selItem.isEventGen) {
+      if (!isFireGen && !selItem.isFireGen &&
+          (selItem.genLevel ?? 0) === (item.genLevel ?? 0)) {
+        mergeEventGenerators(eventState.selectedCell, i);
+        eventState.selectedCell = null;
+        return;
+      }
+      if (isFireGen && selItem.isFireGen &&
+          (selItem.seizoLevel ?? 0) === (item.seizoLevel ?? 0)) {
+        mergeFireGenerators(eventState.selectedCell, i);
+        eventState.selectedCell = null;
+        return;
+      }
+    }
+    // 種類違い or レベル違いなら選択切替
+    eventState.selectedCell = i;
+    if (!isFireGen) showNaviHintForGen(item.genLevel ?? 0, true);
+    renderEventBoard();
+    return;
+  }
+
+  // 2タップ：選択中→生成 / 未選択→選択
+  if (eventState.selectedCell === i) {
+    eventState.selectedCell = null;
+    hideNaviHint();
+    if (isFireGen) onEventFireGenTap(i);
+    else           onEventGenTap(i);
+  } else {
+    eventState.selectedCell = i;
+    if (!isFireGen) showNaviHintForGen(item.genLevel ?? 0, true);
+    renderEventBoard();
+  }
 }
 
-// モバイル用製造機ジェネレータータップ（1タップで生成）
-function handleFireGenTapMobile(i) {
-  onEventFireGenTap(i);
-}
+// 後方互換ラッパー
+function handleGenTapMobile(i)     { handleAnyGenTap(i); }
+function handleFireGenTapMobile(i) { handleAnyGenTap(i); }
 
 // ジェネレータータップ
 // ジェネレーターセルから最も近い空きセルを返す（Manhattanデイスタンス）
@@ -2771,29 +2826,7 @@ function onEventCellClick(index) {
 
   if (item.isEventGen) {
     if (evDrag.tapHandled) { evDrag.tapHandled = false; return; }
-    if (item.isFireGen) { onEventFireGenTap(index); return; }
-
-    // チュートリアル完了後: ジェネレータータイルの選択・マージ処理
-    const stepNow = currentTutStep();
-    if (!stepNow) {
-      if (eventState.selectedCell !== null && eventState.selectedCell !== index) {
-        const sel = eventState.board[eventState.selectedCell];
-        if (sel && sel.isEventGen && !sel.isFireGen &&
-            (sel.genLevel ?? 0) === (item.genLevel ?? 0)) {
-          mergeEventGenerators(eventState.selectedCell, index);
-          return;
-        }
-      }
-      // 同種タイルが複数ある場合は選択、そうでなければタップでアイテム生成
-      const genTileCount = eventState.board.filter(c => c && c.isEventGen && !c.isFireGen).length;
-      if (genTileCount >= 2) {
-        eventState.selectedCell = (eventState.selectedCell === index) ? null : index;
-        renderEventBoard();
-        return;
-      }
-    }
-
-    onEventGenTap(index);
+    handleAnyGenTap(index);
     return;
   }
 
@@ -2987,33 +3020,71 @@ function unlockFireGenerator() {
   eventState.seizoGenLevel   = 0; // Lv1からスタート
   const emptyIdx = eventState.board.findIndex(c => c === null);
   if (emptyIdx === -1) { showToast('ボードが満杯で製造機を配置できません'); return; }
-  eventState.board[emptyIdx] = { isEventGen: true, isFireGen: true };
+  eventState.board[emptyIdx] = { isEventGen: true, isFireGen: true, seizoLevel: 0 };
   showToast('製造機ジェネレーター解放！');
   renderEventBoard();
   renderEventRequest();
 }
 
-// 製造機ジェネレーターLvアップ判定
+// 製造機ジェネレーターLvアップ判定（マージ用タイルを追加配置）
 function checkSeizoGenLevelUp(discoveredStage) {
   for (const trig of SEIZO_GEN_LEVELUP_TRIGGERS) {
     if (discoveredStage === trig.triggerStage &&
-        !eventState.seizoLvTriggered.has(trig.triggerStage) &&
-        eventState.seizoGenLevel < trig.toLevel - 1) {
+        !eventState.seizoLvTriggered.has(trig.triggerStage)) {
+      // 既存の製造機タイルを探す
+      const existingIdx = eventState.board.findIndex(c => c && c.isFireGen);
+      if (existingIdx === -1) break;
+      const existingTile = eventState.board[existingIdx];
+      const currentLv = existingTile.seizoLevel ?? 0;
+      // 同Lvの複製タイルを近くに配置（マージして昇格させる）
+      const emptyIdx = findNearestEmptyEventCell(existingIdx);
+      if (emptyIdx === -1) { showToast('ボードが満杯で製造機タイルを置けません'); break; }
+      eventState.board[emptyIdx] = { isEventGen: true, isFireGen: true, seizoLevel: currentLv };
       eventState.seizoLvTriggered.add(trig.triggerStage);
-      eventState.seizoGenLevel = trig.toLevel - 1; // 0-indexed
-      const lvDisp = eventState.seizoGenLevel + 1;
-      showToast(`製造機 Lv${lvDisp} にアップ！`);
+      showToast('製造機タイルが増えた！マージしてLvアップ！');
       renderEventBoard();
       break;
     }
   }
 }
 
+// ========================================
+// 製造機ジェネレータータイル同士のマージ（Lvアップ）
+// ========================================
+function mergeFireGenerators(fromIdx, toIdx) {
+  const toItem   = eventState.board[toIdx];
+  const newLevel = (toItem.seizoLevel ?? 0) + 1;
+  const maxLevel = SEIZO_GEN_IMAGES.length - 1;
+  if (newLevel > maxLevel) { showToast('製造機は最大レベルです'); return; }
+  eventState.board[toIdx]   = { isEventGen: true, isFireGen: true, seizoLevel: newLevel };
+  eventState.board[fromIdx] = null;
+  eventState.selectedCell   = null;
+  // グローバルレベルも最高値に更新
+  eventState.seizoGenLevel = Math.max(eventState.seizoGenLevel, newLevel);
+  showToast(`製造機ジェネレーター Lv${newLevel + 1} にレベルアップ！`);
+  addEnergy(25, '製造機Lvアップボーナス！');
+
+  setTimeout(() => {
+    const cells = document.querySelectorAll('#event-board .cell');
+    cells[toIdx]?.classList.add('merge-pop');
+    setTimeout(() => cells[toIdx]?.classList.remove('merge-pop'), 300);
+  }, 10);
+
+  fillEventRequests();
+  renderEventBoard();
+  renderEventRequest();
+  renderEventHeader();
+}
+
 // 製造機ジェネレータータップ（tappedCellIdx: タップされたセルのインデックス）
 function onEventFireGenTap(tappedCellIdx = null) {
   if (!debugState.infiniteEnergy && state.energy < 1) { showToast('体力が足りません'); return; }
 
-  const cfg = SEIZO_GEN_CONFIG[eventState.seizoGenLevel] ?? SEIZO_GEN_CONFIG[0];
+  // タップされたタイルの seizoLevel を使う（なければグローバル値）
+  const tileLevel = (tappedCellIdx !== null && eventState.board[tappedCellIdx]?.seizoLevel != null)
+    ? eventState.board[tappedCellIdx].seizoLevel
+    : eventState.seizoGenLevel;
+  const cfg = SEIZO_GEN_CONFIG[tileLevel] ?? SEIZO_GEN_CONFIG[0];
   const outStage = cfg.outStage;
 
   // Lucky判定：確率でアイテム数が増える（倍率の整数部＋端数は確率で追加）
@@ -3219,7 +3290,7 @@ function endEvDrag(x, y) {
     const item = eventState.board[fromIdx];
     if (item && item.isEventGen) {
       evDrag.tapHandled = true;
-      if (item.isFireGen) { if (isTouchDevice) { handleFireGenTapMobile(fromIdx); } else { onEventFireGenTap(fromIdx); } return; }
+      if (item.isFireGen) { handleAnyGenTap(fromIdx); return; }
       // ジェネレーターマージチュートリアル中は選択のみ（生成しない）
       if (isGenMergeTutActive()) {
         eventState.selectedCell = (eventState.selectedCell === fromIdx) ? null : fromIdx;
@@ -3250,6 +3321,11 @@ function endEvDrag(x, y) {
              (fromItem.genLevel ?? 0) === (toItem.genLevel ?? 0)) {
     // メモ帳ジェネレータータイル同士のマージ → Lvアップ
     mergeEventGenerators(fromIdx, toIdx);
+    return;
+  } else if (fromItem.isFireGen && toItem.isFireGen &&
+             (fromItem.seizoLevel ?? 0) === (toItem.seizoLevel ?? 0)) {
+    // 製造機ジェネレータータイル同士のマージ → Lvアップ
+    mergeFireGenerators(fromIdx, toIdx);
     return;
   } else if (!fromItem.isEventGen && evItemCanMerge(fromItem, toItem)) {
     // 通常/霧アイテムのマージ（ロック済み霧はターゲット不可）
