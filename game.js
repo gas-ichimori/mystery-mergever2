@@ -1447,10 +1447,12 @@ document.getElementById('characters-close').addEventListener('click', () => {
 // 設定ページ
 // ========================================
 document.getElementById('settings-btn').addEventListener('click', () => {
+  hideNaviHint();
   document.getElementById('settings-screen').classList.remove('hidden');
 });
 
 document.getElementById('ev-settings-btn').addEventListener('click', () => {
+  hideNaviHint();
   document.getElementById('settings-screen').classList.remove('hidden');
 });
 
@@ -1513,6 +1515,7 @@ document.getElementById('settings-close').addEventListener('click', () => {
 });
 
 document.getElementById('settings-catalog-btn').addEventListener('click', () => {
+  hideNaviHint();
   document.getElementById('settings-screen').classList.add('hidden');
   catalogCurrentChain = 'event';
   renderCatalog();
@@ -1520,12 +1523,14 @@ document.getElementById('settings-catalog-btn').addEventListener('click', () => 
 });
 
 document.getElementById('settings-shop-btn').addEventListener('click', () => {
+  hideNaviHint();
   document.getElementById('settings-screen').classList.add('hidden');
   renderShop();
   document.getElementById('shop-screen').classList.remove('hidden');
 });
 
 document.getElementById('settings-characters-btn').addEventListener('click', () => {
+  hideNaviHint();
   document.getElementById('settings-screen').classList.add('hidden');
   renderCharacters();
   document.getElementById('characters-screen').classList.remove('hidden');
@@ -2153,13 +2158,15 @@ function showNaviHintForFireGen(item, persistent = false) {
   _showNaviHintPanel(text, !isMax, persistent);
 }
 
-function showNaviHintForItem(item) {
+function showNaviHintForItem(item, persistent = false) {
   const chainInfo = item.chainId !== undefined ? CHAINS[item.chainId] : EVENT_CHAIN;
+  const idx  = item.stage - 1;
+  const name = chainInfo.stageNames?.[idx] ?? chainInfo.stages?.[idx] ?? 'アイテム';
   const isMax = item.stage >= chainInfo.stages.length;
   const text = isMax
-    ? '？？？？は、最大Lvに達しています'
-    : '？？？？をマージさせて次のレベルにアップしましょう。';
-  _showNaviHintPanel(text, false);
+    ? `${name}は、最大Lvに達しています`
+    : `${name}をマージさせて次のレベルにアップしましょう。`;
+  _showNaviHintPanel(text, false, persistent);
 }
 
 // 後方互換（既存の showNaviHint 呼び出し箇所があれば利用）
@@ -2356,14 +2363,8 @@ function renderEventBoard() {
           // ジェネレーターマージ誘導中: 通常アイテムはすべてディム
           cell.classList.add('tutorial-dim');
         }
-        cell.addEventListener('mousedown', (e) => {
-          if (!isGenMergeTutActive()) showNaviHintForItem(item);
-          startEvDrag(e, i);
-        });
-        cell.addEventListener('touchstart', (e) => {
-          if (!isGenMergeTutActive()) showNaviHintForItem(item);
-          startEvDragTouch(e, i);
-        }, { passive: false });
+        cell.addEventListener('mousedown', (e) => { startEvDrag(e, i); });
+        cell.addEventListener('touchstart', (e) => { startEvDragTouch(e, i); }, { passive: false });
       }
     }
 
@@ -2914,20 +2915,21 @@ function onEventCellClick(index) {
       doEventMerge(eventState.selectedCell, index);
       return;
     }
-    // 霧アイテムは選択可（ターゲットとして使う）
+    // 別アイテムへ選択切替 + ナビヒント更新
     eventState.selectedCell = index;
+    if (!item.isFog) showNaviHintForItem(item, true);
     renderEventBoard();
     return;
   }
 
   if (eventState.selectedCell === index) {
-    hideNaviHint();
-    eventState.selectedCell = null;
-    renderEventBoard();
+    // 同じアイテムをタップ → 選択・ナビヒント維持（ジェネレーターと同仕様）
     return;
   }
 
+  // 新しいアイテムを選択 + ナビヒント表示
   eventState.selectedCell = index;
+  if (!item.isFog) showNaviHintForItem(item, true);
   renderEventBoard();
 }
 
@@ -3057,6 +3059,7 @@ function mergeEventGenerators(fromIdx, toIdx) {
   eventState.board[toIdx]   = { isEventGen: true, genLevel: newLevel };
   eventState.board[fromIdx] = null;
   eventState.selectedCell   = null;
+  hideNaviHint(); // Lvアップ時はナビヒントを閉じる（特にLv2時）
   if (!isGenMergeTutActive()) {
     showToast(`第一章ジェネレーター Lv${newLevel + 1} にレベルアップ！`);
   }
@@ -3419,13 +3422,19 @@ function endEvDrag(x, y) {
     eventState.board[fromIdx] = toItem;
   }
 
-  // ジェネレーターが選択中の場合はスライド後も選択を維持
-  // 選択中ジェネレーター自身を移動した場合は新しい位置に追跡
-  if (eventState.selectedCell === fromIdx && fromItem && fromItem.isEventGen) {
-    eventState.selectedCell = toIdx; // 移動先を選択中に
+  // 選択中アイテム/ジェネレーターはドラッグ後も選択を維持
+  // 選択中のタイル自身を移動した場合は新位置を追跡
+  if (eventState.selectedCell === fromIdx) {
+    if (!toItem) {
+      eventState.selectedCell = toIdx; // 空きセルへ移動 → 新位置を選択中に
+    } else {
+      eventState.selectedCell = null;  // マージ or 入れ替え → 選択解除
+      hideNaviHint();
+    }
   } else {
+    // 別のタイルをドラッグ中 → 選択中タイルが残っていれば維持
     const _prevSelItem = eventState.selectedCell !== null ? eventState.board[eventState.selectedCell] : null;
-    if (!_prevSelItem || !_prevSelItem.isEventGen) {
+    if (!_prevSelItem) {
       eventState.selectedCell = null;
     }
   }
