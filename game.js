@@ -2639,10 +2639,9 @@ function handleAnyGenTap(i) {
     return;
   }
 
-  // 2タップ：選択中→生成 / 未選択→選択
+  // 2タップ：選択中→生成（選択・ナビヒント維持） / 未選択→選択
   if (eventState.selectedCell === i) {
-    eventState.selectedCell = null;
-    hideNaviHint();
+    // 選択はそのまま・ナビヒントも維持して生成
     if (isFireGen) onEventFireGenTap(i);
     else           onEventGenTap(i);
   } else {

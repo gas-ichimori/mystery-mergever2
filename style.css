@@ -1136,7 +1136,7 @@ body {
 ======================================== */
 #navi-hint-panel {
   position: fixed;
-  top: 60px;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   width: min(460px, 100vw);
