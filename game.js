@@ -139,6 +139,7 @@ let state = {
   chainInitialStages: {}, // チェーンごとの完了済み初期ステージ { chainId: Set<1|2|3> }
   recentlyCompletedStages: new Set(), // 直前の依頼完了で使ったステージ（次の補充で除外）
   permanentlyExcluded: new Set(),    // 二度と出さない依頼 "chainId-stage" 形式（Lv4-9完了済み）
+  usedOnceCharIds: new Set(),        // 1回出現したら二度と出さないキャラID（ミユなど）
   selectedCell: null,
   pendingUse: null,
   // 発見済みアイテム管理: discovered[chainId][stage] = true
@@ -905,8 +906,8 @@ const REQUESTERS = [
   { id: 5, name: '依頼人⑥', img: 'img/image_merge_order_chara_05.png' },
   // 第二章（id: 6-10）
   { id: 6,  name: 'ジン',   img: 'img/image_merge_order_chara_06.png' },
-  { id: 7,  name: 'ユウ',   img: 'img/image_merge_order_chara_07.png' },
-  { id: 8,  name: 'リナ',   img: 'img/image_merge_order_chara_08.png' },
+  { id: 7,  name: 'リナ',   img: 'img/image_merge_order_chara_07.png' },
+  { id: 8,  name: 'ユウ',   img: 'img/image_merge_order_chara_08.png' },
   { id: 9,  name: 'ハルト', img: 'img/image_merge_order_chara_09.png' },
   { id: 10, name: 'タツオ', img: 'img/image_merge_order_chara_10.png' },
 ];
@@ -952,6 +953,9 @@ function generateOneItem(excludeStages, lv4Only = false) {
   const unlocked = state.generators.filter(g => g.unlocked && g.chainId !== 8);
   if (unlocked.length === 0) return null;
 
+  // 依頼に絶対出さないアイテム（chain10のstage1とstage2）
+  const BLOCKED_ITEMS = new Set(['10-1', '10-2']);
+
   for (let attempt = 0; attempt < 60; attempt++) {
     const gen = unlocked[Math.floor(Math.random() * unlocked.length)];
     const chainIntroSet  = state.chainInitialStages[gen.chainId] || new Set();
@@ -964,6 +968,7 @@ function generateOneItem(excludeStages, lv4Only = false) {
       );
       if (candidates.length === 0) continue;
       const stage = candidates[Math.floor(Math.random() * candidates.length)];
+      if (BLOCKED_ITEMS.has(`${gen.chainId}-${stage}`)) continue;
       return { chainId: gen.chainId, stage, isInitial: true };
     } else {
       // イントロ完了済み or 2個目 → ティア設定に基づくLv4+
@@ -974,6 +979,7 @@ function generateOneItem(excludeStages, lv4Only = false) {
       const stage = Math.floor(Math.random() * (maxS - minS)) + minS;
       if (excludeStages.has(stage)) continue;
       if (state.permanentlyExcluded.has(`${gen.chainId}-${stage}`)) continue;
+      if (BLOCKED_ITEMS.has(`${gen.chainId}-${stage}`)) continue;
       return { chainId: gen.chainId, stage, isInitial: false };
     }
   }
@@ -1020,7 +1026,7 @@ function fillRequests() {
       ...state.requests.flatMap(r => r.items.map(it => it.stage)),
       ...extraExclude,
     ]);
-    const available = REQUESTERS.filter(r => !usedCharIds.has(r.id));
+    const available = REQUESTERS.filter(r => !usedCharIds.has(r.id) && !state.usedOnceCharIds.has(r.id));
     let retry = 0;
     while (state.requests.length < maxSlots && available.length > 0 && retry < 50) {
       const ci = Math.floor(Math.random() * available.length);
@@ -1156,6 +1162,12 @@ function completeRequest(index) {
       }
     }
   });
+
+  // 1回限りキャラクター（ミユ id:1）は完了後に永続除外
+  const ONCE_ONLY_CHAR_IDS = new Set([1]);
+  if (ONCE_ONLY_CHAR_IDS.has(req.characterId)) {
+    state.usedOnceCharIds.add(req.characterId);
+  }
 
   state.requests.splice(index, 1);
   fillRequests();
@@ -1390,8 +1402,8 @@ const CHARACTERS = [
   { img: 'img/image_merge_order_chara_04.png',  name: 'ミサキ',   age: '27歳', desc: '会社員' },
   { img: 'img/image_merge_order_chara_05.png',  name: 'シンジ',   age: '27歳', desc: '配達員' },
   { img: 'img/image_merge_order_chara_06.png',  name: 'ジン',     age: '39歳', desc: '不動産管理会社勤務' },
-  { img: 'img/image_merge_order_chara_07.png',  name: 'ユウ',     age: '10歳', desc: 'リナの子供' },
-  { img: 'img/image_merge_order_chara_08.png',  name: 'リナ',     age: '37歳', desc: 'シングルマザー' },
+  { img: 'img/image_merge_order_chara_07.png',  name: 'リナ',     age: '37歳', desc: 'シングルマザー' },
+  { img: 'img/image_merge_order_chara_08.png',  name: 'ユウ',     age: '10歳', desc: 'リナの子供' },
   { img: 'img/image_merge_order_chara_09.png',  name: 'ハルト',   age: '20歳', desc: '大学生' },
   { img: 'img/image_merge_order_chara_10.png',  name: 'タツオ',   age: '44歳', desc: '警備員' },
 ];
@@ -1399,7 +1411,19 @@ const CHARACTERS = [
 function renderCharacters() {
   const list = document.getElementById('characters-list');
   list.innerHTML = '';
-  CHARACTERS.forEach(c => {
+  CHARACTERS.forEach((c, idx) => {
+    // 第一章・第二章ラベルを挿入（ミユの前とジンの前）
+    if (idx === 1) {
+      const label = document.createElement('div');
+      label.className = 'character-chapter-label';
+      label.textContent = '第一章';
+      list.appendChild(label);
+    } else if (idx === 6) {
+      const label = document.createElement('div');
+      label.className = 'character-chapter-label';
+      label.textContent = '第二章';
+      list.appendChild(label);
+    }
     const card = document.createElement('div');
     card.className = 'character-card';
     card.innerHTML = `
@@ -1427,6 +1451,55 @@ document.getElementById('settings-btn').addEventListener('click', () => {
 
 document.getElementById('ev-settings-btn').addEventListener('click', () => {
   document.getElementById('settings-screen').classList.remove('hidden');
+});
+
+// ========================================
+// デバッグモード
+// ========================================
+const debugState = {
+  infiniteEnergy:  false,
+  infiniteCoin:    false,
+  infiniteDiamond: false,
+};
+
+document.getElementById('debug-btn').addEventListener('click', () => {
+  document.getElementById('debug-screen').classList.remove('hidden');
+});
+document.getElementById('debug-close').addEventListener('click', () => {
+  document.getElementById('debug-screen').classList.add('hidden');
+});
+
+document.getElementById('debug-infinite-energy').addEventListener('change', function() {
+  debugState.infiniteEnergy = this.checked;
+  if (this.checked) { state.energy = 99999; state.maxEnergy = 99999; renderEventHeader(); }
+});
+document.getElementById('debug-infinite-coin').addEventListener('change', function() {
+  debugState.infiniteCoin = this.checked;
+  if (this.checked) { state.coin = 9999999; renderEventHeader(); }
+});
+document.getElementById('debug-infinite-diamond').addEventListener('change', function() {
+  debugState.infiniteDiamond = this.checked;
+  if (this.checked) { state.diamond = 9999999; renderEventHeader(); }
+});
+
+document.getElementById('debug-gen-lv-up').addEventListener('click', () => {
+  // メモ帳ジェネレーターを1段階Lvアップ（最大Lv=3 genLevel=3まで）
+  const genTile = eventState.board.find(c => c && c.isEventGen && !c.isFireGen);
+  if (!genTile) { showToast('メモ帳ジェネレーターがありません'); return; }
+  const maxGenLv = EVENT_GEN_IMAGES.length - 1;
+  if ((genTile.genLevel ?? 0) >= maxGenLv) { showToast('最大レベルです'); return; }
+  genTile.genLevel = (genTile.genLevel ?? 0) + 1;
+  eventState.genPowerLevel = getGenMaxAvailablePowerLv(genTile.genLevel);
+  showToast(`メモ帳ジェネレーター Lv${genTile.genLevel + 1} に！`);
+  renderEventBoard();
+});
+
+document.getElementById('debug-firegen-lv-up').addEventListener('click', () => {
+  if (!eventState.fireGenUnlocked) { showToast('製造機はまだ解放されていません'); return; }
+  if (eventState.seizoGenLevel >= SEIZO_GEN_IMAGES.length - 1) { showToast('最大レベルです'); return; }
+  eventState.seizoGenLevel++;
+  showToast(`製造機ジェネレーター Lv${eventState.seizoGenLevel + 1} に！`);
+  renderEventBoard();
 });
 
 document.getElementById('settings-close').addEventListener('click', () => {
@@ -1697,7 +1770,7 @@ const TUTORIAL_STEPS = [
   { type: 'blocking_msg', text: 'ようこそ！\nここが"あなた"のオフィスです' },
   { type: 'blocking_msg', text: 'あなたは、新人"探偵"です' },
   { type: 'blocking_msg', text: 'これから、さまざまな"依頼"を\n解決してもらいます' },
-  { type: 'gen_focus',    text: 'まずは、"メモ帳"を\nタップしてみてください' },
+  { type: 'gen_focus',    text: 'まずは、"メモ帳"を\n２回タップしてみてください。' },
   { type: 'merge_focus',  text: '新しい"アイテム"が出ましたね？\nその同じ"アイテム"を重ねてみてください' },
   { type: 'blocking_msg', text: '重ねると新しい"アイテム"に\nなりましたね？' },
   { type: 'blocking_msg', text: '重ねた"アイテム"で\n"依頼"を解決することができます' },
@@ -1707,7 +1780,7 @@ const TUTORIAL_STEPS = [
   // 依頼解決後
   { type: 'blocking_msg', text: '依頼を解決すると、\n報酬がもらえます' },
   { type: 'blocking_msg', text: 'たくさんの依頼を解決してください' },
-  { type: 'blocking_msg', text: 'それでは、はじめましょう！' },
+  { type: 'blocking_msg', text: 'それでは、探偵業のはじまりです！' },
 ];
 
 let eventState = {
@@ -1956,9 +2029,11 @@ function cycleGenPowerLevel(genLevel) {
 // ナビゲーターヒント表示（非ブロッキング）
 // ========================================
 let naviHintTimer = null;
+let naviHintPersistent = false; // 持続表示中フラグ
 
 function hideNaviHint() {
   if (naviHintTimer) { clearTimeout(naviHintTimer); naviHintTimer = null; }
+  naviHintPersistent = false;
   document.getElementById('navi-hint-panel')?.classList.add('hidden');
 }
 
@@ -1971,15 +2046,19 @@ function _showNaviHintPanel(text, showLvBtn, persistent = false) {
   if (!isTutorialComplete() || isGenMergeTutActive()) return;
   const tutPanel = document.getElementById('tutorial-panel');
   if (tutPanel && !tutPanel.classList.contains('hidden')) return;
+  // 持続表示中（ジェネレーター選択など）は非持続の呼び出しを無視
+  if (naviHintPersistent && !persistent) return;
   textEl.textContent = text;
   if (lvBtn) lvBtn.classList.toggle('hidden', !showLvBtn);
   panel.classList.remove('hidden');
+  naviHintPersistent = persistent;
   if (naviHintTimer) clearTimeout(naviHintTimer);
   if (persistent) {
     naviHintTimer = null; // hideNaviHint() が呼ばれるまで表示し続ける
   } else {
     naviHintTimer = setTimeout(() => {
       panel.classList.add('hidden');
+      naviHintPersistent = false;
       naviHintTimer = null;
     }, 3000);
   }
@@ -2121,9 +2200,7 @@ function renderEventBoard() {
           `;
           if (step) cell.classList.add('tutorial-dim');
           else if (isGenMergeTutActive()) cell.classList.add('tutorial-dim');
-          cell.addEventListener('touchstart', (e) => {
-            e.preventDefault(); evDrag.tapHandled = true; onEventFireGenTap(i);
-          }, { passive: false });
+          cell.addEventListener('touchstart', (e) => startEvDragTouch(e, i), { passive: false });
           cell.addEventListener('mousedown', (e) => startEvDrag(e, i));
         } else {
           // メモ帳ジェネレーター
@@ -2149,8 +2226,14 @@ function renderEventBoard() {
             else                          cell.classList.add('tutorial-dim');
           } else if (isGenMergeTutActive()) {
             const gmStep = currentGenMergeTutStep();
-            if (gmStep?.type === 'focus' && !item.isFireGen) cell.classList.add('tutorial-spotlight');
-            else cell.classList.add('tutorial-dim');
+            if (gmStep?.type === 'focus' && !item.isFireGen) {
+              cell.classList.add('tutorial-spotlight');
+            } else if (gmStep?.type === 'msg' && !item.isFireGen && (item.genLevel ?? 0) >= 1) {
+              // Lv2ジェネレーター（genLevel=1）をメッセージ中にスポットライト表示
+              cell.classList.add('tutorial-spotlight');
+            } else {
+              cell.classList.add('tutorial-dim');
+            }
           }
           cell.addEventListener('touchstart', (e) => startEvDragTouch(e, i), { passive: false });
           cell.addEventListener('mousedown', (e) => startEvDrag(e, i));
@@ -2487,18 +2570,13 @@ function renderEventRequest() {
 // ========================================
 // モバイル用ジェネレーター2タップシステム
 // ========================================
+// モバイル用メモ帳ジェネレータータップ（1タップで生成）
+// ========================================
 function handleGenTapMobile(i) {
-  const step = currentTutStep();
-  // メインチュートリアル中は1タップで生成（従来通り）
-  if (step) {
-    onEventGenTap(i);
-    return;
-  }
-
   const item = eventState.board[i];
   if (!item || !item.isEventGen || item.isFireGen) return;
 
-  // ジェネレーターマージチュートリアル中
+  // ジェネレーターマージチュートリアル中：選択のみ（マージ操作用）
   if (isGenMergeTutActive()) {
     if (eventState.selectedCell !== null && eventState.selectedCell !== i) {
       const selItem = eventState.board[eventState.selectedCell];
@@ -2514,17 +2592,13 @@ function handleGenTapMobile(i) {
     return;
   }
 
-  if (eventState.selectedCell === i) {
-    // 2回目タップ → アイテム生成
-    eventState.selectedCell = null;
-    hideNaviHint();
-    onEventGenTap(i);
-  } else {
-    // 1回目タップ → 選択 + ナビヒント表示（持続）
-    eventState.selectedCell = i;
-    showNaviHintForGen(item.genLevel ?? 0, true);
-    renderEventBoard();
-  }
+  // 1タップでアイテム生成
+  onEventGenTap(i);
+}
+
+// モバイル用製造機ジェネレータータップ（1タップで生成）
+function handleFireGenTapMobile(i) {
+  onEventFireGenTap(i);
 }
 
 // ジェネレータータップ
@@ -2564,7 +2638,7 @@ function onEventGenTap(tappedCellIdx = null) {
   const actualStage = step ? 1 : outStage;
   const actualCost  = step ? 1 : energyCost;
 
-  if (state.energy < actualCost) { showToast(`体力が足りません（必要: ${actualCost}）`); return; }
+  if (!debugState.infiniteEnergy && state.energy < actualCost) { showToast(`体力が足りません（必要: ${actualCost}）`); return; }
 
   // アニメーション始点: タップされたセル（不明なら最初のジェネレーターセル）
   const animFrom = tappedCellIdx !== null
@@ -2574,7 +2648,7 @@ function onEventGenTap(tappedCellIdx = null) {
   const emptyIdx = animFrom !== -1 ? findNearestEmptyEventCell(animFrom) : eventState.board.findIndex(c => c === null);
   if (emptyIdx === -1) { showToast('ボードが満杯です'); return; }
 
-  state.energy -= actualCost;
+  if (!debugState.infiniteEnergy) state.energy -= actualCost;
   eventState.board[emptyIdx] = { stage: actualStage };
   eventState.discovered[actualStage] = true;
 
@@ -2636,7 +2710,7 @@ function flyEventItemAnimation(fromIdx, toIdx, emoji) {
   `;
   document.body.appendChild(el);
 
-  const DURATION = 650;
+  const DURATION = 350;
   const startTime = performance.now();
 
   function animate(now) {
@@ -2886,6 +2960,8 @@ function mergeEventGenerators(fromIdx, toIdx) {
     showToast(`メモ帳ジェネレーター Lv${newLevel + 1} にレベルアップ！`);
   }
   addEnergy(25, 'ジェネレーターLvアップボーナス！');
+  // Lvアップ時に出力Lvを自動で新しい最大値に設定
+  eventState.genPowerLevel = getGenMaxAvailablePowerLv(newLevel);
   // ジェネレーターマージ誘導チュートリアルのフォーカスステップを完了
   if (eventState.genMergeTutStep === 0) {
     setTimeout(() => advanceGenMergeTut(), 400);
@@ -2935,7 +3011,7 @@ function checkSeizoGenLevelUp(discoveredStage) {
 
 // 製造機ジェネレータータップ（tappedCellIdx: タップされたセルのインデックス）
 function onEventFireGenTap(tappedCellIdx = null) {
-  if (state.energy < 1) { showToast('体力が足りません'); return; }
+  if (!debugState.infiniteEnergy && state.energy < 1) { showToast('体力が足りません'); return; }
 
   const cfg = SEIZO_GEN_CONFIG[eventState.seizoGenLevel] ?? SEIZO_GEN_CONFIG[0];
   const outStage = cfg.outStage;
@@ -2955,7 +3031,7 @@ function onEventFireGenTap(tappedCellIdx = null) {
     ? tappedCellIdx
     : eventState.board.findIndex(c => c && c.isEventGen && c.isFireGen);
 
-  state.energy -= 1;
+  if (!debugState.infiniteEnergy) state.energy -= 1;
 
   const chain = CHAINS[SEIZO_CHAIN_ID];
   const imgSrc = chain.stageImages[outStage - 1];
@@ -3143,7 +3219,7 @@ function endEvDrag(x, y) {
     const item = eventState.board[fromIdx];
     if (item && item.isEventGen) {
       evDrag.tapHandled = true;
-      if (item.isFireGen) { onEventFireGenTap(fromIdx); return; }
+      if (item.isFireGen) { if (isTouchDevice) { handleFireGenTapMobile(fromIdx); } else { onEventFireGenTap(fromIdx); } return; }
       // ジェネレーターマージチュートリアル中は選択のみ（生成しない）
       if (isGenMergeTutActive()) {
         eventState.selectedCell = (eventState.selectedCell === fromIdx) ? null : fromIdx;

@@ -236,7 +236,9 @@ body {
 
 .cell.selected {
   border-color: #f1c40f;
-  box-shadow: 0 0 8px #f1c40f;
+  border-width: 3px;
+  box-shadow: 0 0 0 2px #f1c40f, 0 0 14px #f1c40f;
+  background: rgba(241, 196, 15, 0.18);
 }
 
 .cell.merge-target {
@@ -301,7 +303,9 @@ body {
 
 .cell.has-generator.selected {
   border-color: #f1c40f;
-  box-shadow: 0 0 8px #f1c40f;
+  border-width: 3px;
+  box-shadow: 0 0 0 2px #f1c40f, 0 0 14px #f1c40f;
+  background: rgba(241, 196, 15, 0.18);
 }
 
 /* ジェネレーター 星上昇アニメーション */
@@ -1132,7 +1136,7 @@ body {
 ======================================== */
 #navi-hint-panel {
   position: fixed;
-  bottom: 0;
+  top: 60px;
   left: 50%;
   transform: translateX(-50%);
   width: min(460px, 100vw);
@@ -1248,6 +1252,16 @@ body {
   gap: 12px;
 }
 
+.character-chapter-label {
+  font-size: clamp(13px, 3.5vw, 15px);
+  font-weight: bold;
+  color: #7ab8f0;
+  border-bottom: 1px solid rgba(100, 160, 240, 0.4);
+  padding: 6px 4px 4px;
+  margin-top: 8px;
+  letter-spacing: 0.05em;
+}
+
 .character-card {
   display: flex;
   align-items: center;
@@ -1282,4 +1296,104 @@ body {
 .character-desc {
   font-size: clamp(12px, 3.2vw, 14px);
   color: #c8dff5;
+}
+
+/* ========================================
+   デバッグモード画面
+======================================== */
+#debug-screen {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 10, 30, 0.97);
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+}
+#debug-header {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  align-items: center;
+  padding: 12px 14px 8px;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  background: rgba(5, 10, 35, 0.95);
+  backdrop-filter: blur(6px);
+  z-index: 1;
+}
+#debug-close {
+  background: rgba(30,60,120,0.7);
+  color: #e0eaff;
+  border: 1px solid rgba(100,150,220,0.5);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+#debug-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #f0e070;
+}
+#debug-body {
+  width: 100%;
+  max-width: 460px;
+  padding: 16px 14px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.debug-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(20, 35, 80, 0.7);
+  border: 1px solid rgba(80,130,200,0.4);
+  border-radius: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+  color: #d0e8ff;
+  font-size: clamp(13px, 3.5vw, 15px);
+}
+.debug-toggle-row input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  accent-color: #4a9eff;
+}
+.debug-section-label {
+  color: #7ab8f0;
+  font-size: clamp(12px, 3.2vw, 14px);
+  border-bottom: 1px solid rgba(100,160,240,0.3);
+  padding-bottom: 4px;
+}
+#debug-gen-level-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#debug-gen-level-row button {
+  background: rgba(20,50,120,0.8);
+  color: #d0e8ff;
+  border: 1px solid rgba(80,130,220,0.5);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: clamp(13px, 3.5vw, 14px);
+  cursor: pointer;
+  text-align: left;
+}
+#debug-gen-level-row button:active {
+  background: rgba(40,80,160,0.9);
+}
+#debug-btn {
+  background: rgba(60,20,20,0.7);
+  color: #f0e070;
+  border: 1px solid rgba(200,150,50,0.5);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 14px;
+  cursor: pointer;
 }

@@ -93,6 +93,33 @@
     <div id="characters-list"></div>
   </div>
 
+  <!-- デバッグモード画面 -->
+  <div id="debug-screen" class="hidden">
+    <div id="debug-header">
+      <button id="debug-close">✕ 閉じる</button>
+      <span id="debug-title">🐛 デバッグモード</span>
+    </div>
+    <div id="debug-body">
+      <label class="debug-toggle-row">
+        <span>体力を無制限にする</span>
+        <input type="checkbox" id="debug-infinite-energy">
+      </label>
+      <label class="debug-toggle-row">
+        <span>お金を無制限にする</span>
+        <input type="checkbox" id="debug-infinite-coin">
+      </label>
+      <label class="debug-toggle-row">
+        <span>ダイヤを無制限にする</span>
+        <input type="checkbox" id="debug-infinite-diamond">
+      </label>
+      <div class="debug-section-label">ジェネレーターレベル</div>
+      <div id="debug-gen-level-row">
+        <button id="debug-gen-lv-up">メモ帳ジェネレーター Lv アップ</button>
+        <button id="debug-firegen-lv-up">製造機ジェネレーター Lv アップ</button>
+      </div>
+    </div>
+  </div>
+
   <!-- アイテム使用モーダル -->
   <div id="use-modal" class="hidden">
     <div id="use-modal-box">
@@ -134,6 +161,7 @@
     <div id="event-header-bar">
       <div id="event-nav">
         <button id="event-close">← 戻る</button>
+        <button id="debug-btn" title="デバッグ">🐛</button>
         <span id="event-map-title">🗺️ イベントマップ①</span>
       </div>
       <div id="event-currency">
