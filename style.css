@@ -52,7 +52,7 @@ body {
 ======================================== */
 #request-panel {
   position: sticky;
-  top: var(--main-header-h, 60px);
+  top: var(--main-header-h, 100px);
   z-index: 9;
   width: 100%;
   background: rgba(0,0,0,0.7);
@@ -193,7 +193,7 @@ body {
 ======================================== */
 #board-wrap {
   padding: 4px;
-  margin-top: 40px;
+  margin-top: 8px;
 }
 
 #board {
@@ -934,7 +934,7 @@ body {
   align-items: center;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: 90px;
+  padding-bottom: 70px;
 }
 
 #event-header-bar {
@@ -988,7 +988,7 @@ body {
 /* 依頼パネル（イベント） */
 #event-req-panel {
   position: sticky;
-  top: var(--event-header-h, 60px);
+  top: var(--event-header-h, 100px);
   z-index: 9;
   width: 100%;
   background: rgba(0,0,0,0.7);
@@ -1008,7 +1008,7 @@ body {
 /* ボード（イベント） */
 #event-board-wrap {
   padding: 4px;
-  margin-top: 14px;
+  margin-top: 4px;
 }
 
 #event-board {

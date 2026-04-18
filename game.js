@@ -680,7 +680,8 @@ function onGeneratorLevelUp(genId) {
     if (tilesOnBoard < 2) {
       const emptyIdx = state.board.findIndex(c => c === null);
       if (emptyIdx === -1) {
-        showToast('ボードが満杯です');
+        const genCellIdx = state.board.findIndex(c => c?.isGenerator && c.genId === genId);
+        showCellToast('ボードが満杯です', genCellIdx, false);
         return;
       }
       state.board[emptyIdx] = { isGenerator: true, genId };
@@ -752,7 +753,8 @@ function onGeneratorClick(genId) {
   // 空きセルを探す
   const emptyIdx = state.board.findIndex(c => c === null);
   if (emptyIdx === -1) {
-    showToast('ボードが満杯です');
+    const genCellIdx = state.board.findIndex(c => c?.isGenerator && c.genId === genId);
+    showCellToast('ボードが満杯です', genCellIdx, false);
     return;
   }
 
@@ -1383,6 +1385,29 @@ function showToast(msg) {
   el.textContent = msg;
   el.style.cssText = `
     position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.82); color: #fff; padding: 6px 14px;
+    border-radius: 16px; font-size: 12px; z-index: 500;
+    pointer-events: none; max-width: 80vw; text-align: center;
+    white-space: normal; word-break: break-all;
+  `;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2000);
+}
+
+// ジェネレータータイルの直上にトーストを表示（ボード満杯などの通知用）
+function showCellToast(msg, cellIdx, isEventBoard) {
+  const boardId = isEventBoard ? 'event-board' : 'board';
+  const cells = document.querySelectorAll(`#${boardId} .cell`);
+  const cell = (cellIdx !== null && cellIdx >= 0) ? cells[cellIdx] : null;
+  if (!cell) { showToast(msg); return; }
+  const rect = cell.getBoundingClientRect();
+  const x = rect.left + rect.width / 2;
+  const y = Math.max(rect.top - 8, 10);
+  const el = document.createElement('div');
+  el.textContent = msg;
+  el.style.cssText = `
+    position: fixed; left: ${x}px; top: ${y}px;
+    transform: translate(-50%, -100%);
     background: rgba(0,0,0,0.82); color: #fff; padding: 6px 14px;
     border-radius: 16px; font-size: 12px; z-index: 500;
     pointer-events: none; max-width: 80vw; text-align: center;
@@ -2770,7 +2795,7 @@ function onEventGenTap(tappedCellIdx = null) {
     : eventState.board.findIndex(c => c && c.isEventGen && !c.isFireGen);
 
   const emptyIdx = animFrom !== -1 ? findNearestEmptyEventCell(animFrom) : eventState.board.findIndex(c => c === null);
-  if (emptyIdx === -1) { showToast('ボードが満杯です'); return; }
+  if (emptyIdx === -1) { showCellToast('ボードが満杯です', animFrom !== -1 ? animFrom : null, true); return; }
 
   if (!debugState.infiniteEnergy) state.energy -= actualCost;
   eventState.board[emptyIdx] = { stage: actualStage };
@@ -3093,7 +3118,7 @@ function unlockFireGenerator() {
   eventState.fireGenUnlocked = true;
   eventState.seizoGenLevel   = 0; // Lv1からスタート
   const emptyIdx = eventState.board.findIndex(c => c === null);
-  if (emptyIdx === -1) { showToast('ボードが満杯で製造機を配置できません'); return; }
+  if (emptyIdx === -1) { showToast('ボードが満杯で第二章ジェネレーターを配置できません'); return; }
   eventState.board[emptyIdx] = { isEventGen: true, isFireGen: true, seizoLevel: 0 };
   showToast('第二章ジェネレーター解放！');
   renderEventBoard();
@@ -3112,7 +3137,7 @@ function checkSeizoGenLevelUp(discoveredStage) {
       const currentLv = existingTile.seizoLevel ?? 0;
       // 同Lvの複製タイルを近くに配置（マージして昇格させる）
       const emptyIdx = findNearestEmptyEventCell(existingIdx);
-      if (emptyIdx === -1) { showToast('ボードが満杯で製造機タイルを置けません'); break; }
+      if (emptyIdx === -1) { showCellToast('ボードが満杯です', existingIdx, true); break; }
       eventState.board[emptyIdx] = { isEventGen: true, isFireGen: true, seizoLevel: currentLv };
       eventState.seizoLvTriggered.add(trig.triggerStage);
       showToast('第二章ジェネレータータイルが増えた！マージしてLvアップ！');
@@ -3174,7 +3199,11 @@ function onEventFireGenTap(tappedCellIdx = null) {
   const totalCount = baseCount + extraWhole + extraBonus;
 
   // 空きセル確認
-  if (eventState.board.every(c => c !== null)) { showToast('ボードが満杯です'); return; }
+  if (eventState.board.every(c => c !== null)) {
+    const fireGenIdx = tappedCellIdx !== null ? tappedCellIdx : eventState.board.findIndex(c => c && c.isEventGen && c.isFireGen);
+    showCellToast('ボードが満杯です', fireGenIdx, true);
+    return;
+  }
 
   const animFrom = tappedCellIdx !== null
     ? tappedCellIdx
@@ -3563,8 +3592,10 @@ document.getElementById('navi-lv-btn').addEventListener('click', (e) => {
 function updateStickyHeights() {
   const mainHeader  = document.getElementById('header');
   const eventHeader = document.getElementById('event-header-bar');
-  if (mainHeader)  document.documentElement.style.setProperty('--main-header-h',  mainHeader.getBoundingClientRect().height  + 'px');
-  if (eventHeader) document.documentElement.style.setProperty('--event-header-h', eventHeader.getBoundingClientRect().height + 'px');
+  const mh = mainHeader  ? mainHeader.getBoundingClientRect().height  : 0;
+  const eh = eventHeader ? eventHeader.getBoundingClientRect().height : 0;
+  if (mh > 0) document.documentElement.style.setProperty('--main-header-h',  mh + 'px');
+  if (eh > 0) document.documentElement.style.setProperty('--event-header-h', eh + 'px');
 }
 window.addEventListener('resize', updateStickyHeights);
 
@@ -3582,5 +3613,6 @@ renderEventHeader();
 renderEventRequest();
 renderTutorialPanel();
 
-// DOM描画完了後にヘッダー高さを計測
-requestAnimationFrame(updateStickyHeights);
+// DOM描画完了後にヘッダー高さを計測（2段RFAで確実にレイアウト後に実行）
+requestAnimationFrame(() => requestAnimationFrame(updateStickyHeights));
+setTimeout(updateStickyHeights, 300);
