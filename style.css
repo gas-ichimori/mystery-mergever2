@@ -927,6 +927,7 @@ body {
   align-items: center;
   overflow-y: auto;
   overflow-x: hidden;
+  padding-bottom: 90px;
 }
 
 #event-header-bar {
@@ -997,7 +998,7 @@ body {
 /* ボード（イベント） */
 #event-board-wrap {
   padding: 4px;
-  margin-top: 16px;
+  margin-top: 4px;
 }
 
 #event-board {

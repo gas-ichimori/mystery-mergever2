@@ -3341,7 +3341,11 @@ function endEvDrag(x, y) {
     eventState.board[fromIdx] = toItem;
   }
 
-  eventState.selectedCell = null;
+  // ジェネレーターが選択中の場合はスライド操作で選択を解除しない
+  const _prevSelItem = eventState.selectedCell !== null ? eventState.board[eventState.selectedCell] : null;
+  if (!_prevSelItem || !_prevSelItem.isEventGen) {
+    eventState.selectedCell = null;
+  }
   renderEventBoard();
   renderEventRequest(); // 依頼達成可否を更新
 }
