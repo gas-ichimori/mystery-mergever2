@@ -1175,7 +1175,7 @@ body {
   line-height: 1.5;
   flex: 1;
   min-width: 0;
-  white-space: pre-wrap;
+  white-space: normal;
 }
 /* Lvアップダウンボタン */
 #navi-lv-btn {

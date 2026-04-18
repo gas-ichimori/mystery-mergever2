@@ -2141,8 +2141,8 @@ function showNaviHintForGen(genLevel, persistent = false) {
   const maxGenLevel = EVENT_GEN_IMAGES.length - 1;
   const isMaxGen = genLevel >= maxGenLevel;
   const text = isMaxGen
-    ? '第一章ジェネレーターは最大Lvに達しています\nもう一度タップでアイテムを生成！'
-    : '第一章ジェネレーターをマージしてLvアップしましょう。\nもう一度タップでアイテムを生成！';
+    ? '第一章ジェネレーターは最大Lvです。もう一度タップでアイテムを生成！'
+    : '第一章ジェネレーターをマージしてLvアップ！もう一度タップでアイテム生成。';
   if (!isMaxGen) updateNaviLvBtn(genLevel);
   _showNaviHintPanel(text, !isMaxGen, persistent);
 }
@@ -2152,8 +2152,8 @@ function showNaviHintForFireGen(item, persistent = false) {
   const maxSLv = SEIZO_GEN_IMAGES.length - 1;
   const isMax = sLv >= maxSLv;
   const text = isMax
-    ? '第二章ジェネレーターは最大Lvに達しています\nもう一度タップでアイテムを生成！'
-    : '第二章ジェネレーターをマージしてLvアップしましょう。\nもう一度タップでアイテムを生成！';
+    ? '第二章ジェネレーターは最大Lvです。もう一度タップでアイテムを生成！'
+    : '第二章ジェネレーターをマージしてLvアップ！もう一度タップでアイテム生成。';
   if (!isMax) updateFireNaviLvBtn(sLv);
   _showNaviHintPanel(text, !isMax, persistent);
 }
@@ -3002,6 +3002,7 @@ function doEventMerge(fromIdx, toIdx) {
           eventState.board[emptyIdx2] = { isEventGen: true, genLevel: curGenLv };
           // 初回（nextStage===4）のみマージ誘導チュートリアルを起動
           if (nextStage === 4) {
+            hideNaviHint(); // Lv1×2出現時にナビヒントを消す
             setTimeout(() => startGenMergeTut(), 400);
           } else {
             showToast('ジェネレーターが2枚出現！重ねてLvアップ！');
@@ -3059,7 +3060,6 @@ function mergeEventGenerators(fromIdx, toIdx) {
   eventState.board[toIdx]   = { isEventGen: true, genLevel: newLevel };
   eventState.board[fromIdx] = null;
   eventState.selectedCell   = null;
-  hideNaviHint(); // Lvアップ時はナビヒントを閉じる（特にLv2時）
   if (!isGenMergeTutActive()) {
     showToast(`第一章ジェネレーター Lv${newLevel + 1} にレベルアップ！`);
   }
@@ -3366,8 +3366,9 @@ function endEvDrag(x, y) {
   // 同一セルへのドロップ = タップ相当
   if (toIdx === null || toIdx === fromIdx) {
     const item = eventState.board[fromIdx];
+    evDrag.tapHandled = true; // 後続clickをブロック（全ケース）
+
     if (item && item.isEventGen) {
-      evDrag.tapHandled = true;
       // ジェネレーターマージチュートリアル中（第一章のみ）は選択のみ
       if (!item.isFireGen && isGenMergeTutActive()) {
         eventState.selectedCell = (eventState.selectedCell === fromIdx) ? null : fromIdx;
@@ -3377,6 +3378,37 @@ function endEvDrag(x, y) {
       handleAnyGenTap(fromIdx);
       return;
     }
+
+    // 通常アイテムのタップ（touch では click が来ないためここで処理）
+    if (item && !item.isFog) {
+      const tutStep = currentTutStep();
+      if (tutStep && tutStep.type !== 'merge_focus') { renderEventBoard(); return; }
+      if (isGenMergeTutActive()) { renderEventBoard(); return; }
+
+      if (eventState.selectedCell !== null && eventState.selectedCell !== fromIdx) {
+        const sel = eventState.board[eventState.selectedCell];
+        if (sel && evItemCanMerge(sel, item)) {
+          doEventMerge(eventState.selectedCell, fromIdx);
+          return;
+        }
+        eventState.selectedCell = fromIdx;
+        showNaviHintForItem(item, true);
+        renderEventBoard();
+        return;
+      }
+      if (eventState.selectedCell === fromIdx) {
+        // 同一アイテム再タップ → 選択・ナビヒント維持
+        return;
+      }
+      eventState.selectedCell = fromIdx;
+      showNaviHintForItem(item, true);
+      renderEventBoard();
+      return;
+    }
+
+    // 空マス or 霧
+    hideNaviHint();
+    eventState.selectedCell = null;
     renderEventBoard();
     return;
   }
