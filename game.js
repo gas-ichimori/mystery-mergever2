@@ -2863,6 +2863,9 @@ function flyEventItemAnimation(fromIdx, toIdx, emoji) {
 // セルクリック
 // ========================================
 function onEventCellClick(index) {
+  // ドラッグ直後のクリックイベント（タッチ→クリック二重発火）をブロック
+  if (evDrag.tapHandled) { evDrag.tapHandled = false; return; }
+
   const item = eventState.board[index];
 
   // ジェネレーターマージ誘導チュートリアル中の制御
@@ -3271,7 +3274,10 @@ function createEvGhost(x, y, fromIdx) {
   // 画像があれば画像、なければ絵文字
   let imgSrc = null;
   let fallbackEmoji = '❓';
-  if (item.isEventGen) {
+  if (item.isEventGen && item.isFireGen) {
+    const sLv = item.seizoLevel ?? 0;
+    imgSrc = SEIZO_GEN_IMAGES[Math.min(sLv, SEIZO_GEN_IMAGES.length - 1)];
+  } else if (item.isEventGen) {
     imgSrc = EVENT_GEN_IMAGES[Math.min(item.genLevel ?? 0, EVENT_GEN_IMAGES.length - 1)];
   } else if (item.chainId !== undefined) {
     const chain = CHAINS[item.chainId];
@@ -3372,6 +3378,9 @@ function endEvDrag(x, y) {
     return;
   }
 
+  // 実際にドラッグが発生した（別セルへ移動���→ 後続のclickイベントをブロック
+  evDrag.tapHandled = true;
+
   const fromItem = eventState.board[fromIdx];
   const toItem   = eventState.board[toIdx];
   if (!fromItem || fromItem.isFog) return; // 霧アイテムはドラッグ元にならない
@@ -3410,10 +3419,15 @@ function endEvDrag(x, y) {
     eventState.board[fromIdx] = toItem;
   }
 
-  // ジェネレーターが選択中の場合はスライド操作で選択を解除しない
-  const _prevSelItem = eventState.selectedCell !== null ? eventState.board[eventState.selectedCell] : null;
-  if (!_prevSelItem || !_prevSelItem.isEventGen) {
-    eventState.selectedCell = null;
+  // ジェネレーターが選択中の場合はスライド後も選択を維持
+  // 選択中ジェネレーター自身を移動した場合は新しい位置に追跡
+  if (eventState.selectedCell === fromIdx && fromItem && fromItem.isEventGen) {
+    eventState.selectedCell = toIdx; // 移動先を選択中に
+  } else {
+    const _prevSelItem = eventState.selectedCell !== null ? eventState.board[eventState.selectedCell] : null;
+    if (!_prevSelItem || !_prevSelItem.isEventGen) {
+      eventState.selectedCell = null;
+    }
   }
   renderEventBoard();
   renderEventRequest(); // 依頼達成可否を更新
