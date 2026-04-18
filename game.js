@@ -1502,7 +1502,8 @@ document.getElementById('debug-firegen-lv-up').addEventListener('click', () => {
   if (!fireTile) { showToast('第二章ジェネレータータイルがありません'); return; }
   const maxLv = SEIZO_GEN_IMAGES.length - 1;
   fireTile.seizoLevel = ((fireTile.seizoLevel ?? 0) + 1) % (maxLv + 1);
-  eventState.seizoGenLevel = fireTile.seizoLevel;
+  eventState.seizoGenLevel  = fireTile.seizoLevel;
+  eventState.firePowerLevel = getFireGenMaxAvailablePowerLv(fireTile.seizoLevel);
   showToast(`第二章ジェネレーター Lv${fireTile.seizoLevel + 1} に！`);
   renderEventBoard();
 });
@@ -1693,15 +1694,24 @@ const SEIZO_GEN_IMAGES = [
   'img/image_merge_gene2_07.png', // Lv7
 ];
 
-// 製造機ジェネレーター出力設定（インデックス = Lv-1）
+// 第二章ジェネレーター Lvボタン別出力設定（第一章と同じボタン式）
+const FIRE_POWER_CONFIG = [
+  { outStage: 1, luckyProb: 0.01, luckyMult: 2.0 }, // Lv1ボタン ⚡1
+  { outStage: 2, luckyProb: 0.03, luckyMult: 1.5 }, // Lv2ボタン ⚡2
+  { outStage: 4, luckyProb: 0.05, luckyMult: 2.0 }, // Lv4ボタン ⚡4
+  { outStage: 5, luckyProb: 0.07, luckyMult: 1.2 }, // Lv8ボタン ⚡8
+  { outStage: 6, luckyProb: 0.05, luckyMult: 1.5 }, // Lv16ボタン ⚡16
+];
+
+// 製造機ジェネレーター出力設定（旧・互換のため残存）
 const SEIZO_GEN_CONFIG = [
-  { outStage: 1, luckyProb: 0.01, luckyMult: 2.0 }, // Lv1
-  { outStage: 2, luckyProb: 0.03, luckyMult: 1.5 }, // Lv2
-  { outStage: 3, luckyProb: 0.05, luckyMult: 2.0 }, // Lv3
-  { outStage: 4, luckyProb: 0.07, luckyMult: 2.0 }, // Lv4
-  { outStage: 5, luckyProb: 0.09, luckyMult: 1.2 }, // Lv5
-  { outStage: 6, luckyProb: 0.07, luckyMult: 1.5 }, // Lv6
-  { outStage: 7, luckyProb: 0.05, luckyMult: 1.2 }, // Lv7
+  { outStage: 1, luckyProb: 0.01, luckyMult: 2.0 },
+  { outStage: 2, luckyProb: 0.03, luckyMult: 1.5 },
+  { outStage: 3, luckyProb: 0.05, luckyMult: 2.0 },
+  { outStage: 4, luckyProb: 0.07, luckyMult: 2.0 },
+  { outStage: 5, luckyProb: 0.09, luckyMult: 1.2 },
+  { outStage: 6, luckyProb: 0.07, luckyMult: 1.5 },
+  { outStage: 7, luckyProb: 0.05, luckyMult: 1.2 },
 ];
 
 // 製造機ジェネレーターLvアップ条件（製造機アイテムが特定Lvに達したときLvアップ）
@@ -1806,7 +1816,8 @@ let eventState = {
   unlockedFogCells: new Set(),  // マージ可能な霧セルのインデックス
   genMergeTutStep: null,        // ジェネレーターマージ誘導チュート: null=非アクティブ, 0/1/2=ステップ
   genMergeTutDone: false,       // 一度完了したら二度と出さない
-  genPowerLevel: 0,             // 現在選択中の出力パワーレベル (0=1⚡ 1=2⚡ 2=4⚡ 3=8⚡ 4=16⚡)
+  genPowerLevel: 0,             // 第一章ジェネレーター 現在選択中の出力パワーレベル
+  firePowerLevel: 0,            // 第二章ジェネレーター 現在選択中の出力パワーレベル
 };
 
 // タッチデバイス判定
@@ -1839,6 +1850,7 @@ function initEventMap() {
   eventState.genMergeTutStep    = null;
   eventState.genMergeTutDone    = false;
   eventState.genPowerLevel      = 0;
+  eventState.firePowerLevel     = 0;
 
   // 霧アイテム配置（Lv1/2/3）
   EVENT_FOG_ITEM_MAP.forEach((stage, i) => {
@@ -2031,6 +2043,46 @@ function cycleGenPowerLevel(genLevel) {
   return 0;
 }
 
+// --- 第二章ジェネレーター Lvボタン関連 ---
+function isFireGenPowerLvAvailable(powerIdx, seizoLevel) {
+  if (powerIdx === 0) return true;
+  if (powerIdx === 1) return seizoLevel >= 1;                                  // Lv2+
+  if (powerIdx === 2) return seizoLevel >= 3;                                  // Lv4+
+  if (powerIdx === 3) return seizoLevel >= 3 && state.energy >= 200;           // Lv4+ + 200⚡
+  if (powerIdx === 4) return seizoLevel >= 3 && state.energy >= 400;           // Lv4+ + 400⚡
+  return false;
+}
+
+function getFireGenMaxAvailablePowerLv(seizoLevel) {
+  for (let i = 4; i >= 0; i--) {
+    if (isFireGenPowerLvAvailable(i, seizoLevel)) return i;
+  }
+  return 0;
+}
+
+function cycleFireGenPowerLevel(seizoLevel) {
+  let next = (eventState.firePowerLevel + 1) % 5;
+  for (let tries = 0; tries < 5; tries++) {
+    if (isFireGenPowerLvAvailable(next, seizoLevel)) {
+      eventState.firePowerLevel = next;
+      return next;
+    }
+    next = (next + 1) % 5;
+  }
+  eventState.firePowerLevel = 0;
+  return 0;
+}
+
+function updateFireNaviLvBtn(seizoLevel) {
+  const lvLabel = document.getElementById('navi-lv-label');
+  const lvCrown = document.getElementById('navi-lv-crown');
+  if (!lvLabel || !lvCrown) return;
+  const curPL = eventState.firePowerLevel;
+  const maxPL = getFireGenMaxAvailablePowerLv(seizoLevel);
+  lvLabel.textContent = `${POWER_COSTS[curPL]}⚡`;
+  lvCrown.textContent = curPL === maxPL ? '👑' : '';
+}
+
 // ========================================
 // ナビゲーターヒント表示（非ブロッキング）
 // ========================================
@@ -2093,10 +2145,12 @@ function showNaviHintForGen(genLevel, persistent = false) {
 function showNaviHintForFireGen(item, persistent = false) {
   const sLv = item.seizoLevel ?? 0;
   const maxSLv = SEIZO_GEN_IMAGES.length - 1;
-  const text = sLv >= maxSLv
+  const isMax = sLv >= maxSLv;
+  const text = isMax
     ? '第二章ジェネレーターは最大Lvに達しています\nもう一度タップでアイテムを生成！'
     : '第二章ジェネレーターをマージしてLvアップしましょう。\nもう一度タップでアイテムを生成！';
-  _showNaviHintPanel(text, false, persistent);
+  if (!isMax) updateFireNaviLvBtn(sLv);
+  _showNaviHintPanel(text, !isMax, persistent);
 }
 
 function showNaviHintForItem(item) {
@@ -3073,7 +3127,9 @@ function mergeFireGenerators(fromIdx, toIdx) {
   // グローバルレベルも最高値に更新
   eventState.seizoGenLevel = Math.max(eventState.seizoGenLevel, newLevel);
   showToast(`第二章ジェネレーター Lv${newLevel + 1} にレベルアップ！`);
-  addEnergy(25, '製造機Lvアップボーナス！');
+  addEnergy(25, '第二章ジェネレーターLvアップボーナス！');
+  // Lvアップ時に出力Lvを自動で新しい最大値に設定
+  eventState.firePowerLevel = getFireGenMaxAvailablePowerLv(newLevel);
 
   setTimeout(() => {
     const cells = document.querySelectorAll('#event-board .cell');
@@ -3089,19 +3145,21 @@ function mergeFireGenerators(fromIdx, toIdx) {
 
 // 製造機ジェネレータータップ（tappedCellIdx: タップされたセルのインデックス）
 function onEventFireGenTap(tappedCellIdx = null) {
-  if (!debugState.infiniteEnergy && state.energy < 1) { showToast('体力が足りません'); return; }
+  // firePowerLevel に応じた出力設定
+  const powerLv    = eventState.firePowerLevel;
+  const cfg        = FIRE_POWER_CONFIG[powerLv] ?? FIRE_POWER_CONFIG[0];
+  const outStage   = cfg.outStage;
+  const energyCost = POWER_COSTS[powerLv] ?? 1;
 
-  // タップされたタイルの seizoLevel を使う（なければグローバル値）
-  const tileLevel = (tappedCellIdx !== null && eventState.board[tappedCellIdx]?.seizoLevel != null)
-    ? eventState.board[tappedCellIdx].seizoLevel
-    : eventState.seizoGenLevel;
-  const cfg = SEIZO_GEN_CONFIG[tileLevel] ?? SEIZO_GEN_CONFIG[0];
-  const outStage = cfg.outStage;
+  if (!debugState.infiniteEnergy && state.energy < energyCost) {
+    showToast(`体力が足りません（必要: ${energyCost}）`);
+    return;
+  }
 
   // Lucky判定：確率でアイテム数が増える（倍率の整数部＋端数は確率で追加）
-  const isLucky   = Math.random() < cfg.luckyProb;
-  const baseCount = 1;
-  const extraFrac = isLucky ? (cfg.luckyMult % 1) : 0;
+  const isLucky    = Math.random() < cfg.luckyProb;
+  const baseCount  = 1;
+  const extraFrac  = isLucky ? (cfg.luckyMult % 1) : 0;
   const extraWhole = isLucky ? Math.floor(cfg.luckyMult) - 1 : 0;
   const extraBonus = extraFrac > 0 && Math.random() < extraFrac ? 1 : 0;
   const totalCount = baseCount + extraWhole + extraBonus;
@@ -3113,7 +3171,7 @@ function onEventFireGenTap(tappedCellIdx = null) {
     ? tappedCellIdx
     : eventState.board.findIndex(c => c && c.isEventGen && c.isFireGen);
 
-  if (!debugState.infiniteEnergy) state.energy -= 1;
+  if (!debugState.infiniteEnergy) state.energy -= energyCost;
 
   const chain = CHAINS[SEIZO_CHAIN_ID];
   const imgSrc = chain.stageImages[outStage - 1];
@@ -3394,16 +3452,29 @@ document.getElementById('tutorial-char').addEventListener('click', (e) => {
 // LvアップダウンボタンのクリックでgenPowerLevelをサイクル
 document.getElementById('navi-lv-btn').addEventListener('click', (e) => {
   e.stopPropagation();
-  const genItem  = eventState.board.find(c => c && c.isEventGen && !c.isFireGen);
-  const genLevel = genItem ? (genItem.genLevel ?? 0) : 0;
-  cycleGenPowerLevel(genLevel);
-  updateNaviLvBtn(genLevel);
-  // パネルの自動消去タイマーをリセット
-  if (naviHintTimer) clearTimeout(naviHintTimer);
-  naviHintTimer = setTimeout(() => {
-    document.getElementById('navi-hint-panel')?.classList.add('hidden');
-    naviHintTimer = null;
-  }, 3500);
+  // 選択中ジェネレーターの種類に応じてサイクル
+  const selIdx  = eventState.selectedCell;
+  const selItem = selIdx !== null ? eventState.board[selIdx] : null;
+  if (selItem && selItem.isFireGen) {
+    // 第二章ジェネレーター
+    const sLv = selItem.seizoLevel ?? 0;
+    cycleFireGenPowerLevel(sLv);
+    updateFireNaviLvBtn(sLv);
+  } else {
+    // 第一章ジェネレーター
+    const genItem  = eventState.board.find(c => c && c.isEventGen && !c.isFireGen);
+    const genLevel = genItem ? (genItem.genLevel ?? 0) : 0;
+    cycleGenPowerLevel(genLevel);
+    updateNaviLvBtn(genLevel);
+  }
+  // 持続中はタイマーをリセットしない（選択中は消えない）
+  if (!naviHintPersistent) {
+    if (naviHintTimer) clearTimeout(naviHintTimer);
+    naviHintTimer = setTimeout(() => {
+      document.getElementById('navi-hint-panel')?.classList.add('hidden');
+      naviHintTimer = null;
+    }, 3500);
+  }
 });
 
 // ========================================
