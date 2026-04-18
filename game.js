@@ -1486,7 +1486,7 @@ document.getElementById('debug-infinite-diamond').addEventListener('change', fun
 document.getElementById('debug-gen-lv-up').addEventListener('click', () => {
   // パワーレベルをLv1→Lv2→Lv4→Lv8→Lv16→Lv1とループ
   const genTile = eventState.board.find(c => c && c.isEventGen && !c.isFireGen);
-  if (!genTile) { showToast('メモ帳ジェネレーターがありません'); return; }
+  if (!genTile) { showToast('第一章ジェネレーターがありません'); return; }
   const next = (eventState.genPowerLevel + 1) % POWER_COSTS.length;
   eventState.genPowerLevel = next;
   const cost = POWER_COSTS[next];
@@ -1496,14 +1496,14 @@ document.getElementById('debug-gen-lv-up').addEventListener('click', () => {
 });
 
 document.getElementById('debug-firegen-lv-up').addEventListener('click', () => {
-  if (!eventState.fireGenUnlocked) { showToast('製造機はまだ解放されていません'); return; }
+  if (!eventState.fireGenUnlocked) { showToast('第二章ジェネレーターはまだ解放されていません'); return; }
   // 最初の製造機タイルをループLvアップ
   const fireTile = eventState.board.find(c => c && c.isFireGen);
-  if (!fireTile) { showToast('製造機タイルがありません'); return; }
+  if (!fireTile) { showToast('第二章ジェネレータータイルがありません'); return; }
   const maxLv = SEIZO_GEN_IMAGES.length - 1;
   fireTile.seizoLevel = ((fireTile.seizoLevel ?? 0) + 1) % (maxLv + 1);
   eventState.seizoGenLevel = fireTile.seizoLevel;
-  showToast(`製造機ジェネレーター Lv${fireTile.seizoLevel + 1} に！`);
+  showToast(`第二章ジェネレーター Lv${fireTile.seizoLevel + 1} に！`);
   renderEventBoard();
 });
 
@@ -1918,6 +1918,7 @@ function renderTutorialPanel() {
 
   const step = currentTutStep();
   panel.classList.remove('hidden');
+  hideNaviHint(); // チュートリアルパネル表示中はナビヒントを隠す
   msgEl.textContent = step.text;
 
   if (step.type === 'blocking_msg') {
@@ -2083,10 +2084,19 @@ function showNaviHintForGen(genLevel, persistent = false) {
   const maxGenLevel = EVENT_GEN_IMAGES.length - 1;
   const isMaxGen = genLevel >= maxGenLevel;
   const text = isMaxGen
-    ? '？？？？は、最大Lvに達しています'
-    : '？？？？をマージさせて次のレベルにアップしましょう。';
+    ? '第一章ジェネレーターは最大Lvに達しています\nもう一度タップでアイテムを生成！'
+    : '第一章ジェネレーターをマージしてLvアップしましょう。\nもう一度タップでアイテムを生成！';
   if (!isMaxGen) updateNaviLvBtn(genLevel);
   _showNaviHintPanel(text, !isMaxGen, persistent);
+}
+
+function showNaviHintForFireGen(item, persistent = false) {
+  const sLv = item.seizoLevel ?? 0;
+  const maxSLv = SEIZO_GEN_IMAGES.length - 1;
+  const text = sLv >= maxSLv
+    ? '第二章ジェネレーターは最大Lvに達しています\nもう一度タップでアイテムを生成！'
+    : '第二章ジェネレーターをマージしてLvアップしましょう。\nもう一度タップでアイテムを生成！';
+  _showNaviHintPanel(text, false, persistent);
 }
 
 function showNaviHintForItem(item) {
@@ -2634,7 +2644,8 @@ function handleAnyGenTap(i) {
     }
     // 種類違い or レベル違いなら選択切替
     eventState.selectedCell = i;
-    if (!isFireGen) showNaviHintForGen(item.genLevel ?? 0, true);
+    if (isFireGen) showNaviHintForFireGen(item, true);
+    else           showNaviHintForGen(item.genLevel ?? 0, true);
     renderEventBoard();
     return;
   }
@@ -2646,7 +2657,8 @@ function handleAnyGenTap(i) {
     else           onEventGenTap(i);
   } else {
     eventState.selectedCell = i;
-    if (!isFireGen) showNaviHintForGen(item.genLevel ?? 0, true);
+    if (isFireGen) showNaviHintForFireGen(item, true);
+    else           showNaviHintForGen(item.genLevel ?? 0, true);
     renderEventBoard();
   }
 }
@@ -2989,7 +3001,7 @@ function mergeEventGenerators(fromIdx, toIdx) {
   eventState.board[fromIdx] = null;
   eventState.selectedCell   = null;
   if (!isGenMergeTutActive()) {
-    showToast(`メモ帳ジェネレーター Lv${newLevel + 1} にレベルアップ！`);
+    showToast(`第一章ジェネレーター Lv${newLevel + 1} にレベルアップ！`);
   }
   addEnergy(25, 'ジェネレーターLvアップボーナス！');
   // Lvアップ時に出力Lvを自動で新しい最大値に設定
@@ -3020,7 +3032,7 @@ function unlockFireGenerator() {
   const emptyIdx = eventState.board.findIndex(c => c === null);
   if (emptyIdx === -1) { showToast('ボードが満杯で製造機を配置できません'); return; }
   eventState.board[emptyIdx] = { isEventGen: true, isFireGen: true, seizoLevel: 0 };
-  showToast('製造機ジェネレーター解放！');
+  showToast('第二章ジェネレーター解放！');
   renderEventBoard();
   renderEventRequest();
 }
@@ -3040,7 +3052,7 @@ function checkSeizoGenLevelUp(discoveredStage) {
       if (emptyIdx === -1) { showToast('ボードが満杯で製造機タイルを置けません'); break; }
       eventState.board[emptyIdx] = { isEventGen: true, isFireGen: true, seizoLevel: currentLv };
       eventState.seizoLvTriggered.add(trig.triggerStage);
-      showToast('製造機タイルが増えた！マージしてLvアップ！');
+      showToast('第二章ジェネレータータイルが増えた！マージしてLvアップ！');
       renderEventBoard();
       break;
     }
@@ -3054,13 +3066,13 @@ function mergeFireGenerators(fromIdx, toIdx) {
   const toItem   = eventState.board[toIdx];
   const newLevel = (toItem.seizoLevel ?? 0) + 1;
   const maxLevel = SEIZO_GEN_IMAGES.length - 1;
-  if (newLevel > maxLevel) { showToast('製造機は最大レベルです'); return; }
+  if (newLevel > maxLevel) { showToast('第二章ジェネレーターは最大レベルです'); return; }
   eventState.board[toIdx]   = { isEventGen: true, isFireGen: true, seizoLevel: newLevel };
   eventState.board[fromIdx] = null;
   eventState.selectedCell   = null;
   // グローバルレベルも最高値に更新
   eventState.seizoGenLevel = Math.max(eventState.seizoGenLevel, newLevel);
-  showToast(`製造機ジェネレーター Lv${newLevel + 1} にレベルアップ！`);
+  showToast(`第二章ジェネレーター Lv${newLevel + 1} にレベルアップ！`);
   addEnergy(25, '製造機Lvアップボーナス！');
 
   setTimeout(() => {
@@ -3289,14 +3301,13 @@ function endEvDrag(x, y) {
     const item = eventState.board[fromIdx];
     if (item && item.isEventGen) {
       evDrag.tapHandled = true;
-      if (item.isFireGen) { handleAnyGenTap(fromIdx); return; }
-      // ジェネレーターマージチュートリアル中は選択のみ（生成しない）
-      if (isGenMergeTutActive()) {
+      // ジェネレーターマージチュートリアル中（第一章のみ）は選択のみ
+      if (!item.isFireGen && isGenMergeTutActive()) {
         eventState.selectedCell = (eventState.selectedCell === fromIdx) ? null : fromIdx;
         renderEventBoard();
         return;
       }
-      if (isTouchDevice) { handleGenTapMobile(fromIdx); } else { onEventGenTap(fromIdx); }
+      handleAnyGenTap(fromIdx);
       return;
     }
     renderEventBoard();
