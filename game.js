@@ -3558,6 +3558,17 @@ document.getElementById('navi-lv-btn').addEventListener('click', (e) => {
 });
 
 // ========================================
+// ヘッダー高さをCSS変数に反映（sticky top のズレ防止）
+// ========================================
+function updateStickyHeights() {
+  const mainHeader  = document.getElementById('header');
+  const eventHeader = document.getElementById('event-header-bar');
+  if (mainHeader)  document.documentElement.style.setProperty('--main-header-h',  mainHeader.getBoundingClientRect().height  + 'px');
+  if (eventHeader) document.documentElement.style.setProperty('--event-header-h', eventHeader.getBoundingClientRect().height + 'px');
+}
+window.addEventListener('resize', updateStickyHeights);
+
+// ========================================
 // 起動
 // ========================================
 initGame();
@@ -3570,3 +3581,6 @@ renderEventGenerators();
 renderEventHeader();
 renderEventRequest();
 renderTutorialPanel();
+
+// DOM描画完了後にヘッダー高さを計測
+requestAnimationFrame(updateStickyHeights);
