@@ -1797,9 +1797,9 @@ const INITIAL_UNLOCKED_FOG = new Set([30,31,32, 36,40, 43,47, 50,54, 58,59,60]);
 
 // ジェネレーターマージ誘導チュートリアルのステップ定義
 const GEN_MERGE_TUT_STEPS = [
-  { type: 'focus', text: 'もうひとつの"机"が出ました。\n"机"と"机"を組み合わせてください。' },
-  { type: 'msg',   text: '"机"がレベルアップしました。\n出せるアイテムのLvが上がります。' },
-  { type: 'msg',   text: '出せるアイテムのLvを下げたい場合は、\n▲ボタンをタップして、出せるレベルに合わせてください。' },
+  { type: 'focus', text: 'もうひとつの"メモ机"が出ました。\n"メモ机"と"メモ机"を組み合わせてください。' },
+  { type: 'msg',   text: '"メモ机"がレベルアップしました。\n出せるアイテムのLvが上がります。' },
+  { type: 'msg',   text: '出すアイテムレベルを上下したい時は、"メモ机"を選択するとメッセージの横にレベルボタンが出るので、タップしてレベルを変更してください。' },
 ];
 
 // アイテムヒントテキスト（アイテム名は後で差し替え）
@@ -2003,6 +2003,8 @@ function currentGenMergeTutStep() {
 function startGenMergeTut() {
   if (eventState.genMergeTutDone) return;
   eventState.genMergeTutStep = 0;
+  hideNaviHint(); // チュートリアル開始時はナビヒントを非表示
+  eventState.selectedCell = null;
   renderGenMergeTutPanel();
   renderEventBoard();
 }
