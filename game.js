@@ -3521,10 +3521,19 @@ function endEvDrag(x, y) {
     eventState.board[fromIdx] = toItem;
   }
 
-  // ドラッグ後は選択状態をリセット（残像・誤マージ防止）
-  if (eventState.selectedCell !== null) {
-    eventState.selectedCell = null;
-    hideNaviHint();
+  // ドラッグ後の選択状態更新
+  // ジェネレーター: 選択中タイルを移動した場合は新位置を追跡
+  // マージアイテム: 残像・誤マージ防止のためリセット
+  if (fromItem.isEventGen) {
+    if (eventState.selectedCell === fromIdx) {
+      eventState.selectedCell = !toItem ? toIdx : null; // 空きへ移動→新位置, 入れ替え→解除
+      if (eventState.selectedCell === null) hideNaviHint();
+    }
+  } else {
+    if (eventState.selectedCell !== null) {
+      eventState.selectedCell = null;
+      hideNaviHint();
+    }
   }
   renderEventBoard();
   renderEventRequest(); // 依頼達成可否を更新
