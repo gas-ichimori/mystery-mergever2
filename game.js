@@ -1696,8 +1696,8 @@ function openAdventureScene(sceneId, callback = null) {
       const finish = () => {
         if (done) return;
         done = true;
-        el.style.cssText = '';
-        el.classList.add('adv-char-shown');
+        el.classList.add('adv-char-shown'); // 先にクラス追加（opacity: 1 確保）
+        el.style.cssText = '';              // その後インラインをクリア（opacity維持）
         onComplete();
       };
       el.addEventListener('transitionend', finish, { once: true });
@@ -1770,8 +1770,8 @@ function showAdvMessage(idx) {
         const finish = () => {
           if (done) return;
           done = true;
-          charaRight.style.cssText = '';
-          charaRight.classList.add('adv-char-shown');
+          charaRight.classList.add('adv-char-shown'); // 先にクラス追加（opacity: 1 確保）
+          charaRight.style.cssText = '';              // その後インラインをクリア（opacity維持）
           charaRight.classList.toggle('adv-chara-dim', msg.side !== 'right');
           advTextPending = false;
           _applyText();
