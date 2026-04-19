@@ -1483,13 +1483,21 @@ body {
   opacity: 0.42;
   filter: brightness(0.55);
 }
-/* スライドイン（テストシーン用・右キャラ） */
+/* スライドイン（右キャラ） */
 #adv-chara-right.adv-slide-in {
   animation: adv-slide-from-right 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 @keyframes adv-slide-from-right {
   from { transform: translateX(110%); opacity: 0; }
   to   { transform: translateX(0);    opacity: 1; }
+}
+/* スライドイン（左キャラ） */
+#adv-chara-left.adv-slide-in-left {
+  animation: adv-slide-from-left 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+@keyframes adv-slide-from-left {
+  from { transform: translateX(-110%); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
 }
 /* メッセージボックス */
 #adv-message-box {

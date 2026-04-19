@@ -1634,13 +1634,14 @@ const ADV_SCENES = {
     title:         '',
     leftImg:       'img/image_merge_order_chara_00.png',
     rightImg:      'img/image_merge_order_chara_01a.png',
-    rightEntrance: 'none',   // ミユは最初非表示・セリフ時にフェードイン
+    leftEntrance:  'slide',  // ヤスは左からスライドイン
+    rightEntrance: 'none',   // ミユは最初非表示・セリフ時にスライドイン
     autoClose:     false,
     script: [
-      { speaker: 'ヤス', text: 'ご依頼内容をお聞かせください。',                    side: 'left',  showDelay: 500                },
-      { speaker: 'ミユ', text: '猫が居なくなっちゃったの・・・。\n探してください。', side: 'right', showRight: true, showDelay: 500 },
-      { speaker: 'ヤス', text: 'それは、困りましたね。\n依頼を承りました。',          side: 'left'                               },
-      { speaker: 'ミユ', text: 'ありがとうございます！',                             side: 'right', tapCloseDelay: 2500            },
+      { speaker: 'ヤス', text: 'ご依頼内容をお聞かせください。',                          side: 'left'                               },
+      { speaker: 'ミユ', text: '猫が居なくなっちゃったの・・・。\n探してもらえますか？',   side: 'right', showRight: true, slideRight: true },
+      { speaker: 'ヤス', text: 'それは、困りましたね。\n早速、依頼を承ります。',            side: 'left'                               },
+      { speaker: 'ミユ', text: 'ありがとうございます！',                                   side: 'right', tapCloseDelay: 2500            },
     ],
   },
 };
@@ -1676,13 +1677,10 @@ function openAdventureScene(sceneId, callback = null) {
   const charaRight = document.getElementById('adv-chara-right');
 
   // 状態リセット
-  charaLeft.classList.remove('adv-char-shown', 'adv-chara-dim');
+  charaLeft.classList.remove('adv-char-shown', 'adv-chara-dim', 'adv-slide-in-left');
   charaRight.classList.remove('adv-char-shown', 'adv-chara-dim', 'adv-slide-in');
+  charaLeft.style.transform  = '';
   charaRight.style.transform = '';
-
-  // 左キャラ: フェードイン（transitionで opacity 0→1）
-  void charaLeft.offsetWidth;
-  charaLeft.classList.add('adv-char-shown');
 
   // 右キャラ: entrance に応じた処理
   if (scene.rightEntrance === 'slide') {
@@ -1700,9 +1698,27 @@ function openAdventureScene(sceneId, callback = null) {
     void charaRight.offsetWidth;
     charaRight.classList.add('adv-char-shown');
   }
-  // 'none': 非表示のまま（showRight で後からフェードイン）
+  // 'none': 非表示のまま（showRight/slideRight で後から登場）
 
-  showAdvMessage(0);
+  // 左キャラ: entrance に応じた処理
+  if (scene.leftEntrance === 'slide') {
+    charaLeft.style.transform = 'translateX(-110%)';
+    void charaLeft.offsetWidth;
+    charaLeft.classList.add('adv-slide-in-left');
+    advTextPending = true;
+    charaLeft.addEventListener('animationend', () => {
+      charaLeft.classList.remove('adv-slide-in-left');
+      charaLeft.style.transform = '';
+      charaLeft.classList.add('adv-char-shown');
+      advTextPending = false;
+      showAdvMessage(0);
+    }, { once: true });
+  } else {
+    // フェードイン（transition で opacity 0→1）
+    void charaLeft.offsetWidth;
+    charaLeft.classList.add('adv-char-shown');
+    showAdvMessage(0);
+  }
 }
 
 function showAdvMessage(idx) {
@@ -1713,18 +1729,6 @@ function showAdvMessage(idx) {
   const charaLeft  = document.getElementById('adv-chara-left');
   const charaRight = document.getElementById('adv-chara-right');
 
-  // 右キャラのフェードイン（初回のみ）
-  if (msg.showRight && !charaRight.classList.contains('adv-char-shown')) {
-    void charaRight.offsetWidth;
-    charaRight.classList.add('adv-char-shown');
-  }
-
-  // 話者ハイライト / 非話者ディム（フェードイン開始と同時に適用）
-  charaLeft.classList.toggle('adv-chara-dim', msg.side !== 'left');
-  if (charaRight.classList.contains('adv-char-shown')) {
-    charaRight.classList.toggle('adv-chara-dim', msg.side !== 'right');
-  }
-
   function _applyText() {
     document.getElementById('adv-speaker').textContent  = msg.speaker;
     document.getElementById('adv-text').textContent     = msg.text;
@@ -1734,19 +1738,40 @@ function showAdvMessage(idx) {
     }
   }
 
-  if (msg.showDelay) {
-    // キャラフェードイン完了を待ってからテキスト表示
-    document.getElementById('adv-speaker').textContent  = '';
-    document.getElementById('adv-text').textContent     = '';
-    document.getElementById('adv-tap-hint').textContent = '';
-    advTextPending = true;
-    setTimeout(() => {
-      advTextPending = false;
-      _applyText();
-    }, msg.showDelay);
-  } else {
-    _applyText();
+  // 右キャラの登場（初回のみ）
+  if (msg.showRight && !charaRight.classList.contains('adv-char-shown')) {
+    if (msg.slideRight) {
+      // スライドインしてからテキスト表示
+      charaLeft.classList.toggle('adv-chara-dim', msg.side !== 'left');
+      document.getElementById('adv-speaker').textContent  = '';
+      document.getElementById('adv-text').textContent     = '';
+      document.getElementById('adv-tap-hint').textContent = '';
+      charaRight.style.transform = 'translateX(110%)';
+      void charaRight.offsetWidth;
+      charaRight.classList.add('adv-slide-in');
+      advTextPending = true;
+      charaRight.addEventListener('animationend', () => {
+        charaRight.classList.remove('adv-slide-in');
+        charaRight.style.transform = '';
+        charaRight.classList.add('adv-char-shown');
+        charaRight.classList.toggle('adv-chara-dim', msg.side !== 'right');
+        advTextPending = false;
+        _applyText();
+      }, { once: true });
+      return;
+    } else {
+      void charaRight.offsetWidth;
+      charaRight.classList.add('adv-char-shown');
+    }
   }
+
+  // 話者ハイライト / 非話者ディム
+  charaLeft.classList.toggle('adv-chara-dim', msg.side !== 'left');
+  if (charaRight.classList.contains('adv-char-shown')) {
+    charaRight.classList.toggle('adv-chara-dim', msg.side !== 'right');
+  }
+
+  _applyText();
 }
 
 function closeAdventureScene() {
