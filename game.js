@@ -1612,6 +1612,60 @@ document.getElementById('debug-spawn-coin5').addEventListener('click', () => {
   showToast(`💰 Lv5コインを出しました`);
 });
 
+// ========================================
+// アドベンチャーシーン
+// ========================================
+const ADV_TEST_SCRIPT = [
+  { speaker: 'ヤス',  text: 'ヤスです',             side: 'left'  },
+  { speaker: 'ミユ',  text: '猫を探しています',       side: 'right' },
+  { speaker: 'ヤス',  text: 'わかりました！探します', side: 'left'  },
+];
+
+let advMsgIdx = 0;
+
+function openAdventureScene() {
+  advMsgIdx = 0;
+  const screen = document.getElementById('adventure-screen');
+  screen.classList.remove('hidden', 'adv-fade-out');
+  // 右キャラのスライドイン
+  const charaRight = document.getElementById('adv-chara-right');
+  charaRight.classList.remove('adv-slide-in');
+  void charaRight.offsetWidth; // reflow で animation をリセット
+  charaRight.classList.add('adv-slide-in');
+  showAdvMessage(0);
+}
+
+function showAdvMessage(idx) {
+  const msg = ADV_TEST_SCRIPT[idx];
+  document.getElementById('adv-speaker').textContent = msg.speaker;
+  document.getElementById('adv-text').textContent    = msg.text;
+  const isLast = idx >= ADV_TEST_SCRIPT.length - 1;
+  document.getElementById('adv-tap-hint').textContent = isLast ? '' : '▼ タップで続ける';
+  // 話者をハイライト、非話者を暗く
+  document.getElementById('adv-chara-left').classList.toggle('adv-chara-dim',  msg.side !== 'left');
+  document.getElementById('adv-chara-right').classList.toggle('adv-chara-dim', msg.side !== 'right');
+}
+
+document.getElementById('adventure-screen').addEventListener('click', () => {
+  advMsgIdx++;
+  if (advMsgIdx >= ADV_TEST_SCRIPT.length) {
+    // 最後のメッセージ後: フェードアウトしてゲームに戻る
+    const screen = document.getElementById('adventure-screen');
+    screen.classList.add('adv-fade-out');
+    setTimeout(() => {
+      screen.classList.add('hidden');
+      screen.classList.remove('adv-fade-out');
+    }, 800);
+    return;
+  }
+  showAdvMessage(advMsgIdx);
+});
+
+document.getElementById('debug-adv-test').addEventListener('click', () => {
+  document.getElementById('debug-screen').classList.add('hidden');
+  openAdventureScene();
+});
+
 document.getElementById('settings-close').addEventListener('click', () => {
   document.getElementById('settings-screen').classList.add('hidden');
 });

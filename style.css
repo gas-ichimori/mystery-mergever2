@@ -1424,6 +1424,116 @@ body {
   cursor: pointer;
 }
 
+/* ===== アドベンチャーシーン ===== */
+#adventure-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #000;
+  overflow: hidden;
+}
+#adv-bg {
+  position: absolute;
+  inset: 0;
+  background: url('img/image_merge_bg.png') center center / cover no-repeat;
+  z-index: 0;
+}
+/* 背景を少し暗くしてキャラ・テキストを見やすく */
+#adv-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+#adv-title-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: clamp(11px, 3vw, 14px);
+  text-align: center;
+  letter-spacing: 0.05em;
+  z-index: 4;
+}
+/* キャラクター共通 */
+#adv-chara-left,
+#adv-chara-right {
+  position: absolute;
+  bottom: 175px;
+  z-index: 2;
+  transition: opacity 0.3s, filter 0.3s;
+}
+#adv-chara-left  { left: -4px; }
+#adv-chara-right {
+  right: -4px;
+  transform: translateX(110%);
+  opacity: 0;
+}
+#adv-chara-left img,
+#adv-chara-right img {
+  height: clamp(160px, 42vw, 280px);
+  object-fit: contain;
+  display: block;
+}
+/* スライドイン（右キャラ） */
+#adv-chara-right.adv-slide-in {
+  animation: adv-slide-from-right 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+@keyframes adv-slide-from-right {
+  from { transform: translateX(110%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+/* 非話者を暗く */
+.adv-chara-dim {
+  opacity: 0.45;
+  filter: brightness(0.55);
+}
+/* メッセージボックス */
+#adv-message-box {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  min-height: 160px;
+  background: rgba(8, 16, 50, 0.88);
+  border-top: 2px solid rgba(100, 160, 255, 0.45);
+  padding: 14px 20px 28px;
+  z-index: 3;
+  cursor: pointer;
+  user-select: none;
+}
+#adv-speaker {
+  color: #7ec8ff;
+  font-size: clamp(13px, 3.5vw, 16px);
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+#adv-text {
+  color: #f0f4ff;
+  font-size: clamp(15px, 4.2vw, 20px);
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+#adv-tap-hint {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: clamp(10px, 2.8vw, 13px);
+  text-align: right;
+  margin-top: 10px;
+  min-height: 1.2em;
+  animation: adv-hint-blink 1.3s ease-in-out infinite;
+}
+@keyframes adv-hint-blink {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1;   }
+}
+/* フェードアウト */
+#adventure-screen.adv-fade-out {
+  animation: adv-fadeout 0.8s ease-out forwards;
+}
+@keyframes adv-fadeout {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
 /* ===== コインLv5 水蒸気アニメーション ===== */
 .cell.has-coin-smoke {
   position: relative;

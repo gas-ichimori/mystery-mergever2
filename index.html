@@ -130,6 +130,13 @@
           <button id="debug-spawn-coin5" class="debug-loop-btn">💰</button>
         </div>
       </div>
+      <div class="debug-section-label">アドベンチャーシーン</div>
+      <div id="debug-gen-level-row">
+        <div class="debug-gen-row">
+          <span class="debug-gen-label">アドベンチャーシーンテスト</span>
+          <button id="debug-adv-test" class="debug-loop-btn">▶</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -196,6 +203,23 @@
       <div id="event-board"></div>
     </div>
     <!-- event-gen-panel は非表示（ジェネレーターはボード上タイルで操作） -->
+  </div>
+
+  <!-- アドベンチャーシーン -->
+  <div id="adventure-screen" class="hidden">
+    <div id="adv-bg"></div>
+    <div id="adv-title-bar">アドベンチャーシーンテスト</div>
+    <div id="adv-chara-left">
+      <img src="img/image_merge_chara_00.png" alt="ヤス">
+    </div>
+    <div id="adv-chara-right">
+      <img src="img/image_merge_chara_01.png" alt="ミユ">
+    </div>
+    <div id="adv-message-box">
+      <div id="adv-speaker"></div>
+      <div id="adv-text"></div>
+      <div id="adv-tap-hint">▼ タップで続ける</div>
+    </div>
   </div>
 
   <script src="game.js"></script>
