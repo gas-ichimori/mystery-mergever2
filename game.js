@@ -1633,14 +1633,14 @@ const ADV_SCENES = {
   scene01: {
     title:         '',
     leftImg:       'img/image_merge_order_chara_00.png',
-    rightImg:      'img/image_merge_order_chara_01.png',
+    rightImg:      'img/image_merge_order_chara_01a.png',
     rightEntrance: 'none',   // ミユは最初非表示・セリフ時にフェードイン
-    autoClose:     true,     // 最終セリフ後に自動クローズ
+    autoClose:     false,
     script: [
-      { speaker: 'ヤス', text: 'ご依頼内容をお聞かせください。',                    side: 'left'                },
-      { speaker: 'ミユ', text: '猫が居なくなっちゃったの・・・。\n探してください。', side: 'right', showRight: true },
-      { speaker: 'ヤス', text: 'それは、困りましたね。\n依頼を承りました。',          side: 'left'                },
-      { speaker: 'ミユ', text: 'ありがとうございます！',                             side: 'right'               },
+      { speaker: 'ヤス', text: 'ご依頼内容をお聞かせください。',                    side: 'left',  showDelay: 500                },
+      { speaker: 'ミユ', text: '猫が居なくなっちゃったの・・・。\n探してください。', side: 'right', showRight: true, showDelay: 500 },
+      { speaker: 'ヤス', text: 'それは、困りましたね。\n依頼を承りました。',          side: 'left'                               },
+      { speaker: 'ミユ', text: 'ありがとうございます！',                             side: 'right', tapCloseDelay: 2500            },
     ],
   },
 };
@@ -1648,6 +1648,7 @@ const ADV_SCENES = {
 let advMsgIdx       = 0;
 let advCurrentScene = null;
 let advCallback     = null;
+let advTextPending  = false;
 
 function openAdventureScene(sceneId, callback = null) {
   const scene = ADV_SCENES[sceneId];
@@ -1655,6 +1656,7 @@ function openAdventureScene(sceneId, callback = null) {
   advCurrentScene = scene;
   advCallback     = callback;
   advMsgIdx       = 0;
+  advTextPending  = false;
 
   const screen = document.getElementById('adventure-screen');
   screen.classList.remove('hidden', 'adv-fade-out');
@@ -1704,14 +1706,9 @@ function openAdventureScene(sceneId, callback = null) {
 }
 
 function showAdvMessage(idx) {
-  const scene = advCurrentScene;
-  const msg   = scene.script[idx];
-
-  document.getElementById('adv-speaker').textContent = msg.speaker;
-  document.getElementById('adv-text').textContent    = msg.text;
-
+  const scene  = advCurrentScene;
+  const msg    = scene.script[idx];
   const isLast = idx >= scene.script.length - 1;
-  document.getElementById('adv-tap-hint').textContent = isLast ? '' : '▼ タップで続ける';
 
   const charaLeft  = document.getElementById('adv-chara-left');
   const charaRight = document.getElementById('adv-chara-right');
@@ -1722,15 +1719,33 @@ function showAdvMessage(idx) {
     charaRight.classList.add('adv-char-shown');
   }
 
-  // 話者ハイライト / 非話者ディム
+  // 話者ハイライト / 非話者ディム（フェードイン開始と同時に適用）
   charaLeft.classList.toggle('adv-chara-dim', msg.side !== 'left');
   if (charaRight.classList.contains('adv-char-shown')) {
     charaRight.classList.toggle('adv-chara-dim', msg.side !== 'right');
   }
 
-  // 自動クローズ（最終セリフ後 1.5秒）
-  if (isLast && scene.autoClose) {
-    setTimeout(closeAdventureScene, 1500);
+  function _applyText() {
+    document.getElementById('adv-speaker').textContent  = msg.speaker;
+    document.getElementById('adv-text').textContent     = msg.text;
+    document.getElementById('adv-tap-hint').textContent = isLast ? '' : '▼ タップで続ける';
+    if (isLast && scene.autoClose) {
+      setTimeout(closeAdventureScene, 1500);
+    }
+  }
+
+  if (msg.showDelay) {
+    // キャラフェードイン完了を待ってからテキスト表示
+    document.getElementById('adv-speaker').textContent  = '';
+    document.getElementById('adv-text').textContent     = '';
+    document.getElementById('adv-tap-hint').textContent = '';
+    advTextPending = true;
+    setTimeout(() => {
+      advTextPending = false;
+      _applyText();
+    }, msg.showDelay);
+  } else {
+    _applyText();
   }
 }
 
@@ -1744,16 +1759,22 @@ function closeAdventureScene() {
     screen.classList.remove('adv-fade-out');
     advCurrentScene = null;
     advCallback     = null;
+    advTextPending  = false;
     if (cb) cb();
   }, 800);
 }
 
 document.getElementById('adventure-screen').addEventListener('click', () => {
-  if (!advCurrentScene) return;
+  if (!advCurrentScene || advTextPending) return;
   const isLast = advMsgIdx >= advCurrentScene.script.length - 1;
   if (isLast) {
-    if (!advCurrentScene.autoClose) closeAdventureScene();
-    return; // autoClose は setTimeout で処理
+    const msg = advCurrentScene.script[advMsgIdx];
+    if (msg.tapCloseDelay != null) {
+      setTimeout(closeAdventureScene, msg.tapCloseDelay);
+    } else if (!advCurrentScene.autoClose) {
+      closeAdventureScene();
+    }
+    return;
   }
   advMsgIdx++;
   showAdvMessage(advMsgIdx);
