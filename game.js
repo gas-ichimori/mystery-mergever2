@@ -1676,26 +1676,43 @@ function openAdventureScene(sceneId, callback = null) {
   const charaLeft  = document.getElementById('adv-chara-left');
   const charaRight = document.getElementById('adv-chara-right');
 
-  // 状態リセット
-  charaLeft.classList.remove('adv-char-shown', 'adv-chara-dim', 'adv-slide-in-left');
-  charaRight.classList.remove('adv-char-shown', 'adv-chara-dim', 'adv-slide-in');
-  charaLeft.style.transform  = '';
-  charaRight.style.transform = '';
+  // 状態リセット（インラインスタイルも含めてクリア）
+  charaLeft.classList.remove('adv-char-shown', 'adv-chara-dim');
+  charaRight.classList.remove('adv-char-shown', 'adv-chara-dim');
+  charaLeft.style.cssText  = '';
+  charaRight.style.cssText = '';
+
+  // スライドイン共通ヘルパー
+  function _slideIn(el, fromX, onComplete) {
+    el.style.transition = 'none';
+    el.style.transform  = `translateX(${fromX})`;
+    el.style.opacity    = '0';
+    void el.offsetHeight; // リフロー強制
+    el.style.transition = 'transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s ease-out';
+    requestAnimationFrame(() => {
+      el.style.transform = 'translateX(0)';
+      el.style.opacity   = '1';
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        el.style.cssText = '';
+        el.classList.add('adv-char-shown');
+        onComplete();
+      };
+      el.addEventListener('transitionend', finish, { once: true });
+      setTimeout(finish, 700); // transitionend が発火しない場合のフォールバック
+    });
+  }
 
   // 右キャラ: entrance に応じた処理
   if (scene.rightEntrance === 'slide') {
-    charaRight.style.transform = 'translateX(110%)';
-    void charaRight.offsetWidth;
-    charaRight.classList.add('adv-slide-in');
-    charaRight.addEventListener('animationend', () => {
-      charaRight.classList.remove('adv-slide-in');
-      charaRight.style.transform = '';
-      charaRight.classList.add('adv-char-shown');
+    _slideIn(charaRight, '110%', () => {
       const cur = advCurrentScene?.script[advMsgIdx];
       if (cur) charaRight.classList.toggle('adv-chara-dim', cur.side !== 'right');
-    }, { once: true });
+    });
   } else if (scene.rightEntrance === 'fade') {
-    void charaRight.offsetWidth;
+    void charaRight.offsetHeight;
     charaRight.classList.add('adv-char-shown');
   }
   // 'none': 非表示のまま（showRight/slideRight で後から登場）
@@ -1703,24 +1720,12 @@ function openAdventureScene(sceneId, callback = null) {
   // 左キャラ: entrance に応じた処理
   if (scene.leftEntrance === 'slide') {
     advTextPending = true;
-    // double-RAF でアニメーション開始を確実に
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      charaLeft.classList.add('adv-slide-in-left');
-      let done = false;
-      const onDone = () => {
-        if (done) return;
-        done = true;
-        charaLeft.classList.remove('adv-slide-in-left');
-        charaLeft.classList.add('adv-char-shown');
-        advTextPending = false;
-        showAdvMessage(0);
-      };
-      charaLeft.addEventListener('animationend', onDone, { once: true });
-      setTimeout(onDone, 600); // animationend が発火しない場合のフォールバック
-    }));
+    _slideIn(charaLeft, '-110%', () => {
+      advTextPending = false;
+      showAdvMessage(0);
+    });
   } else {
-    // フェードイン（transition で opacity 0→1）
-    void charaLeft.offsetWidth;
+    void charaLeft.offsetHeight;
     charaLeft.classList.add('adv-char-shown');
     showAdvMessage(0);
   }
@@ -1751,18 +1756,29 @@ function showAdvMessage(idx) {
       document.getElementById('adv-speaker').textContent  = '';
       document.getElementById('adv-text').textContent     = '';
       document.getElementById('adv-tap-hint').textContent = '';
-      charaRight.style.transform = 'translateX(110%)';
-      void charaRight.offsetWidth;
-      charaRight.classList.add('adv-slide-in');
+      charaRight.style.cssText = '';
+      charaRight.style.transition = 'none';
+      charaRight.style.transform  = 'translateX(110%)';
+      charaRight.style.opacity    = '0';
+      void charaRight.offsetHeight;
+      charaRight.style.transition = 'transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s ease-out';
       advTextPending = true;
-      charaRight.addEventListener('animationend', () => {
-        charaRight.classList.remove('adv-slide-in');
-        charaRight.style.transform = '';
-        charaRight.classList.add('adv-char-shown');
-        charaRight.classList.toggle('adv-chara-dim', msg.side !== 'right');
-        advTextPending = false;
-        _applyText();
-      }, { once: true });
+      requestAnimationFrame(() => {
+        charaRight.style.transform = 'translateX(0)';
+        charaRight.style.opacity   = '1';
+        let done = false;
+        const finish = () => {
+          if (done) return;
+          done = true;
+          charaRight.style.cssText = '';
+          charaRight.classList.add('adv-char-shown');
+          charaRight.classList.toggle('adv-chara-dim', msg.side !== 'right');
+          advTextPending = false;
+          _applyText();
+        };
+        charaRight.addEventListener('transitionend', finish, { once: true });
+        setTimeout(finish, 700);
+      });
       return;
     } else {
       void charaRight.offsetWidth;
