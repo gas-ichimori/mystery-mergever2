@@ -1601,6 +1601,14 @@ document.getElementById('debug-firegen-lv-up').addEventListener('click', () => {
   renderEventBoard();
 });
 
+document.getElementById('debug-spawn-coin5').addEventListener('click', () => {
+  const emptyIdx = eventState.board.findIndex(c => c === null);
+  if (emptyIdx === -1) { showToast('ボードが満杯です'); return; }
+  eventState.board[emptyIdx] = { isCoin: true, coinLv: COIN_MAX_LV };
+  renderEventBoard();
+  showToast(`💰 Lv5コインを出しました`);
+});
+
 document.getElementById('settings-close').addEventListener('click', () => {
   document.getElementById('settings-screen').classList.add('hidden');
 });
