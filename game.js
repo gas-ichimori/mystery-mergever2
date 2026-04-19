@@ -1503,8 +1503,11 @@ const CHARACTERS = [
 function renderCharacters() {
   const list = document.getElementById('characters-list');
   list.innerHTML = '';
+  const ch2Unlocked = !!eventState.fireGenUnlocked;
   CHARACTERS.forEach((c, idx) => {
-    // 第一章・第二章ラベルを挿入（ミユの前とジンの前）
+    // 第二章キャラクター（idx 6〜）は製造機解放後のみ表示
+    if (idx >= 6 && !ch2Unlocked) return;
+    // 第一章・第二章ラベルを挿入
     if (idx === 1) {
       const label = document.createElement('div');
       label.className = 'character-chapter-label';
