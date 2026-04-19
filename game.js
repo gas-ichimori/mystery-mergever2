@@ -2310,6 +2310,8 @@ function showNaviHintForBubble(item) {
   if (lvBtn)  lvBtn.classList.add('hidden');
   if (diaBtn) diaBtn.classList.remove('hidden');
   if (diaLbl) diaLbl.textContent = `💎 ${cost}`;
+  document.getElementById('navi-trash-btn')?.classList.add('hidden');
+  document.getElementById('navi-coin-btn')?.classList.add('hidden');
   panel.classList.remove('hidden');
   naviHintPersistent = true;
   if (naviHintTimer) clearTimeout(naviHintTimer);
