@@ -1481,8 +1481,8 @@ body {
 /* 非話者を暗く（ID+クラスで高い詳細度） */
 #adv-chara-left.adv-chara-dim,
 #adv-chara-right.adv-chara-dim {
-  opacity: 0.42;
-  filter: brightness(0.55);
+  opacity: 0.65;
+  filter: brightness(0.72);
 }
 /* スライドイン: 初期位置（adv-slide-ready） */
 #adv-chara-left.adv-slide-ready  { transform: translateX(-110%); opacity: 0; }

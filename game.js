@@ -349,6 +349,7 @@ function startDragTouch(e, fromIdx) {
 
   document.addEventListener('touchmove', onDragMoveTouch, { passive: false });
   document.addEventListener('touchend', onDragEndTouch);
+  document.addEventListener('touchcancel', onDragEndTouch);
 }
 
 function createGhost(x, y, fromIdx) {
@@ -407,10 +408,12 @@ function onDragEnd(e) {
 }
 
 function onDragEndTouch(e) {
-  const t = e.changedTouches[0];
-  endDrag(t.clientX, t.clientY);
+  const t = e.changedTouches?.[0];
+  if (t) endDrag(t.clientX, t.clientY);
+  else { if (drag.ghost) { drag.ghost.remove(); drag.ghost = null; } drag.active = false; drag.fromIdx = null; }
   document.removeEventListener('touchmove', onDragMoveTouch);
   document.removeEventListener('touchend', onDragEndTouch);
+  document.removeEventListener('touchcancel', onDragEndTouch);
 }
 
 function endDrag(x, y) {
@@ -837,8 +840,7 @@ function rollLucky(powerLv) {
 function rollPower(powerLv, chainMaxStage) {
   const bonus = GEN_POWER_BONUS[powerLv];
   if (!bonus) return null;
-  const prob = 0.10 + Math.random() * 0.30;
-  if (Math.random() < prob) {
+  if (Math.random() < 0.05) {  // Power確率 5% 固定
     return bonus.outStage !== null ? Math.min(bonus.outStage, chainMaxStage) : chainMaxStage;
   }
   return null;
@@ -1641,7 +1643,7 @@ const ADV_SCENES = {
       { speaker: 'ヤス', text: 'ご依頼内容をお聞かせください。',                          side: 'left'                               },
       { speaker: 'ミユ', text: '猫が居なくなっちゃったの・・・。\n探してもらえますか？',   side: 'right', showRight: true, slideRight: true },
       { speaker: 'ヤス', text: 'それは、困りましたね。\n早速、依頼を承ります。',            side: 'left'                               },
-      { speaker: 'ミユ', text: 'ありがとうございます！',                                   side: 'right', tapCloseDelay: 2500            },
+      { speaker: 'ミユ', text: 'ありがとうございます！',                                   side: 'right'                              },
     ],
   },
 };
@@ -1736,7 +1738,7 @@ function showAdvMessage(idx) {
   function _applyText() {
     document.getElementById('adv-speaker').textContent  = msg.speaker;
     document.getElementById('adv-text').textContent     = msg.text;
-    document.getElementById('adv-tap-hint').textContent = isLast ? '' : '▼ タップで続ける';
+    document.getElementById('adv-tap-hint').textContent = '▼ タップで続ける';
     if (isLast && scene.autoClose) {
       setTimeout(closeAdventureScene, 1500);
     }
@@ -2857,7 +2859,31 @@ function eventRequestCompletable(req) {
 }
 
 // イベントボードのアイテムを消費して依頼を完了
-function completeEventRequest(index) {
+function showRewardNearBtn(text, btnEl) {
+  const rect = btnEl.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.textContent = text;
+  el.style.cssText = `
+    position:fixed;
+    left:${rect.left + rect.width / 2}px;
+    top:${rect.top - 8}px;
+    transform:translate(-50%,-100%);
+    background:rgba(10,30,70,0.92);
+    color:#fff;
+    padding:6px 18px;
+    border-radius:20px;
+    font-size:14px;
+    font-weight:bold;
+    pointer-events:none;
+    z-index:9999;
+    white-space:nowrap;
+    animation:toast-pop 2s ease-out forwards;
+  `;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2100);
+}
+
+function completeEventRequest(index, btnEl) {
   const req = eventState.requests[index];
   if (!req) return;
   if (!eventRequestCompletable(req)) { showToast('該当アイテムがありません'); return; }
@@ -2875,7 +2901,8 @@ function completeEventRequest(index) {
 
   state.coin += req.coin;
   state.requestCompletedTotal++;
-  showToast(`依頼完了！ 💰+${req.coin.toLocaleString()}`);
+  if (btnEl) showRewardNearBtn(`依頼完了！ 💰+${req.coin.toLocaleString()}`, btnEl);
+  else showToast(`依頼完了！ 💰+${req.coin.toLocaleString()}`);
   if (state.requestCompletedTotal % 10 === 0) {
     addEnergy(25, `依頼${state.requestCompletedTotal}回達成ボーナス！`);
   }
@@ -2941,6 +2968,7 @@ function fillEventRequests() {
       }
       const key = item.chainId !== undefined ? `${item.chainId}-${item.stage}` : `ev-${item.stage}`;
       if (excludeKeys.has(key)) continue;
+      if (item.stage <= 2 && tutDone) continue; // チュートリアル後はLv1-2を依頼から除外
       if (eventState.completedLowStages.has(key)) continue; // Lv1-5完了済みはスキップ
       if (item.stage >= 6 && eventState.recentlySolvedKeys.has(key)) continue; // Lv6+連続スキップ
       return { item, key };
@@ -2948,11 +2976,17 @@ function fillEventRequests() {
     return null;
   }
 
+  const tutDone = eventState.tutorialStep >= TUTORIAL_STEPS.length;
   let retry = 0;
   while (eventState.requests.length < MAX_SLOTS && retry < 40) {
     // 製造機Lv3以上になったら第二章依頼人（id:6-10）も解放
     const maxCharId = (eventState.seizoGenLevel >= 2) ? 10 : 5;
-    const available = REQUESTERS.filter(r => r.id <= maxCharId && !usedCharIds.has(r.id));
+    // チュートリアル後はミユ（id:1）を依頼人から除外
+    const available = REQUESTERS.filter(r =>
+      r.id <= maxCharId &&
+      !usedCharIds.has(r.id) &&
+      !(tutDone && r.id === 1)
+    );
     if (available.length === 0) break;
 
     const result1 = pickRandomItem(usedStageKeys);
@@ -3079,7 +3113,7 @@ function renderEventRequest() {
     if (completable) {
       div.querySelector('.req-complete-btn').addEventListener('click', e => {
         e.stopPropagation();
-        completeEventRequest(i);
+        completeEventRequest(i, e.currentTarget);
       });
     }
     panel.appendChild(div);
@@ -3218,7 +3252,7 @@ function onEventGenTap(tappedCellIdx = null) {
     if (powerStage !== null) {
       finalStage = powerStage;
       isPower = true;
-    } else {
+    } else if (outStage >= 2) { // Lv1出力時はLucky不可
       const luckyMult = rollLucky(powerLv);
       if (luckyMult !== null) {
         const ls = Math.min(Math.floor(outStage * luckyMult), evMaxStage);
@@ -3541,9 +3575,10 @@ function doEventMerge(fromIdx, toIdx) {
     }
   }
 
-  // 30%の確率でしゃぼん玉アイテムを追加出現（チュートリアル・霧マージ中は除く）
+  // 5%〜25%の確率でしゃぼん玉アイテムを追加出現（チュートリアル・霧マージ中は除く）
   const tutStepNow = currentTutStep();
-  if (!tutStepNow && !isGenMergeTutActive() && !toWasFog && Math.random() < 0.30) {
+  const bubbleProb = 0.05 + Math.random() * 0.20;
+  if (!tutStepNow && !isGenMergeTutActive() && !toWasFog && Math.random() < bubbleProb) {
     const bubbleSlot = findNearestEmptyEventCell(toIdx);
     if (bubbleSlot !== -1) {
       const bubbleItem = chainId !== undefined
@@ -3828,6 +3863,7 @@ function startEvDragTouch(e, fromIdx) {
   createEvGhost(t.clientX, t.clientY, fromIdx);
   document.addEventListener('touchmove', onEvDragMoveTouch, { passive: false });
   document.addEventListener('touchend', onEvDragEndTouch);
+  document.addEventListener('touchcancel', onEvDragEndTouch);
 }
 
 function createEvGhost(x, y, fromIdx) {
@@ -3907,10 +3943,12 @@ function onEvDragEnd(e) {
 }
 
 function onEvDragEndTouch(e) {
-  const t = e.changedTouches[0];
-  endEvDrag(t.clientX, t.clientY);
+  const t = e.changedTouches?.[0];
+  if (t) endEvDrag(t.clientX, t.clientY);
+  else { if (evDrag.ghost) { evDrag.ghost.remove(); evDrag.ghost = null; } evDrag.active = false; evDrag.fromIdx = null; document.querySelectorAll('#event-board .cell').forEach(c => c.classList.remove('drop-over')); }
   document.removeEventListener('touchmove', onEvDragMoveTouch);
   document.removeEventListener('touchend', onEvDragEndTouch);
+  document.removeEventListener('touchcancel', onEvDragEndTouch);
 }
 
 function highlightEvDropTarget(x, y) {
