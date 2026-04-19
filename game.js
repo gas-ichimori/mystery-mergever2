@@ -1677,37 +1677,31 @@ function openAdventureScene(sceneId, callback = null) {
   const charaRight = document.getElementById('adv-chara-right');
 
   // 状態リセット（インラインスタイルも含めてクリア）
-  charaLeft.classList.remove('adv-char-shown', 'adv-chara-dim');
-  charaRight.classList.remove('adv-char-shown', 'adv-chara-dim');
+  charaLeft.classList.remove('adv-char-shown', 'adv-chara-dim', 'adv-slide-ready', 'adv-slide-active');
+  charaRight.classList.remove('adv-char-shown', 'adv-chara-dim', 'adv-slide-ready', 'adv-slide-active');
   charaLeft.style.cssText  = '';
   charaRight.style.cssText = '';
 
-  // スライドイン共通ヘルパー
-  function _slideIn(el, fromX, onComplete) {
-    el.style.transition = 'none';
-    el.style.transform  = `translateX(${fromX})`;
-    el.style.opacity    = '0';
-    void el.offsetHeight; // リフロー強制
-    el.style.transition = 'transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s ease-out';
-    requestAnimationFrame(() => {
-      el.style.transform = 'translateX(0)';
-      el.style.opacity   = '1';
-      let done = false;
-      const finish = () => {
-        if (done) return;
-        done = true;
-        el.classList.add('adv-char-shown'); // 先にクラス追加（opacity: 1 確保）
-        el.style.cssText = '';              // その後インラインをクリア（opacity維持）
-        onComplete();
-      };
-      el.addEventListener('transitionend', finish, { once: true });
-      setTimeout(finish, 700); // transitionend が発火しない場合のフォールバック
-    });
+  // スライドイン共通ヘルパー（インラインスタイル不使用・CSSクラスのみ）
+  function _slideIn(el, onComplete) {
+    el.classList.add('adv-slide-ready');   // 初期位置へ（opacity:0, off-screen）
+    void el.offsetHeight;                  // リフロー強制
+    el.classList.add('adv-slide-active');  // ターゲット位置へ（transition 発動）
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      el.classList.remove('adv-slide-ready', 'adv-slide-active');
+      el.classList.add('adv-char-shown');  // opacity:1 を確保してから slide クラスを外す
+      onComplete();
+    };
+    el.addEventListener('transitionend', finish, { once: true });
+    setTimeout(finish, 700);
   }
 
   // 右キャラ: entrance に応じた処理
   if (scene.rightEntrance === 'slide') {
-    _slideIn(charaRight, '110%', () => {
+    _slideIn(charaRight, () => {
       const cur = advCurrentScene?.script[advMsgIdx];
       if (cur) charaRight.classList.toggle('adv-chara-dim', cur.side !== 'right');
     });
@@ -1720,7 +1714,7 @@ function openAdventureScene(sceneId, callback = null) {
   // 左キャラ: entrance に応じた処理
   if (scene.leftEntrance === 'slide') {
     advTextPending = true;
-    _slideIn(charaLeft, '-110%', () => {
+    _slideIn(charaLeft, () => {
       advTextPending = false;
       showAdvMessage(0);
     });
@@ -1751,34 +1745,27 @@ function showAdvMessage(idx) {
   // 右キャラの登場（初回のみ）
   if (msg.showRight && !charaRight.classList.contains('adv-char-shown')) {
     if (msg.slideRight) {
-      // スライドインしてからテキスト表示
+      // スライドインしてからテキスト表示（CSSクラスのみ・インラインスタイル不使用）
       charaLeft.classList.toggle('adv-chara-dim', msg.side !== 'left');
       document.getElementById('adv-speaker').textContent  = '';
       document.getElementById('adv-text').textContent     = '';
       document.getElementById('adv-tap-hint').textContent = '';
-      charaRight.style.cssText = '';
-      charaRight.style.transition = 'none';
-      charaRight.style.transform  = 'translateX(110%)';
-      charaRight.style.opacity    = '0';
+      charaRight.classList.add('adv-slide-ready');
       void charaRight.offsetHeight;
-      charaRight.style.transition = 'transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s ease-out';
+      charaRight.classList.add('adv-slide-active');
       advTextPending = true;
-      requestAnimationFrame(() => {
-        charaRight.style.transform = 'translateX(0)';
-        charaRight.style.opacity   = '1';
-        let done = false;
-        const finish = () => {
-          if (done) return;
-          done = true;
-          charaRight.classList.add('adv-char-shown'); // 先にクラス追加（opacity: 1 確保）
-          charaRight.style.cssText = '';              // その後インラインをクリア（opacity維持）
-          charaRight.classList.toggle('adv-chara-dim', msg.side !== 'right');
-          advTextPending = false;
-          _applyText();
-        };
-        charaRight.addEventListener('transitionend', finish, { once: true });
-        setTimeout(finish, 700);
-      });
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        charaRight.classList.remove('adv-slide-ready', 'adv-slide-active');
+        charaRight.classList.add('adv-char-shown');
+        charaRight.classList.toggle('adv-chara-dim', msg.side !== 'right');
+        advTextPending = false;
+        _applyText();
+      };
+      charaRight.addEventListener('transitionend', finish, { once: true });
+      setTimeout(finish, 700);
       return;
     } else {
       void charaRight.offsetWidth;

@@ -1483,23 +1483,15 @@ body {
   opacity: 0.42;
   filter: brightness(0.55);
 }
-/* スライドイン（右キャラ） */
-#adv-chara-right.adv-slide-in {
-  transition: none; /* アニメーション中は transition を無効化 */
-  animation: adv-slide-from-right 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-@keyframes adv-slide-from-right {
-  from { transform: translateX(110%); opacity: 0; }
-  to   { transform: translateX(0);    opacity: 1; }
-}
-/* スライドイン（左キャラ） */
-#adv-chara-left.adv-slide-in-left {
-  transition: none; /* アニメーション中は transition を無効化 */
-  animation: adv-slide-from-left 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-@keyframes adv-slide-from-left {
-  from { transform: translateX(-110%); opacity: 0; }
-  to   { transform: translateX(0);     opacity: 1; }
+/* スライドイン: 初期位置（adv-slide-ready） */
+#adv-chara-left.adv-slide-ready  { transform: translateX(-110%); opacity: 0; }
+#adv-chara-right.adv-slide-ready { transform: translateX(110%);  opacity: 0; }
+/* スライドイン: ターゲット位置（adv-slide-active）※CSS selectorが後に来るため勝つ */
+#adv-chara-left.adv-slide-active,
+#adv-chara-right.adv-slide-active {
+  transform: translateX(0);
+  opacity: 1;
+  transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s ease-out;
 }
 /* メッセージボックス */
 #adv-message-box {
