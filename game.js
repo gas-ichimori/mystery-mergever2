@@ -135,6 +135,21 @@ const BUBBLE_DIAMOND_COST = [
   160, 176, 192, 208, 224, 240, 256, 272, 288, 304, 320, // Lv10〜20
 ];
 
+// コインアイテム定数
+const COIN_MAX_LV   = 5;
+const COIN_REWARD   = [0, 10, 20, 30, 40, 100]; // インデックス = coinLv
+const COIN_EMOJI    = ['', '🪙', '🪙', '🪙', '🪙', '💰'];
+const COIN_IMAGES   = [
+  null,
+  'img/image_merge_coin_01.png',
+  'img/image_merge_coin_02.png',
+  'img/image_merge_coin_03.png',
+  'img/image_merge_coin_04.png',
+  'img/image_merge_coin_05.png',
+];
+// しゃぼん玉がコインに変わるまでの時間（ミリ秒）
+const BUBBLE_COIN_DELAY_MS = 60000;
+
 // ========================================
 // ゲーム状態
 // ========================================
@@ -2174,12 +2189,16 @@ function updateFireNaviLvBtn(seizoLevel) {
 // ========================================
 let naviHintTimer = null;
 let naviHintPersistent = false; // 持続表示中フラグ
+let lastCoinTapTime = 0;
+let lastCoinTapIdx  = -1;
 
 function hideNaviHint() {
   if (naviHintTimer) { clearTimeout(naviHintTimer); naviHintTimer = null; }
   naviHintPersistent = false;
   document.getElementById('navi-hint-panel')?.classList.add('hidden');
   document.getElementById('navi-diamond-btn')?.classList.add('hidden');
+  document.getElementById('navi-trash-btn')?.classList.add('hidden');
+  document.getElementById('navi-coin-btn')?.classList.add('hidden');
 }
 
 function _showNaviHintPanel(text, showLvBtn, persistent = false) {
@@ -2195,7 +2214,9 @@ function _showNaviHintPanel(text, showLvBtn, persistent = false) {
   if (naviHintPersistent && !persistent) return;
   textEl.textContent = text;
   if (lvBtn) lvBtn.classList.toggle('hidden', !showLvBtn);
-  document.getElementById('navi-diamond-btn')?.classList.add('hidden'); // しゃぼん玉以外ではダイヤボタンを隠す
+  document.getElementById('navi-diamond-btn')?.classList.add('hidden');
+  document.getElementById('navi-trash-btn')?.classList.add('hidden');
+  document.getElementById('navi-coin-btn')?.classList.add('hidden');
   panel.classList.remove('hidden');
   naviHintPersistent = persistent;
   if (naviHintTimer) clearTimeout(naviHintTimer);
@@ -2250,6 +2271,29 @@ function showNaviHintForItem(item, persistent = false) {
     ? `${name}は、最大Lvに達しています`
     : `${name}をマージさせて次のレベルにアップしましょう。`;
   _showNaviHintPanel(text, false, persistent);
+  // Lv1: ゴミ箱ボタン、Lv2以降: コイン獲得ボタン
+  const trashBtn = document.getElementById('navi-trash-btn');
+  const coinBtn  = document.getElementById('navi-coin-btn');
+  const coinLbl  = document.getElementById('navi-coin-label');
+  if (item.stage === 1) {
+    trashBtn?.classList.remove('hidden');
+    coinBtn?.classList.add('hidden');
+  } else {
+    trashBtn?.classList.add('hidden');
+    const reward = item.stage * 10;
+    if (coinLbl) coinLbl.textContent = `💰 ${reward}`;
+    coinBtn?.classList.remove('hidden');
+  }
+}
+
+function showNaviHintForCoin(item) {
+  const lv     = item.coinLv ?? 1;
+  const reward = COIN_REWARD[lv] ?? 0;
+  const isMax  = lv >= COIN_MAX_LV;
+  const text   = isMax
+    ? `コインLv${lv}（最大）: ダブルタップで💰+${reward}`
+    : `コインLv${lv}: ダブルタップで💰+${reward}。同じLvと重ねてLvアップ！`;
+  _showNaviHintPanel(text, false, true);
 }
 
 // しゃぼん玉アイテム用ナビヒント（ダイヤボタンを表示）
@@ -2303,6 +2347,10 @@ function showNaviHint(text) { _showNaviHintPanel(text, false); }
 
 // ボードアイテムの表示情報を取得（chainId あり → メインチェーン、なし → EVENT_CHAIN）
 function getEvItemDisplay(item) {
+  if (item.isCoin) {
+    const lv = item.coinLv ?? 1;
+    return { emoji: COIN_EMOJI[lv] ?? '🪙', imgSrc: COIN_IMAGES[lv] ?? null };
+  }
   if (item.chainId !== undefined) {
     const chain = CHAINS[item.chainId];
     return {
@@ -2321,6 +2369,9 @@ function evItemCanMerge(a, b) {
   if (!a || !b) return false;
   if (a.isEventGen || b.isEventGen) return false;
   if (a.isBubble || b.isBubble) return false; // しゃぼん玉はマージ不可
+  // コイン同士のマージ（同Lv かつ Lv5未満）
+  if (a.isCoin && b.isCoin) return a.coinLv === b.coinLv && a.coinLv < COIN_MAX_LV;
+  if (a.isCoin || b.isCoin) return false;
   return a.stage === b.stage && (a.chainId ?? 'ev') === (b.chainId ?? 'ev');
 }
 
@@ -2336,7 +2387,9 @@ function renderEventBoard() {
   const evPairSet = new Set();
   eventState.board.forEach(item => {
     if (!item || item.isEventGen) return;
-    const key = `${item.chainId ?? 'ev'}-${item.stage}`;
+    const key = item.isCoin
+      ? `coin-${item.coinLv}`
+      : `${item.chainId ?? 'ev'}-${item.stage}`;
     evPairMap[key] = (evPairMap[key] || 0) + 1;
     if (evPairMap[key] >= 2) evPairSet.add(key);
   });
@@ -2479,9 +2532,12 @@ function renderEventBoard() {
         if (selItem && i !== eventState.selectedCell && evItemCanMerge(selItem, item)) {
           cell.classList.add('merge-target');
         }
-        // ヒントシェイク
-        const normalKey = `${item.chainId ?? 'ev'}-${item.stage}`;
-        if (evPairSet.has(normalKey)) cell.classList.add('merge-hint');
+        // ヒントシェイク（コインLv5は最大なのでシェイクしない）
+        const normalKey = item.isCoin
+          ? `coin-${item.coinLv}`
+          : `${item.chainId ?? 'ev'}-${item.stage}`;
+        const canMergeItem = item.isCoin ? item.coinLv < COIN_MAX_LV : true;
+        if (evPairSet.has(normalKey) && canMergeItem) cell.classList.add('merge-hint');
 
         // チュートリアルの見た目
         if (step) {
@@ -3070,6 +3126,37 @@ function onEventCellClick(index) {
     return;
   }
 
+  // コインアイテムのタップ / ダブルタップ
+  if (item.isCoin) {
+    const now = Date.now();
+    if (now - lastCoinTapTime < 400 && lastCoinTapIdx === index) {
+      // ダブルタップ: コイン獲得してアイテム消去
+      const reward = COIN_REWARD[item.coinLv ?? 1] ?? 0;
+      state.coin += reward;
+      eventState.board[index] = null;
+      eventState.selectedCell = null;
+      hideNaviHint();
+      showToast(`💰 +${reward}`);
+      renderEventBoard();
+      renderEventHeader();
+      lastCoinTapTime = 0; lastCoinTapIdx = -1;
+      return;
+    }
+    lastCoinTapTime = now; lastCoinTapIdx = index;
+    // シングルタップ: 選択 + ナビヒント
+    if (eventState.selectedCell !== null && eventState.selectedCell !== index) {
+      const sel = eventState.board[eventState.selectedCell];
+      if (sel && evItemCanMerge(sel, item)) {
+        doEventMerge(eventState.selectedCell, index);
+        return;
+      }
+    }
+    eventState.selectedCell = index;
+    showNaviHintForCoin(item);
+    renderEventBoard();
+    return;
+  }
+
   if (eventState.selectedCell !== null && eventState.selectedCell !== index) {
     const sel = eventState.board[eventState.selectedCell];
     if (sel && evItemCanMerge(sel, item)) {
@@ -3125,6 +3212,22 @@ function unlockAdjacentFogCells(idx) {
 function doEventMerge(fromIdx, toIdx) {
   const fromItem = eventState.board[fromIdx];
   const toItem   = eventState.board[toIdx];
+
+  // ── コインマージの特別処理 ──
+  if (fromItem.isCoin && toItem?.isCoin) {
+    const newLv = Math.min((fromItem.coinLv ?? 1) + 1, COIN_MAX_LV);
+    eventState.board[toIdx]   = { isCoin: true, coinLv: newLv };
+    eventState.board[fromIdx] = null;
+    eventState.selectedCell   = null;
+    hideNaviHint();
+    setTimeout(() => {
+      const cells = document.querySelectorAll('#event-board .cell');
+      cells[toIdx]?.classList.add('merge-pop');
+      setTimeout(() => cells[toIdx]?.classList.remove('merge-pop'), 300);
+    }, 10);
+    renderEventBoard();
+    return;
+  }
 
   // chainId 継承（片方が霧アイテムでも chainId は引き継ぐ）
   // 霧アイテムは chainId なし（EVENT_CHAIN）、炎アイテムは chainId:0
@@ -3192,8 +3295,8 @@ function doEventMerge(fromIdx, toIdx) {
     const bubbleSlot = findNearestEmptyEventCell(toIdx);
     if (bubbleSlot !== -1) {
       const bubbleItem = chainId !== undefined
-        ? { chainId, stage: nextStage, isBubble: true }
-        : { stage: nextStage, isBubble: true };
+        ? { chainId, stage: nextStage, isBubble: true, bubbleTimestamp: Date.now() }
+        : { stage: nextStage, isBubble: true, bubbleTimestamp: Date.now() };
       eventState.board[bubbleSlot] = bubbleItem;
     }
   }
@@ -3413,6 +3516,8 @@ function startEvDrag(e, fromIdx) {
     else showNaviHintForGen(item.genLevel ?? 0, true);
   } else if (item.isBubble) {
     showNaviHintForBubble(item);
+  } else if (item.isCoin) {
+    showNaviHintForCoin(item);
   } else if (!item.isFog) {
     showNaviHintForItem(item, true);
   }
@@ -3454,6 +3559,8 @@ function startEvDragTouch(e, fromIdx) {
     else showNaviHintForGen(item.genLevel ?? 0, true);
   } else if (item.isBubble) {
     showNaviHintForBubble(item);
+  } else if (item.isCoin) {
+    showNaviHintForCoin(item);
   } else if (!item.isFog) {
     showNaviHintForItem(item, true);
   }
@@ -3604,6 +3711,35 @@ function endEvDrag(x, y) {
       if (item.isBubble) {
         eventState.selectedCell = fromIdx;
         showNaviHintForBubble(item);
+        renderEventBoard();
+        return;
+      }
+
+      // コインアイテムのタップ / ダブルタップ
+      if (item.isCoin) {
+        const now = Date.now();
+        if (now - lastCoinTapTime < 400 && lastCoinTapIdx === fromIdx) {
+          const reward = COIN_REWARD[item.coinLv ?? 1] ?? 0;
+          state.coin += reward;
+          eventState.board[fromIdx] = null;
+          eventState.selectedCell   = null;
+          hideNaviHint();
+          showToast(`💰 +${reward}`);
+          renderEventBoard();
+          renderEventHeader();
+          lastCoinTapTime = 0; lastCoinTapIdx = -1;
+          return;
+        }
+        lastCoinTapTime = now; lastCoinTapIdx = fromIdx;
+        if (eventState.selectedCell !== null && eventState.selectedCell !== fromIdx) {
+          const sel = eventState.board[eventState.selectedCell];
+          if (sel && evItemCanMerge(sel, item)) {
+            doEventMerge(eventState.selectedCell, fromIdx);
+            return;
+          }
+        }
+        eventState.selectedCell = fromIdx;
+        showNaviHintForCoin(item);
         renderEventBoard();
         return;
       }
@@ -3773,6 +3909,36 @@ document.getElementById('navi-diamond-btn').addEventListener('click', (e) => {
   popBubble(selIdx);
 });
 
+// ゴミ箱ボタン（Lv1マージアイテムを削除）
+document.getElementById('navi-trash-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const selIdx  = eventState.selectedCell;
+  if (selIdx === null) return;
+  const selItem = eventState.board[selIdx];
+  if (!selItem || selItem.stage !== 1 || selItem.isFog || selItem.isBubble || selItem.isCoin || selItem.isEventGen) return;
+  eventState.board[selIdx] = null;
+  eventState.selectedCell  = null;
+  hideNaviHint();
+  renderEventBoard();
+});
+
+// コインボタン（Lv2以上のマージアイテムをコインに換金）
+document.getElementById('navi-coin-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const selIdx  = eventState.selectedCell;
+  if (selIdx === null) return;
+  const selItem = eventState.board[selIdx];
+  if (!selItem || selItem.stage < 2 || selItem.isFog || selItem.isBubble || selItem.isCoin || selItem.isEventGen) return;
+  const reward = selItem.stage * 10;
+  state.coin += reward;
+  eventState.board[selIdx] = null;
+  eventState.selectedCell  = null;
+  hideNaviHint();
+  showToast(`💰 +${reward}`);
+  renderEventBoard();
+  renderEventHeader();
+});
+
 // ========================================
 // ヘッダー高さをCSS変数に反映（sticky top のズレ防止）
 // ========================================
@@ -3803,3 +3969,25 @@ renderTutorialPanel();
 // DOM描画完了後にヘッダー高さを計測（2段RFAで確実にレイアウト後に実行）
 requestAnimationFrame(() => requestAnimationFrame(updateStickyHeights));
 setTimeout(updateStickyHeights, 300);
+
+// しゃぼん玉 → コイン変換タイマー（5秒ごとにチェック、60秒経過でLv1コインに変換）
+setInterval(() => {
+  let changed = false;
+  eventState.board.forEach((item, i) => {
+    if (!item || !item.isBubble) return;
+    const ts = item.bubbleTimestamp ?? Date.now();
+    if (Date.now() - ts >= BUBBLE_COIN_DELAY_MS) {
+      eventState.board[i] = { isCoin: true, coinLv: 1 };
+      // 選択中だったらナビヒントをリセット
+      if (eventState.selectedCell === i) {
+        eventState.selectedCell = null;
+        hideNaviHint();
+      }
+      changed = true;
+    }
+  });
+  if (changed) {
+    const screen = document.getElementById('event-screen');
+    if (!screen?.classList.contains('hidden')) renderEventBoard();
+  }
+}, 5000);

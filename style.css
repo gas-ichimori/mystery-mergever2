@@ -1472,3 +1472,42 @@ body {
   transition: background 0.15s;
 }
 #navi-diamond-btn:active { background: #3d1e78; }
+
+/* ゴミ箱ボタン（Lv1アイテム削除） */
+#navi-trash-btn {
+  flex-shrink: 0;
+  background: #8b1a1a;
+  color: #fff;
+  border: 2px solid #e05050;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: clamp(14px, 3.5vw, 18px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  pointer-events: auto;
+  transition: background 0.15s;
+}
+#navi-trash-btn:active { background: #5a0f0f; }
+
+/* コイン換金ボタン（Lv2以上のアイテム → コイン） */
+#navi-coin-btn {
+  flex-shrink: 0;
+  background: #7a5a00;
+  color: #fff;
+  border: 2px solid #f0c040;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: clamp(9px, 2.8vw, 12px);
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 36px;
+  pointer-events: auto;
+  transition: background 0.15s;
+}
+#navi-coin-btn:active { background: #4d3800; }
