@@ -1423,3 +1423,52 @@ body {
   font-size: 14px;
   cursor: pointer;
 }
+
+/* ===== シャボン玉 ===== */
+.cell.has-bubble {
+  position: relative;
+}
+.bubble-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255,255,255,0.55) 0%,
+    rgba(150,200,255,0.25) 45%,
+    transparent 70%
+  );
+  border: 2px solid rgba(150,200,255,0.65);
+  animation: bubble-shimmer 2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 5;
+}
+@keyframes bubble-shimmer {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.06); }
+}
+@keyframes bubble-pop {
+  0%   { transform: scale(1);   opacity: 1; }
+  50%  { transform: scale(1.4); opacity: 0.5; }
+  100% { transform: scale(0);   opacity: 0; }
+}
+
+/* ダイヤボタン（ナビパネル内） */
+#navi-diamond-btn {
+  flex-shrink: 0;
+  background: #5b2ea6;
+  color: #fff;
+  border: 2px solid #b97aff;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: clamp(9px, 2.8vw, 12px);
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 36px;
+  pointer-events: auto;
+  transition: background 0.15s;
+}
+#navi-diamond-btn:active { background: #3d1e78; }

@@ -110,13 +110,29 @@ const POWER_CONFIG = [
 // ステージ別体力消耗（1始まり）
 const ENERGY_COST = [1, 2, 4, 8, 16];
 
-// Lucky!判定：レベルごとの確率・倍率設定
+// Lucky!判定：ボタンLvごとの確率・倍率設定（確率は毎回10%〜40%でランダム）
 const LUCKY_CONFIG = [
-  { prob: 0.01, multMin: 2.0, multMax: 2.0 }, // Lv1: 1%、×2固定
-  { prob: 0.04, multMin: 1.5, multMax: 2.0 }, // Lv2: 4%、×1.5〜2.0
-  { prob: 0.06, multMin: 1.5, multMax: 1.5 }, // Lv3: 6%、×1.5固定
-  { prob: 0.08, multMin: 1.2, multMax: 1.4 }, // Lv4: 8%、×1.2〜1.4
-  { prob: 0.10, multMin: 1.4, multMax: 1.6 }, // Lv5: 10%、×1.4〜1.6
+  { probMin: 0.10, probMax: 0.40, multMin: 2.0,  multMax: 2.0  }, // Lv1ボタン: ×2固定
+  { probMin: 0.10, probMax: 0.40, multMin: 1.5,  multMax: 2.0  }, // Lv2ボタン: ×1.5〜2.0
+  { probMin: 0.10, probMax: 0.40, multMin: 1.5,  multMax: 2.0  }, // Lv4ボタン: ×1.5〜2.0
+  { probMin: 0.10, probMax: 0.40, multMin: 1.5,  multMax: 2.0  }, // Lv8ボタン: ×1.5〜2.0
+  { probMin: 0.10, probMax: 0.40, multMin: 1.1,  multMax: 1.25 }, // Lv16ボタン: ×1.1〜1.25
+];
+
+// Power: Lv4/Lv8/Lv16ボタンから確率で高Lvアイテムを出力（確率は10%〜40%ランダム）
+const GEN_POWER_BONUS = [
+  null,            // powerLv 0 (Lv1ボタン): Powerなし
+  null,            // powerLv 1 (Lv2ボタン): Powerなし
+  { outStage: 16 },           // powerLv 2 (Lv4ボタン): Lv16出力
+  { outStage: 16 },           // powerLv 3 (Lv8ボタン): Lv16出力
+  { outStage: null },         // powerLv 4 (Lv16ボタン): 最大Lv出力
+];
+
+// しゃぼん玉を割るためのダイヤコスト（インデックス = マージアイテムLv）
+const BUBBLE_DIAMOND_COST = [
+  0, 0,  // Lv0,1 (未使用)
+  2, 4, 6, 8, 16, 32, 64, 128,  // Lv2〜9
+  160, 176, 192, 208, 224, 240, 256, 272, 288, 304, 320, // Lv10〜20
 ];
 
 // ========================================
@@ -758,16 +774,20 @@ function onGeneratorClick(genId) {
     return;
   }
 
-  // Lucky!判定（レベル別確率・倍率）
+  // Power → Lucky の順で判定（Power優先、どちらも発動しない場合は通常出力）
+  const chainMaxStage = CHAINS[gen.chainId].stages.length;
   let outputStage = startStage;
-  let isLucky = false;
-  const luckyCfg = LUCKY_CONFIG[gen.powerLevel];
-  if (Math.random() < luckyCfg.prob) {
-    const mult = luckyCfg.multMin + Math.random() * (luckyCfg.multMax - luckyCfg.multMin);
-    const luckyStage = Math.min(Math.floor(startStage * mult), CHAINS[gen.chainId].stages.length);
-    if (luckyStage > startStage) {
-      outputStage = luckyStage;
-      isLucky = true;
+  let isLucky = false, isPower = false;
+
+  const powerStage = rollPower(gen.powerLevel, chainMaxStage);
+  if (powerStage !== null) {
+    outputStage = powerStage;
+    isPower = true;
+  } else {
+    const luckyMult = rollLucky(gen.powerLevel);
+    if (luckyMult !== null) {
+      const ls = Math.min(Math.floor(startStage * luckyMult), chainMaxStage);
+      if (ls > startStage) { outputStage = ls; isLucky = true; }
     }
   }
 
@@ -775,43 +795,74 @@ function onGeneratorClick(genId) {
   state.energy -= cost;
   state.board[emptyIdx] = { chainId: gen.chainId, stage: outputStage };
   discoverItem(gen.chainId, outputStage);
-  if (isLucky) showLuckyOnCell(emptyIdx);
 
   // ジェネレータータイルから対象セルへ飛び出す演出
   const genCellIdx = state.board.findIndex((c, i) => i !== emptyIdx && c?.isGenerator && c.genId === genId);
+  const showCellId = genCellIdx !== -1 ? genCellIdx : emptyIdx;
   const emoji = CHAINS[gen.chainId].stages[outputStage - 1];
-  flyItemAnimation(genCellIdx !== -1 ? genCellIdx : emptyIdx, emptyIdx, emoji);
+  flyItemAnimation(showCellId, emptyIdx, emoji);
+  if (isPower) showPowerOnCell(showCellId, 'board');
+  else if (isLucky) showLuckyOnCell(showCellId, 'board');
 
   renderAll();
 }
 
 // Lucky! テキストをアイテムセルの上にフェードアウト表示
-function showLuckyOnCell(cellIdx) {
-  // fly アニメーション終了（750ms）後に表示
+// Lucky判定ヘルパー：倍率を返す（発動しない場合はnull）
+function rollLucky(powerLv) {
+  const cfg = LUCKY_CONFIG[powerLv] ?? LUCKY_CONFIG[0];
+  const prob = cfg.probMin + Math.random() * (cfg.probMax - cfg.probMin);
+  if (Math.random() < prob) {
+    return cfg.multMin + Math.random() * (cfg.multMax - cfg.multMin);
+  }
+  return null;
+}
+
+// Power判定ヘルパー：出力ステージを返す（発動しない場合はnull）
+function rollPower(powerLv, chainMaxStage) {
+  const bonus = GEN_POWER_BONUS[powerLv];
+  if (!bonus) return null;
+  const prob = 0.10 + Math.random() * 0.30;
+  if (Math.random() < prob) {
+    return bonus.outStage !== null ? Math.min(bonus.outStage, chainMaxStage) : chainMaxStage;
+  }
+  return null;
+}
+
+// ジェネレーターセル近くに特殊テキスト（Lucky!/Power!）を表示
+function showSpecialOnCell(cellIdx, boardId, text, color) {
   setTimeout(() => {
-    const cells = document.querySelectorAll('.cell');
+    const cells = document.querySelectorAll(`#${boardId} .cell`);
     const cell = cells[cellIdx];
     if (!cell) return;
     const rect = cell.getBoundingClientRect();
     const el = document.createElement('div');
-    el.textContent = '🍀 Lucky!';
+    el.textContent = text;
     el.style.cssText = `
       position: fixed;
       left: ${rect.left + rect.width / 2}px;
-      top: ${rect.top + rect.height / 2}px;
-      transform: translate(-50%, -50%) scale(1.2);
-      color: #ffd700;
+      top: ${rect.top}px;
+      transform: translate(-50%, -100%) scale(1.2);
+      color: ${color};
       font-size: 13px;
       font-weight: bold;
       pointer-events: none;
       z-index: 200;
-      text-shadow: 0 1px 4px #000, 0 0 8px #ff8c00;
+      text-shadow: 0 1px 4px #000;
       white-space: nowrap;
       animation: lucky-fade 1.4s ease-out forwards;
     `;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 1400);
   }, 750);
+}
+
+function showLuckyOnCell(cellIdx, boardId = 'board') {
+  showSpecialOnCell(cellIdx, boardId, '🍀 Lucky!', '#ffd700');
+}
+
+function showPowerOnCell(cellIdx, boardId = 'board') {
+  showSpecialOnCell(cellIdx, boardId, '⚡ Power!', '#e74c3c');
 }
 
 // アイテムが fromIdx セルから toIdx セルへ湾曲しながら飛ぶアニメーション
@@ -1724,13 +1775,13 @@ const SEIZO_GEN_IMAGES = [
   'img/image_merge_gene2_07.png', // Lv7
 ];
 
-// 第二章ジェネレーター Lvボタン別出力設定（第一章と同じボタン式）
+// 第二章ジェネレーター Lvボタン別出力設定（Lucky/PowerはLUCKY_CONFIG/GEN_POWER_BONUSを使用）
 const FIRE_POWER_CONFIG = [
-  { outStage: 1, luckyProb: 0.01, luckyMult: 2.0 }, // Lv1ボタン ⚡1
-  { outStage: 2, luckyProb: 0.03, luckyMult: 1.5 }, // Lv2ボタン ⚡2
-  { outStage: 4, luckyProb: 0.05, luckyMult: 2.0 }, // Lv4ボタン ⚡4
-  { outStage: 5, luckyProb: 0.07, luckyMult: 1.2 }, // Lv8ボタン ⚡8
-  { outStage: 6, luckyProb: 0.05, luckyMult: 1.5 }, // Lv16ボタン ⚡16
+  { outStage: 1 }, // Lv1ボタン ⚡1
+  { outStage: 2 }, // Lv2ボタン ⚡2
+  { outStage: 4 }, // Lv4ボタン ⚡4
+  { outStage: 5 }, // Lv8ボタン ⚡8
+  { outStage: 6 }, // Lv16ボタン ⚡16
 ];
 
 // 製造機ジェネレーター出力設定（旧・互換のため残存）
@@ -2128,6 +2179,7 @@ function hideNaviHint() {
   if (naviHintTimer) { clearTimeout(naviHintTimer); naviHintTimer = null; }
   naviHintPersistent = false;
   document.getElementById('navi-hint-panel')?.classList.add('hidden');
+  document.getElementById('navi-diamond-btn')?.classList.add('hidden');
 }
 
 function _showNaviHintPanel(text, showLvBtn, persistent = false) {
@@ -2143,6 +2195,7 @@ function _showNaviHintPanel(text, showLvBtn, persistent = false) {
   if (naviHintPersistent && !persistent) return;
   textEl.textContent = text;
   if (lvBtn) lvBtn.classList.toggle('hidden', !showLvBtn);
+  document.getElementById('navi-diamond-btn')?.classList.add('hidden'); // しゃぼん玉以外ではダイヤボタンを隠す
   panel.classList.remove('hidden');
   naviHintPersistent = persistent;
   if (naviHintTimer) clearTimeout(naviHintTimer);
@@ -2199,6 +2252,48 @@ function showNaviHintForItem(item, persistent = false) {
   _showNaviHintPanel(text, false, persistent);
 }
 
+// しゃぼん玉アイテム用ナビヒント（ダイヤボタンを表示）
+function showNaviHintForBubble(item) {
+  const stage = item.stage ?? 1;
+  const cost  = BUBBLE_DIAMOND_COST[stage] ?? 0;
+  const panel  = document.getElementById('navi-hint-panel');
+  const textEl = document.getElementById('navi-hint-text');
+  const lvBtn  = document.getElementById('navi-lv-btn');
+  const diaBtn = document.getElementById('navi-diamond-btn');
+  const diaLbl = document.getElementById('navi-diamond-label');
+  if (!panel || !textEl) return;
+  textEl.textContent = `しゃぼん玉に包まれています。💎${cost} で割ることができます。`;
+  if (lvBtn)  lvBtn.classList.add('hidden');
+  if (diaBtn) diaBtn.classList.remove('hidden');
+  if (diaLbl) diaLbl.textContent = `💎 ${cost}`;
+  panel.classList.remove('hidden');
+  naviHintPersistent = true;
+  if (naviHintTimer) clearTimeout(naviHintTimer);
+  naviHintTimer = null;
+}
+
+// しゃぼん玉を割るアニメーション + ダイヤ消費
+function popBubble(cellIdx) {
+  const cells = document.querySelectorAll('#event-board .cell');
+  const cell  = cells[cellIdx];
+  const overlay = cell?.querySelector('.bubble-overlay');
+  const finish = () => {
+    if (eventState.board[cellIdx]) {
+      delete eventState.board[cellIdx].isBubble;
+    }
+    hideNaviHint();
+    eventState.selectedCell = null;
+    renderEventBoard();
+    renderEventHeader();
+  };
+  if (overlay) {
+    overlay.style.animation = 'bubble-pop 0.35s ease-out forwards';
+    setTimeout(finish, 350);
+  } else {
+    finish();
+  }
+}
+
 // 後方互換（既存の showNaviHint 呼び出し箇所があれば利用）
 function showNaviHint(text) { _showNaviHintPanel(text, false); }
 
@@ -2225,6 +2320,7 @@ function getEvItemDisplay(item) {
 function evItemCanMerge(a, b) {
   if (!a || !b) return false;
   if (a.isEventGen || b.isEventGen) return false;
+  if (a.isBubble || b.isBubble) return false; // しゃぼん玉はマージ不可
   return a.stage === b.stage && (a.chainId ?? 'ev') === (b.chainId ?? 'ev');
 }
 
@@ -2369,6 +2465,14 @@ function renderEventBoard() {
           ? `<img class="item-img${item.stage === 1 ? ' item-img-lg' : ''}" src="${imgSrc}" alt="${emoji}">`
           : `<span class="item-emoji">${emoji}</span>`;
         cell.innerHTML = iconHtml;
+
+        // しゃぼん玉オーバーレイ
+        if (item.isBubble) {
+          cell.classList.add('has-bubble');
+          const overlay = document.createElement('div');
+          overlay.className = 'bubble-overlay';
+          cell.appendChild(overlay);
+        }
 
         if (i === eventState.selectedCell) cell.classList.add('selected');
         // マージターゲット
@@ -2786,10 +2890,8 @@ function onEventGenTap(tappedCellIdx = null) {
   const energyCost = POWER_COSTS[powerLv] ?? 1;
 
   // チュートリアル中は Lv1 固定・体力消費 1
-  const actualStage = step ? 1 : outStage;
-  const actualCost  = step ? 1 : energyCost;
-
-  if (!debugState.infiniteEnergy && state.energy < actualCost) { showToast(`体力が足りません（必要: ${actualCost}）`); return; }
+  const baseCost = step ? 1 : energyCost;
+  if (!debugState.infiniteEnergy && state.energy < baseCost) { showToast(`体力が足りません（必要: ${baseCost}）`); return; }
 
   // アニメーション始点: タップされたセル（不明なら最初のジェネレーターセル）
   const animFrom = tappedCellIdx !== null
@@ -2799,13 +2901,34 @@ function onEventGenTap(tappedCellIdx = null) {
   const emptyIdx = animFrom !== -1 ? findNearestEmptyEventCell(animFrom) : eventState.board.findIndex(c => c === null);
   if (emptyIdx === -1) { showCellToast('ボードが満杯です', animFrom !== -1 ? animFrom : null, true); return; }
 
-  if (!debugState.infiniteEnergy) state.energy -= actualCost;
-  eventState.board[emptyIdx] = { stage: actualStage };
-  eventState.discovered[actualStage] = true;
+  // Power → Lucky の順で判定（チュートリアル中はスキップ）
+  let finalStage = step ? 1 : outStage;
+  let isLucky = false, isPower = false;
+  if (!step) {
+    const evMaxStage = EVENT_CHAIN.stages.length;
+    const powerStage = rollPower(powerLv, evMaxStage);
+    if (powerStage !== null) {
+      finalStage = powerStage;
+      isPower = true;
+    } else {
+      const luckyMult = rollLucky(powerLv);
+      if (luckyMult !== null) {
+        const ls = Math.min(Math.floor(outStage * luckyMult), evMaxStage);
+        if (ls > outStage) { finalStage = ls; isLucky = true; }
+      }
+    }
+  }
+
+  if (!debugState.infiniteEnergy) state.energy -= baseCost;
+  eventState.board[emptyIdx] = { stage: finalStage };
+  eventState.discovered[finalStage] = true;
 
   // アイテム飛び出しアニメーション
-  const stageContent = EVENT_CHAIN.stageImages?.[actualStage - 1] || EVENT_CHAIN.stages[actualStage - 1];
-  flyEventItemAnimation(animFrom !== -1 ? animFrom : emptyIdx, emptyIdx, stageContent);
+  const stageContent = EVENT_CHAIN.stageImages?.[finalStage - 1] || EVENT_CHAIN.stages[finalStage - 1];
+  const genShowIdx = animFrom !== -1 ? animFrom : emptyIdx;
+  flyEventItemAnimation(genShowIdx, emptyIdx, stageContent);
+  if (isPower) showPowerOnCell(genShowIdx, 'event-board');
+  else if (isLucky) showLuckyOnCell(genShowIdx, 'event-board');
 
   if (step && step.type === 'gen_focus') {
     eventState.tutorialGenTaps++;
@@ -2939,6 +3062,14 @@ function onEventCellClick(index) {
   // 霧アイテムはタップ操作一切不可
   if (item.isFog) return;
 
+  // しゃぼん玉アイテムのタップ → ダイヤボタン表示
+  if (item.isBubble) {
+    eventState.selectedCell = index;
+    showNaviHintForBubble(item);
+    renderEventBoard();
+    return;
+  }
+
   if (eventState.selectedCell !== null && eventState.selectedCell !== index) {
     const sel = eventState.board[eventState.selectedCell];
     if (sel && evItemCanMerge(sel, item)) {
@@ -3052,6 +3183,18 @@ function doEventMerge(fromIdx, toIdx) {
     if (!eventState.seizoDiscovered[nextStage]) {
       eventState.seizoDiscovered[nextStage] = true;
       checkSeizoGenLevelUp(nextStage);
+    }
+  }
+
+  // 30%の確率でしゃぼん玉アイテムを追加出現（チュートリアル・霧マージ中は除く）
+  const tutStepNow = currentTutStep();
+  if (!tutStepNow && !isGenMergeTutActive() && !toWasFog && Math.random() < 0.30) {
+    const bubbleSlot = findNearestEmptyEventCell(toIdx);
+    if (bubbleSlot !== -1) {
+      const bubbleItem = chainId !== undefined
+        ? { chainId, stage: nextStage, isBubble: true }
+        : { stage: nextStage, isBubble: true };
+      eventState.board[bubbleSlot] = bubbleItem;
     }
   }
 
@@ -3192,14 +3335,6 @@ function onEventFireGenTap(tappedCellIdx = null) {
     return;
   }
 
-  // Lucky判定：確率でアイテム数が増える（倍率の整数部＋端数は確率で追加）
-  const isLucky    = Math.random() < cfg.luckyProb;
-  const baseCount  = 1;
-  const extraFrac  = isLucky ? (cfg.luckyMult % 1) : 0;
-  const extraWhole = isLucky ? Math.floor(cfg.luckyMult) - 1 : 0;
-  const extraBonus = extraFrac > 0 && Math.random() < extraFrac ? 1 : 0;
-  const totalCount = baseCount + extraWhole + extraBonus;
-
   // 空きセル確認
   if (eventState.board.every(c => c !== null)) {
     const fireGenIdx = tappedCellIdx !== null ? tappedCellIdx : eventState.board.findIndex(c => c && c.isEventGen && c.isFireGen);
@@ -3211,21 +3346,34 @@ function onEventFireGenTap(tappedCellIdx = null) {
     ? tappedCellIdx
     : eventState.board.findIndex(c => c && c.isEventGen && c.isFireGen);
 
+  // Power → Lucky の順で判定
+  const chain = CHAINS[SEIZO_CHAIN_ID];
+  let finalStage = outStage;
+  let isLucky = false, isPower = false;
+
+  const powerStage = rollPower(powerLv, chain.stages.length);
+  if (powerStage !== null) {
+    finalStage = powerStage;
+    isPower = true;
+  } else {
+    const luckyMult = rollLucky(powerLv);
+    if (luckyMult !== null) {
+      const ls = Math.min(Math.floor(outStage * luckyMult), chain.stages.length);
+      if (ls > outStage) { finalStage = ls; isLucky = true; }
+    }
+  }
+
   if (!debugState.infiniteEnergy) state.energy -= energyCost;
 
-  const chain = CHAINS[SEIZO_CHAIN_ID];
-  const imgSrc = chain.stageImages[outStage - 1];
-
-  let placed = 0;
-  for (let k = 0; k < totalCount; k++) {
-    const slot = animFrom !== -1 ? findNearestEmptyEventCell(animFrom) : eventState.board.findIndex(c => c === null);
-    if (slot === -1) break;
-    eventState.board[slot] = { chainId: SEIZO_CHAIN_ID, stage: outStage };
-    flyEventItemAnimation(animFrom !== -1 ? animFrom : slot, slot, imgSrc || chain.stages[outStage - 1]);
-    placed++;
+  const slot = animFrom !== -1 ? findNearestEmptyEventCell(animFrom) : eventState.board.findIndex(c => c === null);
+  if (slot !== -1) {
+    eventState.board[slot] = { chainId: SEIZO_CHAIN_ID, stage: finalStage };
+    const imgSrc = chain.stageImages?.[finalStage - 1];
+    flyEventItemAnimation(animFrom !== -1 ? animFrom : slot, slot, imgSrc || chain.stages[finalStage - 1]);
   }
-  const actualCount = placed;
-  if (isLucky && actualCount > 1) showToast(`✨ Lucky! ×${actualCount}`);
+  const genShowIdx = animFrom !== -1 ? animFrom : (slot !== -1 ? slot : 0);
+  if (isPower) showPowerOnCell(genShowIdx, 'event-board');
+  else if (isLucky) showLuckyOnCell(genShowIdx, 'event-board');
 
   renderEventHeader();
   renderEventBoard();
@@ -3263,6 +3411,8 @@ function startEvDrag(e, fromIdx) {
   if (item.isEventGen) {
     if (item.isFireGen) showNaviHintForFireGen(item, true);
     else showNaviHintForGen(item.genLevel ?? 0, true);
+  } else if (item.isBubble) {
+    showNaviHintForBubble(item);
   } else if (!item.isFog) {
     showNaviHintForItem(item, true);
   }
@@ -3302,6 +3452,8 @@ function startEvDragTouch(e, fromIdx) {
   if (item.isEventGen) {
     if (item.isFireGen) showNaviHintForFireGen(item, true);
     else showNaviHintForGen(item.genLevel ?? 0, true);
+  } else if (item.isBubble) {
+    showNaviHintForBubble(item);
   } else if (!item.isFog) {
     showNaviHintForItem(item, true);
   }
@@ -3447,6 +3599,14 @@ function endEvDrag(x, y) {
     if (item && !item.isFog) {
       // 指を動かしていた場合はドラッグ扱い → 選択しない（ナビヒントは startEvDragTouch で表示済み）
       if (evDrag.hasMoved) { renderEventBoard(); return; }
+
+      // しゃぼん玉アイテムのタップ → ダイヤボタン表示
+      if (item.isBubble) {
+        eventState.selectedCell = fromIdx;
+        showNaviHintForBubble(item);
+        renderEventBoard();
+        return;
+      }
 
       const tutStep = currentTutStep();
       if (tutStep && tutStep.type !== 'merge_focus') { renderEventBoard(); return; }
@@ -3595,6 +3755,22 @@ document.getElementById('navi-lv-btn').addEventListener('click', (e) => {
       naviHintTimer = null;
     }, 3500);
   }
+});
+
+// ダイヤボタン（しゃぼん玉を割る）
+document.getElementById('navi-diamond-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const selIdx  = eventState.selectedCell;
+  const selItem = selIdx !== null ? eventState.board[selIdx] : null;
+  if (!selItem || !selItem.isBubble) return;
+  const cost = BUBBLE_DIAMOND_COST[selItem.stage] ?? 0;
+  if (state.diamond < cost) {
+    showToast(`ダイヤが足りません（必要: 💎${cost}）`);
+    return;
+  }
+  state.diamond -= cost;
+  renderEventHeader();
+  popBubble(selIdx);
 });
 
 // ========================================
