@@ -1702,17 +1702,22 @@ function openAdventureScene(sceneId, callback = null) {
 
   // 左キャラ: entrance に応じた処理
   if (scene.leftEntrance === 'slide') {
-    charaLeft.style.transform = 'translateX(-110%)';
-    void charaLeft.offsetWidth;
-    charaLeft.classList.add('adv-slide-in-left');
     advTextPending = true;
-    charaLeft.addEventListener('animationend', () => {
-      charaLeft.classList.remove('adv-slide-in-left');
-      charaLeft.style.transform = '';
-      charaLeft.classList.add('adv-char-shown');
-      advTextPending = false;
-      showAdvMessage(0);
-    }, { once: true });
+    // double-RAF でアニメーション開始を確実に
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      charaLeft.classList.add('adv-slide-in-left');
+      let done = false;
+      const onDone = () => {
+        if (done) return;
+        done = true;
+        charaLeft.classList.remove('adv-slide-in-left');
+        charaLeft.classList.add('adv-char-shown');
+        advTextPending = false;
+        showAdvMessage(0);
+      };
+      charaLeft.addEventListener('animationend', onDone, { once: true });
+      setTimeout(onDone, 600); // animationend が発火しない場合のフォールバック
+    }));
   } else {
     // フェードイン（transition で opacity 0→1）
     void charaLeft.offsetWidth;

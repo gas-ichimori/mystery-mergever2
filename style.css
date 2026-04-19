@@ -1485,6 +1485,7 @@ body {
 }
 /* スライドイン（右キャラ） */
 #adv-chara-right.adv-slide-in {
+  transition: none; /* アニメーション中は transition を無効化 */
   animation: adv-slide-from-right 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 @keyframes adv-slide-from-right {
@@ -1493,6 +1494,7 @@ body {
 }
 /* スライドイン（左キャラ） */
 #adv-chara-left.adv-slide-in-left {
+  transition: none; /* アニメーション中は transition を無効化 */
   animation: adv-slide-from-left 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 @keyframes adv-slide-from-left {
