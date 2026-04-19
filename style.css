@@ -1424,6 +1424,47 @@ body {
   cursor: pointer;
 }
 
+/* ===== コインLv5 煙アニメーション ===== */
+.cell.has-coin-smoke {
+  position: relative;
+  overflow: visible;
+}
+.coin-smoke-overlay {
+  position: absolute;
+  bottom: 55%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 200%;
+  pointer-events: none;
+  z-index: 6;
+  overflow: visible;
+}
+.coin-smoke-overlay::before,
+.coin-smoke-overlay::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  border-radius: 50%;
+  background: rgba(200, 200, 200, 0.55);
+  animation: coin-smoke-rise 1.8s ease-out infinite;
+}
+.coin-smoke-overlay::before {
+  width: 10px; height: 10px;
+  left: 30%;
+  animation-delay: 0s;
+}
+.coin-smoke-overlay::after {
+  width: 8px; height: 8px;
+  left: 55%;
+  animation-delay: 0.7s;
+}
+@keyframes coin-smoke-rise {
+  0%   { transform: translateY(0)   scale(1);   opacity: 0.7; }
+  60%  { transform: translateY(-18px) scale(1.5); opacity: 0.4; }
+  100% { transform: translateY(-32px) scale(2);   opacity: 0; }
+}
+
 /* ===== シャボン玉 ===== */
 .cell.has-bubble {
   position: relative;

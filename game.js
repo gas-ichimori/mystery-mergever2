@@ -145,7 +145,7 @@ const COIN_IMAGES   = [
   'img/image_merge_icon_coin02.png',
   'img/image_merge_icon_coin03.png',
   'img/image_merge_icon_coin04.png',
-  null, // Lv5: 画像未提供のため絵文字フォールバック
+  'img/image_merge_icon_coin04.png', // Lv5: Lv4画像 + 煙アニメーション
 ];
 // しゃぼん玉がコインに変わるまでの時間（ミリ秒）
 const BUBBLE_COIN_DELAY_MS = 60000;
@@ -2528,17 +2528,30 @@ function renderEventBoard() {
           overlay.className = 'bubble-overlay';
           cell.appendChild(overlay);
         }
+        // コインLv5: 煙アニメーションオーバーレイ
+        if (item.isCoin && item.coinLv >= COIN_MAX_LV) {
+          cell.classList.add('has-coin-smoke');
+          const smoke = document.createElement('div');
+          smoke.className = 'coin-smoke-overlay';
+          cell.appendChild(smoke);
+        }
 
         if (i === eventState.selectedCell) cell.classList.add('selected');
         // マージターゲット
         if (selItem && i !== eventState.selectedCell && evItemCanMerge(selItem, item)) {
           cell.classList.add('merge-target');
         }
-        // ヒントシェイク（コインLv5は最大なのでシェイクしない）
+        // ヒントシェイク（最大Lv・しゃぼん玉はシェイクしない）
         const normalKey = item.isCoin
           ? `coin-${item.coinLv}`
           : `${item.chainId ?? 'ev'}-${item.stage}`;
-        const canMergeItem = item.isCoin ? item.coinLv < COIN_MAX_LV : true;
+        let canMergeItem = false;
+        if (item.isCoin) {
+          canMergeItem = item.coinLv < COIN_MAX_LV;
+        } else if (!item.isBubble) {
+          const chainForMax = item.chainId !== undefined ? CHAINS[item.chainId] : EVENT_CHAIN;
+          canMergeItem = item.stage < (chainForMax.stages?.length ?? 99);
+        }
         if (evPairSet.has(normalKey) && canMergeItem) cell.classList.add('merge-hint');
 
         // チュートリアルの見た目
@@ -3339,7 +3352,7 @@ function mergeEventGenerators(fromIdx, toIdx) {
   eventState.board[fromIdx] = null;
   eventState.selectedCell   = null;
   if (!isGenMergeTutActive()) {
-    showToast(`第一章ジェネレーター Lv${newLevel + 1} にレベルアップ！`);
+    showCellToast(`第一章ジェネレーター Lv${newLevel + 1} にレベルアップ！`, toIdx, true);
   }
   addEnergy(25, 'ジェネレーターLvアップボーナス！');
   // Lvアップ時に出力Lvを自動で新しい最大値に設定
@@ -3410,7 +3423,7 @@ function mergeFireGenerators(fromIdx, toIdx) {
   eventState.selectedCell   = null;
   // グローバルレベルも最高値に更新
   eventState.seizoGenLevel = Math.max(eventState.seizoGenLevel, newLevel);
-  showToast(`第二章ジェネレーター Lv${newLevel + 1} にレベルアップ！`);
+  showCellToast(`第二章ジェネレーター Lv${newLevel + 1} にレベルアップ！`, toIdx, true);
   addEnergy(25, '第二章ジェネレーターLvアップボーナス！');
   // Lvアップ時に出力Lvを自動で新しい最大値に設定
   eventState.firePowerLevel = getFireGenMaxAvailablePowerLv(newLevel);
@@ -3594,7 +3607,11 @@ function createEvGhost(x, y, fromIdx) {
   // 画像があれば画像、なければ絵文字
   let imgSrc = null;
   let fallbackEmoji = '❓';
-  if (item.isEventGen && item.isFireGen) {
+  if (item.isCoin) {
+    const lv = item.coinLv ?? 1;
+    imgSrc = COIN_IMAGES[lv] ?? null;
+    fallbackEmoji = COIN_EMOJI[lv] ?? '🪙';
+  } else if (item.isEventGen && item.isFireGen) {
     const sLv = item.seizoLevel ?? 0;
     imgSrc = SEIZO_GEN_IMAGES[Math.min(sLv, SEIZO_GEN_IMAGES.length - 1)];
   } else if (item.isEventGen) {
