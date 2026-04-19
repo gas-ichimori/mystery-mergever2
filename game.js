@@ -148,7 +148,7 @@ const COIN_IMAGES   = [
   'img/image_merge_icon_coin04.png', // Lv5: Lv4画像 + 煙アニメーション
 ];
 // しゃぼん玉がコインに変わるまでの時間（ミリ秒）
-const BUBBLE_COIN_DELAY_MS = 60000;
+const BUBBLE_COIN_DELAY_MS = 40000;
 
 // ========================================
 // ゲーム状態
@@ -2232,14 +2232,8 @@ function transitionToMainGame() {
   if (genIdx !== -1) {
     eventState.board[genIdx] = { isEventGen: true, genLevel: genItem?.genLevel ?? 0 };
   }
-  // 最初の依頼: チュートリアルキャラ（01.png）Lv2 固定
-  eventState.requests = [{
-    characterId: -1,
-    charImg: 'img/image_merge_order_chara_01.png',
-    items: [{ stage: 2 }],
-    coin: calcCoinReward(2),
-  }];
-  // 残り枠を Lv3+ で補充
+  // Lv3+ で依頼を補充（Lv2固定依頼・chara_01.png は廃止）
+  eventState.requests = [];
   fillEventRequests();
   renderEventBoard();
   renderEventGenerators();
@@ -2850,7 +2844,7 @@ function eventRequestCompletable(req) {
   const boardCopy = [...eventState.board];
   for (const reqItem of req.items) {
     const idx = boardCopy.findIndex(b =>
-      b && !b.isFog && !b.isEventGen && eventItemMatchesReq(b, reqItem)
+      b && !b.isFog && !b.isEventGen && !b.isBubble && eventItemMatchesReq(b, reqItem)
     );
     if (idx === -1) return false;
     boardCopy[idx] = null;
@@ -2891,7 +2885,7 @@ function completeEventRequest(index, btnEl) {
   const boardCopy = [...eventState.board];
   for (const reqItem of req.items) {
     const idx = boardCopy.findIndex(b =>
-      b && !b.isFog && !b.isEventGen && eventItemMatchesReq(b, reqItem)
+      b && !b.isFog && !b.isEventGen && !b.isBubble && eventItemMatchesReq(b, reqItem)
     );
     if (idx !== -1) {
       eventState.board[idx] = null;
