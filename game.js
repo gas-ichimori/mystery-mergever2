@@ -141,11 +141,11 @@ const COIN_REWARD   = [0, 10, 20, 30, 40, 100]; // インデックス = coinLv
 const COIN_EMOJI    = ['', '🪙', '🪙', '🪙', '🪙', '💰'];
 const COIN_IMAGES   = [
   null,
-  'img/image_merge_coin_01.png',
-  'img/image_merge_coin_02.png',
-  'img/image_merge_coin_03.png',
-  'img/image_merge_coin_04.png',
-  'img/image_merge_coin_05.png',
+  'img/image_merge_icon_coin01.png',
+  'img/image_merge_icon_coin02.png',
+  'img/image_merge_icon_coin03.png',
+  'img/image_merge_icon_coin04.png',
+  null, // Lv5: 画像未提供のため絵文字フォールバック
 ];
 // しゃぼん玉がコインに変わるまでの時間（ミリ秒）
 const BUBBLE_COIN_DELAY_MS = 60000;
