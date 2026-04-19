@@ -1475,8 +1475,9 @@ body {
   object-fit: contain;
   display: block;
 }
-/* 表示状態（フェードイン効果は transition で） */
-.adv-char-shown { opacity: 1; }
+/* 表示状態（ID+クラスで詳細度1-1-0 → base IDセレクタ1-0-0に勝つ） */
+#adv-chara-left.adv-char-shown,
+#adv-chara-right.adv-char-shown { opacity: 1; }
 /* 非話者を暗く（ID+クラスで高い詳細度） */
 #adv-chara-left.adv-chara-dim,
 #adv-chara-right.adv-chara-dim {
