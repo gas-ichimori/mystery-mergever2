@@ -2528,11 +2528,16 @@ function renderEventBoard() {
           overlay.className = 'bubble-overlay';
           cell.appendChild(overlay);
         }
-        // コインLv5: 煙アニメーションオーバーレイ
+        // コインLv5: 水蒸気アニメーションオーバーレイ
         if (item.isCoin && item.coinLv >= COIN_MAX_LV) {
           cell.classList.add('has-coin-smoke');
           const smoke = document.createElement('div');
           smoke.className = 'coin-smoke-overlay';
+          for (let s = 0; s < 3; s++) {
+            const p = document.createElement('span');
+            p.className = 'steam-particle';
+            smoke.appendChild(p);
+          }
           cell.appendChild(smoke);
         }
 

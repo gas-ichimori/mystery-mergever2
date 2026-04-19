@@ -1424,45 +1424,53 @@ body {
   cursor: pointer;
 }
 
-/* ===== コインLv5 煙アニメーション ===== */
+/* ===== コインLv5 水蒸気アニメーション ===== */
 .cell.has-coin-smoke {
   position: relative;
   overflow: visible;
 }
 .coin-smoke-overlay {
   position: absolute;
-  bottom: 55%;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 62%;
+  left: 0;
   width: 100%;
-  height: 200%;
+  height: 160%;
   pointer-events: none;
   z-index: 6;
   overflow: visible;
 }
-.coin-smoke-overlay::before,
-.coin-smoke-overlay::after {
-  content: '';
+.steam-particle {
   position: absolute;
   bottom: 0;
   border-radius: 50%;
-  background: rgba(200, 200, 200, 0.55);
-  animation: coin-smoke-rise 1.8s ease-out infinite;
+  filter: blur(3px);
+  background: radial-gradient(circle, rgba(230,245,255,0.85) 0%, rgba(200,225,255,0.4) 60%, transparent 100%);
+  animation: steam-rise 2s ease-out infinite;
 }
-.coin-smoke-overlay::before {
-  width: 10px; height: 10px;
-  left: 30%;
+.steam-particle:nth-child(1) {
+  width: 13px; height: 16px;
+  left: 20%;
   animation-delay: 0s;
+  animation-duration: 2.2s;
 }
-.coin-smoke-overlay::after {
-  width: 8px; height: 8px;
-  left: 55%;
+.steam-particle:nth-child(2) {
+  width: 10px; height: 13px;
+  left: 48%;
   animation-delay: 0.7s;
+  animation-duration: 1.9s;
 }
-@keyframes coin-smoke-rise {
-  0%   { transform: translateY(0)   scale(1);   opacity: 0.7; }
-  60%  { transform: translateY(-18px) scale(1.5); opacity: 0.4; }
-  100% { transform: translateY(-32px) scale(2);   opacity: 0; }
+.steam-particle:nth-child(3) {
+  width: 8px; height: 10px;
+  left: 68%;
+  animation-delay: 1.4s;
+  animation-duration: 2.4s;
+}
+@keyframes steam-rise {
+  0%   { transform: translateY(0)    translateX(0)    scale(1);   opacity: 0; }
+  12%  { opacity: 0.75; }
+  40%  { transform: translateY(-14px) translateX(5px)  scale(1.4); opacity: 0.55; }
+  70%  { transform: translateY(-28px) translateX(-4px) scale(1.9); opacity: 0.25; }
+  100% { transform: translateY(-44px) translateX(3px)  scale(2.5); opacity: 0; }
 }
 
 /* ===== シャボン玉 ===== */
