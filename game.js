@@ -151,6 +151,23 @@ const COIN_IMAGES   = [
 const BUBBLE_COIN_DELAY_MS = 40000;
 
 // ========================================
+// プレイヤーレベル設定
+// ========================================
+// 現在のレベルでストーリー1話を進めるのに必要なコイン
+function getStoryCost(level) {
+  if (level <= 11) return 2000;
+  if (level <= 21) return 4000;
+  if (level <= 31) return 8000;
+  return 16000; // Lv32-41+
+}
+// 現在のレベルからレベルアップに必要な経験値（コイン換算）
+function getLevelUpXP(level) {
+  if (level <= 10) return 10000;
+  if (level <= 20) return 20000;
+  return 40000; // Lv21-40+
+}
+
+// ========================================
 // ゲーム状態
 // ========================================
 const COLS = 7;
@@ -172,6 +189,8 @@ let state = {
   permanentlyExcluded: new Set(),    // 二度と出さない依頼 "chainId-stage" 形式（Lv4-9完了済み）
   usedOnceCharIds: new Set(),        // 1回出現したら二度と出さないキャラID（ミユなど）
   selectedCell: null,
+  playerLevel: 1,   // プレイヤーレベル
+  playerXP: 0,      // 現レベル内の経験値（コイン換算）
   pendingUse: null,
   // 発見済みアイテム管理: discovered[chainId][stage] = true
   discovered: {},
@@ -1646,6 +1665,18 @@ const ADV_SCENES = {
       { speaker: 'ミユ', text: 'ありがとうございます！',                                   side: 'right'                              },
     ],
   },
+  // ストーリー進行02（仮）
+  scene02: {
+    title:         '',
+    leftImg:       'img/image_merge_order_chara_00.png',
+    rightImg:      'img/image_merge_order_chara_01a.png',
+    leftEntrance:  'slide',
+    rightEntrance: 'none',
+    autoClose:     false,
+    script: [
+      { speaker: 'ヤス', text: '（ストーリー02 準備中）', side: 'left' },
+    ],
+  },
 };
 
 let advMsgIdx       = 0;
@@ -1818,6 +1849,10 @@ document.getElementById('adventure-screen').addEventListener('click', () => {
 document.getElementById('debug-adv-test').addEventListener('click', () => {
   document.getElementById('debug-screen').classList.add('hidden');
   openAdventureScene('test');
+});
+
+document.getElementById('story-btn').addEventListener('click', () => {
+  progressStory();
 });
 
 document.getElementById('settings-close').addEventListener('click', () => {
@@ -2821,7 +2856,58 @@ function renderEventHeader() {
   if (ec) ec.textContent = `💰${state.coin}`;
   const ed = document.getElementById('ev-diamond');
   if (ed) ed.textContent = `💎${state.diamond}`;
+  renderPlayerLevel();
+}
 
+// プレイヤーレベルアイコン・ストーリーボタンの表示更新
+function renderPlayerLevel() {
+  const numEl    = document.getElementById('player-level-num');
+  const ringEl   = document.getElementById('player-level-ring');
+  const storyBtn = document.getElementById('story-btn');
+  if (!numEl || !ringEl) return;
+
+  numEl.textContent = state.playerLevel;
+
+  const xp     = state.playerXP;
+  const needed = getLevelUpXP(state.playerLevel);
+  const pct    = Math.min(100, (xp / needed) * 100);
+  ringEl.style.background =
+    `conic-gradient(#f9c846 ${pct}%, #2a3a6a ${pct}%)`;
+
+  if (storyBtn) {
+    const cost       = getStoryCost(state.playerLevel);
+    const canProgress = state.coin >= cost;
+    storyBtn.disabled = !canProgress;
+    storyBtn.classList.toggle('story-btn-active', canProgress);
+  }
+}
+
+// ストーリー進行処理（コイン消費 → 経験値加算 → レベルアップ判定 → シーン再生）
+function progressStory() {
+  const cost = getStoryCost(state.playerLevel);
+  if (state.coin < cost) { showToast('コインが足りません'); return; }
+  state.coin    -= cost;
+  state.playerXP += cost;
+
+  // レベルアップ判定（複数回上がる場合も対応）
+  let leveledUp = false;
+  while (state.playerXP >= getLevelUpXP(state.playerLevel)) {
+    state.playerXP -= getLevelUpXP(state.playerLevel);
+    state.playerLevel++;
+    leveledUp = true;
+  }
+  if (leveledUp) {
+    showToast(`プレイヤー Lv${state.playerLevel} になりました！`);
+    // レベルアップ時にリングを一瞬フラッシュ
+    const ringEl = document.getElementById('player-level-ring');
+    if (ringEl) {
+      ringEl.classList.add('player-level-up-flash');
+      setTimeout(() => ringEl.classList.remove('player-level-up-flash'), 800);
+    }
+  }
+
+  renderEventHeader();
+  openAdventureScene('scene02');
 }
 
 // ========================================
