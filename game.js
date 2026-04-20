@@ -1613,6 +1613,32 @@ function showToast(msg) {
 }
 
 // ジェネレータータイルの直上にトーストを表示（ボード満杯などの通知用）
+// パネル要素のすぐ下にトーストを表示（依頼完了など）
+function showToastNearPanel(msg, panelEl) {
+  if (!panelEl) { showToast(msg); return; }
+  const rect = panelEl.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.textContent = msg;
+  el.style.cssText = `
+    position:fixed;
+    left:${rect.left + rect.width / 2}px;
+    top:${rect.bottom + 8}px;
+    transform:translate(-50%, 0);
+    background:rgba(10,30,70,0.92);
+    color:#fff;
+    padding:6px 18px;
+    border-radius:20px;
+    font-size:14px;
+    font-weight:bold;
+    pointer-events:none;
+    z-index:9999;
+    white-space:nowrap;
+    animation:toast-pop 2s ease-out forwards;
+  `;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2100);
+}
+
 function showCellToast(msg, cellIdx, isEventBoard) {
   const boardId = isEventBoard ? 'event-board' : 'board';
   const cells = document.querySelectorAll(`#${boardId} .cell`);
@@ -3698,7 +3724,7 @@ function completeTutorialRequest() {
   if (idx === -1) { showToast('アイテムがありません'); return; }
   eventState.board[idx] = null;
   state.coin += 100;
-  showToast('依頼完了！ 💰+100');
+  showToastNearPanel('依頼完了！ 💰+100', document.getElementById('event-req-panel'));
   renderEventHeader();
   renderEventBoard();
   advanceTutorial();
@@ -3846,9 +3872,7 @@ function mergeEventGenerators(fromIdx, toIdx) {
   eventState.board[fromIdx] = null;
   eventState.selectedCell   = null;
   discoverGen('ch1', newLevel); // Lvアップで新レベルを発見
-  if (!isGenMergeTutActive()) {
-    showCellToast(`第一章ジェネレーター Lv${newLevel + 1} にレベルアップ！`, toIdx, true);
-  }
+  showCellToast(`第一章ジェネレーター Lv${newLevel + 1} にレベルアップ！`, toIdx, true);
   addEnergy(25, 'ジェネレーターLvアップボーナス！');
   // Lvアップ時に出力Lvを自動で新しい最大値に設定
   eventState.genPowerLevel = getGenMaxAvailablePowerLv(newLevel);
