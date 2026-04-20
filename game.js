@@ -1375,72 +1375,203 @@ function discoverItem(chainId, stage) {
 }
 
 // ========================================
-// 図鑑レンダリング
+// アイテムリスト 発見・解放システム
+// ========================================
+
+// 第一章マージアイテムを発見（初回のみ）
+function discoverEventItem(stage) {
+  if (eventState.discovered[stage]) return;
+  eventState.discovered[stage] = true;
+  updateCatalogBadge();
+}
+
+// 第二章マージアイテムを発見（初回のみ）
+function discoverSeizoItem(stage) {
+  if (eventState.seizoDiscovered[stage]) return;
+  eventState.seizoDiscovered[stage] = true;
+  checkSeizoGenLevelUp(stage);
+  updateCatalogBadge();
+}
+
+// ジェネレーターのレベルを発見（初回のみ）
+// genType: 'ch1' / 'ch2', level: 0始まり
+function discoverGen(genType, level) {
+  const key = `${genType}_${level}`;
+  if (eventState.genDiscovered[key]) return;
+  eventState.genDiscovered[key] = true;
+  updateCatalogBadge();
+}
+
+// 未解放アイテムがあるか確認
+function hasUnrevealedItems() {
+  for (const s of Object.keys(eventState.discovered)) {
+    if (eventState.discovered[s] && !eventState.revealed[s]) return true;
+  }
+  for (const s of Object.keys(eventState.seizoDiscovered)) {
+    if (eventState.seizoDiscovered[s] && !eventState.seizoRevealed[s]) return true;
+  }
+  for (const k of Object.keys(eventState.genDiscovered)) {
+    if (eventState.genDiscovered[k] && !eventState.genRevealed[k]) return true;
+  }
+  return false;
+}
+
+// カタログボタンのアテンション演出を更新
+function updateCatalogBadge() {
+  const active = hasUnrevealedItems();
+  document.querySelectorAll('.catalog-access-btn').forEach(btn => {
+    btn.classList.toggle('catalog-badge-active', active);
+  });
+}
+
+// アイテムリスト内の「？」をタップして解放（💎+1）
+// itemType: 'event' | 'seizo' | 'ch1gen' | 'ch2gen', id: stage or level（0始まり）
+function revealCatalogItem(itemType, id) {
+  if (itemType === 'event') {
+    if (!eventState.discovered[id] || eventState.revealed[id]) return;
+    eventState.revealed[id] = true;
+  } else if (itemType === 'seizo') {
+    if (!eventState.seizoDiscovered[id] || eventState.seizoRevealed[id]) return;
+    eventState.seizoRevealed[id] = true;
+  } else if (itemType === 'ch1gen') {
+    const k = `ch1_${id}`;
+    if (!eventState.genDiscovered[k] || eventState.genRevealed[k]) return;
+    eventState.genRevealed[k] = true;
+  } else if (itemType === 'ch2gen') {
+    const k = `ch2_${id}`;
+    if (!eventState.genDiscovered[k] || eventState.genRevealed[k]) return;
+    eventState.genRevealed[k] = true;
+  } else { return; }
+
+  state.diamond += 1;
+  showToast('💎+1 アイテムを解放しました！');
+  renderHeader();
+  renderEventHeader();
+  updateCatalogBadge();
+  renderCatalog();
+}
+
+// ========================================
+// アイテムリスト レンダリング
 // ========================================
 function renderCatalog() {
   // タブ：第一章（EVENT_CHAIN）と第二章（CHAINS[11]）のみ
   const tabsEl = document.getElementById('catalog-gen-tabs');
   tabsEl.innerHTML = '';
 
-  // 第一章タブ
   const evTab = document.createElement('div');
   evTab.className = 'catalog-tab' + (catalogCurrentChain === 'event' ? ' active' : '');
-  evTab.textContent = EVENT_CHAIN.name; // '第一章'
+  evTab.textContent = EVENT_CHAIN.name;
   evTab.addEventListener('click', () => { catalogCurrentChain = 'event'; renderCatalog(); });
   tabsEl.appendChild(evTab);
 
-  // 第二章タブ（製造機解放後に表示）
   if (eventState.fireGenUnlocked) {
-    const ch2 = CHAINS[SEIZO_CHAIN_ID];
     const tab2 = document.createElement('div');
     tab2.className = 'catalog-tab' + (catalogCurrentChain === SEIZO_CHAIN_ID ? ' active' : '');
-    tab2.textContent = ch2.name; // '第二章'
+    tab2.textContent = CHAINS[SEIZO_CHAIN_ID].name;
     tab2.addEventListener('click', () => { catalogCurrentChain = SEIZO_CHAIN_ID; renderCatalog(); });
     tabsEl.appendChild(tab2);
   }
 
-  // アイテム一覧
   const listEl = document.getElementById('catalog-list');
   listEl.innerHTML = '';
 
+  // アイテムカード生成ヘルパー
+  // state: 'locked' | 'pending' | 'revealed'
+  function makeCard(imgSrc, emoji, lvLabel, name, state, onReveal) {
+    const div = document.createElement('div');
+    if (state === 'revealed') {
+      div.className = 'catalog-item discovered';
+      div.innerHTML = imgSrc
+        ? `<img class="catalog-img" src="${imgSrc}" alt="${emoji}">`
+        : `<span class="catalog-emoji">${emoji}</span>`;
+      div.innerHTML += `<span class="catalog-stage">${lvLabel}</span>
+                        <span class="catalog-name">${name}</span>`;
+    } else if (state === 'pending') {
+      div.className = 'catalog-item catalog-pending';
+      div.innerHTML = `<button class="catalog-reveal-btn">？</button>
+                       <span class="catalog-stage">${lvLabel}</span>
+                       <span class="catalog-name">???</span>`;
+      div.querySelector('.catalog-reveal-btn').addEventListener('click', onReveal);
+    } else {
+      // locked
+      div.className = 'catalog-item undiscovered';
+      div.innerHTML = `<span class="catalog-emoji catalog-locked-q">？</span>
+                       <span class="catalog-stage">${lvLabel}</span>
+                       <span class="catalog-name">???</span>`;
+    }
+    return div;
+  }
+
   if (catalogCurrentChain === 'event') {
-    // 第一章アイテム表示
+    // ── ジェネレーター（第一章）
+    const genHeader = document.createElement('div');
+    genHeader.className = 'catalog-section-header';
+    genHeader.textContent = 'ジェネレーター';
+    listEl.appendChild(genHeader);
+
+    EVENT_GEN_IMAGES.forEach((imgSrc, idx) => {
+      const key = `ch1_${idx}`;
+      const disc = !!eventState.genDiscovered[key];
+      const rev  = !!eventState.genRevealed[key];
+      const lvLabel = `Lv${idx + 1}`;
+      const name    = EVENT_GEN_NAMES[idx] ?? lvLabel;
+      const itemState = rev ? 'revealed' : disc ? 'pending' : 'locked';
+      const card = makeCard(imgSrc, '🗂️', lvLabel, name, itemState, () => revealCatalogItem('ch1gen', idx));
+      listEl.appendChild(card);
+    });
+
+    // ── マージアイテム（第一章）
+    const itemHeader = document.createElement('div');
+    itemHeader.className = 'catalog-section-header';
+    itemHeader.textContent = 'マージアイテム';
+    listEl.appendChild(itemHeader);
+
     EVENT_CHAIN.stages.forEach((emoji, idx) => {
       const stage = idx + 1;
-      const found = eventState.discovered[stage];
-      const imgSrc = EVENT_CHAIN.stageImages[idx];
-      const stageName = EVENT_CHAIN.stageNames?.[idx] ?? (EVENT_CHAIN.name + ' Lv' + stage);
-      const div = document.createElement('div');
-      div.className = 'catalog-item ' + (found ? 'discovered' : 'undiscovered');
-      const iconHtml = found && imgSrc
-        ? `<img class="catalog-img" src="${imgSrc}" alt="${emoji}">`
-        : `<span class="catalog-emoji">${found ? emoji : '?'}</span>`;
-      div.innerHTML = `
-        ${iconHtml}
-        <span class="catalog-stage">Lv${stage}</span>
-        <span class="catalog-name">${found ? stageName : '???'}</span>
-      `;
-      listEl.appendChild(div);
+      const disc  = !!eventState.discovered[stage];
+      const rev   = !!eventState.revealed[stage];
+      const imgSrc   = EVENT_CHAIN.stageImages[idx];
+      const stageName = EVENT_CHAIN.stageNames?.[idx] ?? `${EVENT_CHAIN.name} Lv${stage}`;
+      const itemState = rev ? 'revealed' : disc ? 'pending' : 'locked';
+      const card = makeCard(imgSrc, emoji, `Lv${stage}`, stageName, itemState, () => revealCatalogItem('event', stage));
+      listEl.appendChild(card);
     });
+
   } else if (catalogCurrentChain === SEIZO_CHAIN_ID) {
-    // 第二章アイテム表示（製造機アイテム）
+    // ── ジェネレーター（第二章）
+    const genHeader = document.createElement('div');
+    genHeader.className = 'catalog-section-header';
+    genHeader.textContent = 'ジェネレーター';
+    listEl.appendChild(genHeader);
+
+    SEIZO_GEN_IMAGES.forEach((imgSrc, idx) => {
+      const key = `ch2_${idx}`;
+      const disc = !!eventState.genDiscovered[key];
+      const rev  = !!eventState.genRevealed[key];
+      const lvLabel = `Lv${idx + 1}`;
+      const name    = SEIZO_GEN_NAMES[idx] ?? lvLabel;
+      const itemState = rev ? 'revealed' : disc ? 'pending' : 'locked';
+      const card = makeCard(imgSrc, '⚙️', lvLabel, name, itemState, () => revealCatalogItem('ch2gen', idx));
+      listEl.appendChild(card);
+    });
+
+    // ── マージアイテム（第二章）
+    const itemHeader = document.createElement('div');
+    itemHeader.className = 'catalog-section-header';
+    itemHeader.textContent = 'マージアイテム';
+    listEl.appendChild(itemHeader);
+
     const chain = CHAINS[SEIZO_CHAIN_ID];
     chain.stages.forEach((emoji, idx) => {
       const stage = idx + 1;
-      const found = !!eventState.seizoDiscovered[stage];
-      const imgSrc = chain.stageImages?.[idx];
-      const stageName = chain.stageNames?.[idx] ?? (chain.name + ' Lv' + stage);
-      const div = document.createElement('div');
-      div.className = 'catalog-item ' + (found ? 'discovered' : 'undiscovered');
-      const iconHtml = found && imgSrc
-        ? `<img class="catalog-img" src="${imgSrc}" alt="${emoji}">`
-        : `<span class="catalog-emoji">${found ? emoji : '?'}</span>`;
-      div.innerHTML = `
-        ${iconHtml}
-        <span class="catalog-stage">Lv${stage}</span>
-        <span class="catalog-name">${found ? stageName : '???'}</span>
-      `;
-      listEl.appendChild(div);
+      const disc  = !!eventState.seizoDiscovered[stage];
+      const rev   = !!eventState.seizoRevealed[stage];
+      const imgSrc    = chain.stageImages?.[idx];
+      const stageName = chain.stageNames?.[idx] ?? `${chain.name} Lv${stage}`;
+      const itemState = rev ? 'revealed' : disc ? 'pending' : 'locked';
+      const card = makeCard(imgSrc, emoji, `Lv${stage}`, stageName, itemState, () => revealCatalogItem('seizo', stage));
+      listEl.appendChild(card);
     });
   }
 }
@@ -1862,9 +1993,7 @@ document.getElementById('settings-close').addEventListener('click', () => {
 document.getElementById('settings-catalog-btn').addEventListener('click', () => {
   hideNaviHint();
   document.getElementById('settings-screen').classList.add('hidden');
-  catalogCurrentChain = 'event';
-  renderCatalog();
-  document.getElementById('catalog-screen').classList.remove('hidden');
+  openCatalog();
 });
 
 document.getElementById('settings-shop-btn').addEventListener('click', () => {
@@ -1882,13 +2011,16 @@ document.getElementById('settings-characters-btn').addEventListener('click', () 
 });
 
 // ========================================
-// 図鑑ボタン
+// アイテムリストボタン（複数箇所）
 // ========================================
-document.getElementById('catalog-btn').addEventListener('click', () => {
+function openCatalog() {
   catalogCurrentChain = 'event';
   renderCatalog();
   document.getElementById('catalog-screen').classList.remove('hidden');
-});
+}
+document.getElementById('catalog-btn').addEventListener('click', openCatalog);
+document.getElementById('main-catalog-btn').addEventListener('click', openCatalog);
+document.getElementById('ev-catalog-btn').addEventListener('click', openCatalog);
 
 document.getElementById('catalog-close').addEventListener('click', () => {
   document.getElementById('catalog-screen').classList.add('hidden');
@@ -2029,6 +2161,8 @@ const EVENT_GEN_IMAGES = [
   'img/image_merge_gene1_03.png', // Lv3
   'img/image_merge_gene1_04.png', // Lv4
 ];
+// 第一章ジェネレーター名（Lv1〜4）
+const EVENT_GEN_NAMES = ['メモ机', '観察キット', '調査バッグ', '調査バッグ+'];
 
 // 第二章チェーンID（CHAINS配列のインデックス）
 const SEIZO_CHAIN_ID = 11;
@@ -2043,6 +2177,8 @@ const SEIZO_GEN_IMAGES = [
   'img/image_merge_gene2_06.png', // Lv6
   'img/image_merge_gene2_07.png', // Lv7
 ];
+// 第二章ジェネレーター名（Lv1〜7）
+const SEIZO_GEN_NAMES = ['鍵製造機', 'ICカード製造機', '鍛冶製造機', '監視室', 'レーダー探知機', 'マンション模型', '3Dプリンター'];
 
 // 第二章ジェネレーター Lvボタン別出力設定（Lucky/PowerはLUCKY_CONFIG/GEN_POWER_BONUSを使用）
 const FIRE_POWER_CONFIG = [
@@ -2169,6 +2305,10 @@ let eventState = {
   genMergeTutDone: false,       // 一度完了したら二度と出さない
   genPowerLevel: 0,             // 第一章ジェネレーター 現在選択中の出力パワーレベル
   firePowerLevel: 0,            // 第二章ジェネレーター 現在選択中の出力パワーレベル
+  revealed: {},            // 第一章アイテム: stage→true（ダイヤ取得済み）
+  seizoRevealed: {},       // 第二章アイテム: stage→true
+  genDiscovered: {},       // ジェネレーター: 'ch1_N'/'ch2_N'→true（出現済み）
+  genRevealed: {},         // ジェネレーター: 同キー→true（ダイヤ取得済み）
 };
 
 // タッチデバイス判定
@@ -2205,6 +2345,10 @@ function initEventMap() {
   eventState.genMergeTutDone    = false;
   eventState.genPowerLevel      = 0;
   eventState.firePowerLevel     = 0;
+  eventState.revealed           = {};
+  eventState.seizoRevealed      = {};
+  eventState.genDiscovered      = {};
+  eventState.genRevealed        = {};
 
   // 霧アイテム配置（Lv1/2/3）
   EVENT_FOG_ITEM_MAP.forEach((stage, i) => {
@@ -2215,6 +2359,7 @@ function initEventMap() {
   const genIdx = eventState.board.findIndex(c => c === null);
   if (genIdx !== -1) {
     eventState.board[genIdx] = { isEventGen: true, genLevel: 0 };
+    discoverGen('ch1', 0); // Lv1 を発見
   }
 }
 
@@ -3343,7 +3488,7 @@ function onEventGenTap(tappedCellIdx = null) {
 
   if (!debugState.infiniteEnergy) state.energy -= baseCost;
   eventState.board[emptyIdx] = { stage: finalStage };
-  eventState.discovered[finalStage] = true;
+  discoverEventItem(finalStage);
 
   // アイテム飛び出しアニメーション
   const stageContent = EVENT_CHAIN.stageImages?.[finalStage - 1] || EVENT_CHAIN.stages[finalStage - 1];
@@ -3618,7 +3763,7 @@ function doEventMerge(fromIdx, toIdx) {
   if (toWasFog) unlockAdjacentFogCells(toIdx);
 
   if (chainId === undefined) {
-    eventState.discovered[nextStage] = true;
+    discoverEventItem(nextStage);
 
     // Lv4/8/12 初回到達でジェネレーター2枚目タイルを自動出現（1ステージにつき1回のみ）
     if ((nextStage === 4 || nextStage === 8 || nextStage === 12) &&
@@ -3649,10 +3794,7 @@ function doEventMerge(fromIdx, toIdx) {
 
   // 製造機アイテム（第二章）の発見トラッキングとLvアップ判定
   if (chainId === SEIZO_CHAIN_ID) {
-    if (!eventState.seizoDiscovered[nextStage]) {
-      eventState.seizoDiscovered[nextStage] = true;
-      checkSeizoGenLevelUp(nextStage);
-    }
+    discoverSeizoItem(nextStage); // 内部で checkSeizoGenLevelUp も呼ぶ
   }
 
   // 5%〜25%の確率でしゃぼん玉アイテムを追加出現（チュートリアル・霧マージ中は除く）
@@ -3703,6 +3845,7 @@ function mergeEventGenerators(fromIdx, toIdx) {
   eventState.board[toIdx]   = { isEventGen: true, genLevel: newLevel };
   eventState.board[fromIdx] = null;
   eventState.selectedCell   = null;
+  discoverGen('ch1', newLevel); // Lvアップで新レベルを発見
   if (!isGenMergeTutActive()) {
     showCellToast(`第一章ジェネレーター Lv${newLevel + 1} にレベルアップ！`, toIdx, true);
   }
@@ -3735,6 +3878,7 @@ function unlockFireGenerator() {
   const emptyIdx = eventState.board.findIndex(c => c === null);
   if (emptyIdx === -1) { showToast('ボードが満杯で第二章ジェネレーターを配置できません'); return; }
   eventState.board[emptyIdx] = { isEventGen: true, isFireGen: true, seizoLevel: 0 };
+  discoverGen('ch2', 0); // Lv1 を発見
   showToast('第二章ジェネレーター解放！');
   renderEventBoard();
   renderEventRequest();
@@ -3775,6 +3919,7 @@ function mergeFireGenerators(fromIdx, toIdx) {
   eventState.selectedCell   = null;
   // グローバルレベルも最高値に更新
   eventState.seizoGenLevel = Math.max(eventState.seizoGenLevel, newLevel);
+  discoverGen('ch2', newLevel); // Lvアップで新レベルを発見
   showCellToast(`第二章ジェネレーター Lv${newLevel + 1} にレベルアップ！`, toIdx, true);
   addEnergy(25, '第二章ジェネレーターLvアップボーナス！');
   // Lvアップ時に出力Lvを自動で新しい最大値に設定

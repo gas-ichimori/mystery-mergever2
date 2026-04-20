@@ -539,10 +539,90 @@ body {
   border-color: #4a5aaa;
 }
 
-.catalog-emoji  { font-size: 28px; line-height: 1; }
-.catalog-img    { width: 48px; height: 48px; object-fit: contain; }
-.catalog-stage  { font-size: 10px; color: #aaa; }
-.catalog-name   { font-size: 9px; color: #888; text-align: center; }
+.catalog-emoji      { font-size: 28px; line-height: 1; }
+.catalog-locked-q   { font-size: 28px; line-height: 1; color: #556; }
+.catalog-img        { width: 48px; height: 48px; object-fit: contain; }
+.catalog-stage      { font-size: 10px; color: #aaa; }
+.catalog-name       { font-size: 9px; color: #888; text-align: center; }
+
+/* 発見済み・未解放（？タップ待ち） */
+.catalog-item.catalog-pending {
+  border-color: #f9c846;
+  animation: catalog-pending-glow 1.6s ease-in-out infinite;
+  cursor: pointer;
+}
+.catalog-reveal-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f9c846;
+  color: #1a1a2e;
+  font-size: 22px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: catalog-q-bounce 0.9s ease-in-out infinite alternate;
+}
+.catalog-reveal-btn:active { transform: scale(0.9); }
+@keyframes catalog-pending-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(249,200,70,0.6); }
+  50%       { box-shadow: 0 0 0 4px rgba(249,200,70,0); }
+}
+@keyframes catalog-q-bounce {
+  from { transform: scale(0.88); }
+  to   { transform: scale(1.06); }
+}
+
+/* カタログセクション見出し */
+.catalog-section-header {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  color: #8899cc;
+  padding: 4px 2px 2px;
+  border-bottom: 1px solid #2a3a6a;
+  margin-bottom: 2px;
+}
+
+/* アイテムリストアクセスボタン（メインゲーム・イベント共通） */
+.catalog-access-btn {
+  background: rgba(30, 60, 120, 0.5);
+  color: #aabbdd;
+  border: 1px solid rgba(100, 150, 220, 0.3);
+  border-radius: 7px;
+  padding: 3px 8px;
+  font-size: 15px;
+  cursor: pointer;
+  line-height: 1;
+  position: relative;
+  transition: background 0.3s, border-color 0.3s;
+}
+.catalog-access-btn:active { background: rgba(20, 40, 90, 0.9); }
+
+/* 未解放アイテムありの演出 */
+.catalog-access-btn.catalog-badge-active {
+  background: rgba(249, 200, 70, 0.18);
+  border-color: #f9c846;
+  color: #f9c846;
+  animation: catalog-btn-pulse 1.8s ease-in-out infinite;
+}
+.catalog-access-btn.catalog-badge-active::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #f9c846;
+  box-shadow: 0 0 4px rgba(249,200,70,0.8);
+}
+@keyframes catalog-btn-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(249,200,70,0.6); }
+  50%       { box-shadow: 0 0 0 5px rgba(249,200,70,0); }
+}
 
 /* ========================================
    ショップ画面
