@@ -4007,6 +4007,7 @@ function onEventFireGenTap(tappedCellIdx = null) {
   const slot = animFrom !== -1 ? findNearestEmptyEventCell(animFrom) : eventState.board.findIndex(c => c === null);
   if (slot !== -1) {
     eventState.board[slot] = { chainId: SEIZO_CHAIN_ID, stage: finalStage };
+    discoverSeizoItem(finalStage); // 生成時に発見登録
     const imgSrc = chain.stageImages?.[finalStage - 1];
     flyEventItemAnimation(animFrom !== -1 ? animFrom : slot, slot, imgSrc || chain.stages[finalStage - 1]);
   }
