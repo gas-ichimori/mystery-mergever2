@@ -1902,7 +1902,7 @@ function openAdventureScene(sceneId, callback = null) {
   if (bgEl) {
     bgEl.style.transition = '';
     bgEl.style.opacity    = '1';
-    bgEl.style.backgroundImage = scene.bg ? `url('${scene.bg}')` : '';
+    bgEl.style.background = scene.bg ? `url('${scene.bg}') center / cover no-repeat` : '';
   }
 
   // スライドイン共通ヘルパー（インラインスタイル不使用・CSSクラスのみ）
@@ -2000,7 +2000,7 @@ function showAdvMessage(idx) {
       bgEl.style.transition = 'opacity 0.5s ease';
       bgEl.style.opacity    = '0';
       setTimeout(() => {
-        bgEl.style.backgroundImage = `url('${msg.changeBg}')`;
+        bgEl.style.background = `url('${msg.changeBg}') center / cover no-repeat`;
         bgEl.style.opacity = '1';
         if (msg.autoAdvance) {
           setTimeout(() => { advTextPending = false; advMsgIdx++; showAdvMessage(advMsgIdx); }, 600);
@@ -2018,7 +2018,8 @@ function showAdvMessage(idx) {
   if (msg.showRight && !charaRight.classList.contains('adv-char-shown')) {
     if (msg.slideRight) {
       // スライドインしてからテキスト表示（CSSクラスのみ・インラインスタイル不使用）
-      charaLeft.classList.toggle('adv-chara-dim', msg.side !== 'left');
+      if (charaLeft.classList.contains('adv-char-shown'))
+        charaLeft.classList.toggle('adv-chara-dim', msg.side !== 'left');
       document.getElementById('adv-speaker').textContent  = '';
       document.getElementById('adv-text').textContent     = '';
       document.getElementById('adv-tap-hint').textContent = '';
@@ -2082,7 +2083,8 @@ function showAdvMessage(idx) {
   }
 
   // 話者ハイライト / 非話者ディム
-  charaLeft.classList.toggle('adv-chara-dim', msg.side !== 'left');
+  if (charaLeft.classList.contains('adv-char-shown'))
+    charaLeft.classList.toggle('adv-chara-dim', msg.side !== 'left');
   if (charaRight.classList.contains('adv-char-shown')) {
     charaRight.classList.toggle('adv-chara-dim', msg.side !== 'right');
   }
