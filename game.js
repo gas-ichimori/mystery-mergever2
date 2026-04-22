@@ -2176,6 +2176,14 @@ document.getElementById('debug-adv-test').addEventListener('click', () => {
   document.getElementById('debug-screen').classList.add('hidden');
   openAdventureScene('test');
 });
+document.getElementById('debug-adv-scene01').addEventListener('click', () => {
+  document.getElementById('debug-screen').classList.add('hidden');
+  openAdventureScene('scene01');
+});
+document.getElementById('debug-adv-scene02').addEventListener('click', () => {
+  document.getElementById('debug-screen').classList.add('hidden');
+  openAdventureScene('scene02');
+});
 
 document.getElementById('story-btn').addEventListener('click', () => {
   progressStory();
