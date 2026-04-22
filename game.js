@@ -1877,7 +1877,7 @@ const ADV_SCENES = {
     title:         '',
     leftImg:       'img/image_merge_order_chara_00.png',
     rightImg:      'img/image_merge_order_chara_01a.png',
-    bg:            'img/image_merge_bg_light.png',
+    bg:            'img/image_merge_bg_hiruma.png',
     rightEntrance: 'slide',   // ミユが右からスライドイン
     leftEntrance:  'none',    // ヤスは後から登場
     autoClose:     false,
