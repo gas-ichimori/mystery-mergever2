@@ -1587,7 +1587,7 @@ body {
   position: fixed;
   inset: 0;
   z-index: 300;
-  background: #000 url('img/image_merge_bg.png') center center / cover no-repeat;
+  background-color: #000;
   overflow: hidden;
 }
 /* #adv-bg は暗転オーバーレイ（::after）専用 */

@@ -1947,9 +1947,13 @@ function openAdventureScene(sceneId, callback = null) {
   charaLeft.querySelector('img').classList.remove('adv-img-flip');
   charaRight.querySelector('img').classList.remove('adv-img-flip');
 
-  // 背景設定（#adventure-screen に直接設定）
+  // 背景設定（全プロパティをインラインで設定してCSS競合を完全排除）
   const advScreen = document.getElementById('adventure-screen');
-  advScreen.style.backgroundImage = scene.bg ? `url('${scene.bg}')` : '';
+  const bgSrc = scene.bg || 'img/image_merge_bg.png';
+  advScreen.style.backgroundImage    = `url('${bgSrc}')`;
+  advScreen.style.backgroundSize     = 'cover';
+  advScreen.style.backgroundPosition = 'center center';
+  advScreen.style.backgroundRepeat   = 'no-repeat';
 
   // スライドイン共通ヘルパー（インラインスタイル不使用・CSSクラスのみ）
   function _slideIn(el, onComplete) {
@@ -2042,9 +2046,13 @@ function showAdvMessage(idx) {
       el.querySelector('img').classList.remove('adv-img-flip');
     });
 
-    // 背景を即座に切り替え（#adventure-screen に直接設定）
+    // 背景を即座に切り替え（全プロパティをインラインで上書き）
     if (msg.changeBg) {
-      document.getElementById('adventure-screen').style.backgroundImage = `url('${msg.changeBg}')`;
+      const scr = document.getElementById('adventure-screen');
+      scr.style.backgroundImage    = `url('${msg.changeBg}')`;
+      scr.style.backgroundSize     = 'cover';
+      scr.style.backgroundPosition = 'center center';
+      scr.style.backgroundRepeat   = 'no-repeat';
     }
 
     if (msg.autoAdvance) {
