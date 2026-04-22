@@ -1766,11 +1766,13 @@ document.getElementById('characters-close').addEventListener('click', () => {
 // 設定ページ
 // ========================================
 document.getElementById('settings-btn').addEventListener('click', () => {
+  if (isTutorialInProgress()) return;
   hideNaviHint();
   document.getElementById('settings-screen').classList.remove('hidden');
 });
 
 document.getElementById('ev-settings-btn').addEventListener('click', () => {
+  if (isTutorialInProgress()) return;
   hideNaviHint();
   document.getElementById('settings-screen').classList.remove('hidden');
 });
@@ -2186,6 +2188,7 @@ document.getElementById('debug-adv-scene02').addEventListener('click', () => {
 });
 
 document.getElementById('story-btn').addEventListener('click', () => {
+  if (isTutorialInProgress()) return;
   progressStory();
 });
 
@@ -2221,9 +2224,9 @@ function openCatalog() {
   renderCatalog();
   document.getElementById('catalog-screen').classList.remove('hidden');
 }
-document.getElementById('catalog-btn').addEventListener('click', openCatalog);
-document.getElementById('main-catalog-btn').addEventListener('click', openCatalog);
-document.getElementById('ev-catalog-btn').addEventListener('click', openCatalog);
+document.getElementById('catalog-btn').addEventListener('click', () => { if (isTutorialInProgress()) return; openCatalog(); });
+document.getElementById('main-catalog-btn').addEventListener('click', () => { if (isTutorialInProgress()) return; openCatalog(); });
+document.getElementById('ev-catalog-btn').addEventListener('click', () => { if (isTutorialInProgress()) return; openCatalog(); });
 
 document.getElementById('catalog-close').addEventListener('click', () => {
   document.getElementById('catalog-screen').classList.add('hidden');
@@ -2318,6 +2321,7 @@ function renderShop() {
 let shopTimerInterval = null;
 
 document.getElementById('shop-btn').addEventListener('click', () => {
+  if (isTutorialInProgress()) return;
   renderShop();
   document.getElementById('shop-screen').classList.remove('hidden');
   shopTimerInterval = setInterval(renderShop, 60000); // 1分ごと更新
@@ -2571,6 +2575,11 @@ function initEventMap() {
 // ========================================
 function isTutorialComplete() {
   return eventState.tutorialStep >= TUTORIAL_STEPS.length;
+}
+
+// メインチュートリアルまたはジェネレーターマージ誘導チュートリアルが進行中か
+function isTutorialInProgress() {
+  return !isTutorialComplete() || isGenMergeTutActive();
 }
 
 function currentTutStep() {
@@ -4573,6 +4582,7 @@ function endEvDrag(x, y) {
 // イベント画面ナビゲーション
 // ========================================
 document.getElementById('event-btn').addEventListener('click', () => {
+  if (isTutorialInProgress()) return;
   document.getElementById('event-screen').classList.remove('hidden');
   renderEventBoard();
   renderEventHeader();
@@ -4581,6 +4591,7 @@ document.getElementById('event-btn').addEventListener('click', () => {
 });
 
 document.getElementById('event-close').addEventListener('click', () => {
+  if (isTutorialInProgress()) return;
   document.getElementById('event-screen').classList.add('hidden');
   document.getElementById('tutorial-overlay').classList.add('hidden');
   document.getElementById('tutorial-panel').classList.add('hidden');
