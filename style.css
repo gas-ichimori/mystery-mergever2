@@ -1587,22 +1587,14 @@ body {
   position: fixed;
   inset: 0;
   z-index: 300;
-  background: #000;
+  background: #000 url('img/image_merge_bg.png') center center / cover no-repeat;
   overflow: hidden;
 }
+/* #adv-bg は暗転オーバーレイ（::after）専用 */
 #adv-bg {
   position: absolute;
   inset: 0;
   z-index: 0;
-  overflow: hidden;
-}
-#adv-bg-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center center;
 }
 /* 背景を少し暗くしてキャラ・テキストを見やすく */
 #adv-bg::after {
