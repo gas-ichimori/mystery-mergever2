@@ -2038,29 +2038,27 @@ function showAdvMessage(idx) {
     document.getElementById('adv-speaker').textContent  = '';
     document.getElementById('adv-text').textContent     = '';
     document.getElementById('adv-tap-hint').textContent = '';
-    // 両キャラをフェードアウト（adv-char-shown を外すと opacity:0 に戻る）
-    charaLeft.classList.remove('adv-char-shown', 'adv-chara-dim');
-    charaRight.classList.remove('adv-char-shown', 'adv-chara-dim');
-    // flip リセット
-    charaLeft.querySelector('img').classList.remove('adv-img-flip');
-    charaRight.querySelector('img').classList.remove('adv-img-flip');
+    // 両キャラを即座に非表示（CSS transitionを無効化してフラッシュ防止）
+    [charaLeft, charaRight].forEach(el => {
+      el.style.transition = 'none';
+      el.style.opacity    = '0';
+      el.classList.remove('adv-char-shown', 'adv-chara-dim');
+      el.querySelector('img').classList.remove('adv-img-flip');
+    });
 
+    // 背景を即座に切り替え
     if (msg.changeBg) {
-      // 背景フェードアウト → 画像差し替え → フェードイン
       const bgEl = document.getElementById('adv-bg');
-      bgEl.style.transition = 'opacity 0.5s ease';
-      bgEl.style.opacity    = '0';
-      setTimeout(() => {
-        bgEl.style.background = `url('${msg.changeBg}') center / cover no-repeat`;
-        bgEl.style.opacity = '1';
-        if (msg.autoAdvance) {
-          setTimeout(() => { advTextPending = false; advMsgIdx++; showAdvMessage(advMsgIdx); }, 600);
-        }
-      }, 600);
-    } else if (msg.autoAdvance) {
+      bgEl.style.backgroundImage    = `url('${msg.changeBg}')`;
+      bgEl.style.backgroundSize     = 'cover';
+      bgEl.style.backgroundPosition = 'center center';
+      bgEl.style.backgroundRepeat   = 'no-repeat';
+    }
+
+    if (msg.autoAdvance) {
       setTimeout(() => {
         advTextPending = false; advMsgIdx++; showAdvMessage(advMsgIdx);
-      }, msg.advanceDelay ?? 800);
+      }, msg.advanceDelay ?? 400);
     }
     return;
   }
@@ -2068,6 +2066,9 @@ function showAdvMessage(idx) {
   // ─── 右キャラの登場（初回のみ）───
   if (msg.showRight && !charaRight.classList.contains('adv-char-shown')) {
     if (msg.slideRight) {
+      // インラインスタイルをクリア（hideAll で設定された opacity:'0'/transition:'none' を解除）
+      charaRight.style.transition = '';
+      charaRight.style.opacity    = '';
       // スライドインしてからテキスト表示（CSSクラスのみ・インラインスタイル不使用）
       if (charaLeft.classList.contains('adv-char-shown'))
         charaLeft.classList.toggle('adv-chara-dim', msg.side !== 'left');
@@ -2099,6 +2100,9 @@ function showAdvMessage(idx) {
 
   // ─── 左キャラの登場（初回のみ）← showLeft/slideLeft/flipLeft ───
   if (msg.showLeft && !charaLeft.classList.contains('adv-char-shown')) {
+    // インラインスタイルをクリア（hideAll で設定された opacity:'0'/transition:'none' を解除）
+    charaLeft.style.transition = '';
+    charaLeft.style.opacity    = '';
     // flip フラグを img に適用（スライド前に設定して反転状態でスライドイン）
     const leftImg = charaLeft.querySelector('img');
     if (msg.flipLeft) leftImg.classList.add('adv-img-flip');
