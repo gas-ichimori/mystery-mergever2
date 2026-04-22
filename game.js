@@ -1822,16 +1822,38 @@ const ADV_SCENES = {
       { speaker: 'ミユ', text: 'ありがとうございます！',                                   side: 'right'                              },
     ],
   },
-  // ストーリー進行02（仮）
+  // 第一章スライド01（2,000コインで解放）
   scene02: {
     title:         '',
     leftImg:       'img/image_merge_order_chara_00.png',
     rightImg:      'img/image_merge_order_chara_01a.png',
-    leftEntrance:  'slide',
-    rightEntrance: 'none',
+    bg:            'img/image_merge_bg_light.png',
+    rightEntrance: 'slide',   // ミユが右からスライドイン
+    leftEntrance:  'none',    // ヤスは後から登場
     autoClose:     false,
     script: [
-      { speaker: 'ヤス', text: '（ストーリー02 準備中）', side: 'left' },
+      // ─── フェーズ1: 依頼事務所 ───
+      // [0] ミユ（右スライドイン後）が話す
+      { speaker: 'ミユ', text: 'すみません…！ミケがいなくなっちゃって…！', side: 'right' },
+      // [1] ミユ暗転 + ヤス（左右反転）が左からスライドイン
+      { speaker: 'ヤス', text: 'なるほど...最後に見かけたのは、どちらですか？', side: 'left',
+        showLeft: true, slideLeft: true, flipLeft: true },
+      // [2] ヤス暗転 ミユ明転
+      { speaker: 'ミユ', text: 'こっちです！', side: 'right' },
+      // [3] 両キャラ消去 → 背景チェンジ（自動進行）
+      { hideAll: true, changeBg: 'img/image_merge_bg_road_light.png',
+        autoAdvance: true },
+      // ─── フェーズ2: 道路 ───
+      // [4] ミユが右からスライドイン（再登場）
+      { speaker: 'ミユ', text: 'この道です…さっきまでいたのに…', side: 'right',
+        showRight: true, slideRight: true },
+      // [5] ミユ暗転 + ヤス（左右反転）が左からスライドイン
+      { speaker: 'ヤス', text: '急に居なくなったのですか？', side: 'left',
+        showLeft: true, slideLeft: true, flipLeft: true },
+      // [6] ヤス暗転 ミユ明転
+      { speaker: 'ミユ', text: 'はい...', side: 'right' },
+      // [7] ミユ暗転 ヤス明転
+      { speaker: 'ヤス', text: 'わかりました...すぐに探しましょう！', side: 'left' },
     ],
   },
 };
@@ -1871,6 +1893,17 @@ function openAdventureScene(sceneId, callback = null) {
   charaRight.classList.remove('adv-char-shown', 'adv-chara-dim', 'adv-slide-ready', 'adv-slide-active');
   charaLeft.style.cssText  = '';
   charaRight.style.cssText = '';
+  // 反転フラグリセット
+  charaLeft.querySelector('img').classList.remove('adv-img-flip');
+  charaRight.querySelector('img').classList.remove('adv-img-flip');
+
+  // 背景設定（scene.bg が指定されている場合は上書き、未指定は CSS デフォルト）
+  const bgEl = document.getElementById('adv-bg');
+  if (bgEl) {
+    bgEl.style.transition = '';
+    bgEl.style.opacity    = '1';
+    bgEl.style.backgroundImage = scene.bg ? `url('${scene.bg}')` : '';
+  }
 
   // スライドイン共通ヘルパー（インラインスタイル不使用・CSSクラスのみ）
   function _slideIn(el, onComplete) {
@@ -1889,11 +1922,23 @@ function openAdventureScene(sceneId, callback = null) {
     setTimeout(finish, 700);
   }
 
+  // メッセージ開始を一度だけ呼ぶためのフラグ
+  let _msgStarted = false;
+  function _startMessages() {
+    if (_msgStarted) return;
+    _msgStarted = true;
+    advTextPending = false;
+    showAdvMessage(0);
+  }
+
   // 右キャラ: entrance に応じた処理
   if (scene.rightEntrance === 'slide') {
+    advTextPending = true;
     _slideIn(charaRight, () => {
       const cur = advCurrentScene?.script[advMsgIdx];
       if (cur) charaRight.classList.toggle('adv-chara-dim', cur.side !== 'right');
+      // leftEntrance が 'none' なら右スライド完了後にメッセージ開始
+      if (scene.leftEntrance === 'none') _startMessages();
     });
   } else if (scene.rightEntrance === 'fade') {
     void charaRight.offsetHeight;
@@ -1905,13 +1950,17 @@ function openAdventureScene(sceneId, callback = null) {
   if (scene.leftEntrance === 'slide') {
     advTextPending = true;
     _slideIn(charaLeft, () => {
-      advTextPending = false;
-      showAdvMessage(0);
+      _startMessages();
     });
+  } else if (scene.leftEntrance === 'none') {
+    // 非表示のまま。メッセージ開始は右キャラのスライド完了後に委譲
+    // rightEntrance が 'slide' でない場合は即開始
+    if (scene.rightEntrance !== 'slide') _startMessages();
   } else {
+    // default/fade: 即表示
     void charaLeft.offsetHeight;
     charaLeft.classList.add('adv-char-shown');
-    showAdvMessage(0);
+    _startMessages();
   }
 }
 
@@ -1932,7 +1981,40 @@ function showAdvMessage(idx) {
     }
   }
 
-  // 右キャラの登場（初回のみ）
+  // ─── 新機能: 両キャラ消去 + 背景チェンジ（hideAll）───
+  if (msg.hideAll) {
+    advTextPending = true;
+    document.getElementById('adv-speaker').textContent  = '';
+    document.getElementById('adv-text').textContent     = '';
+    document.getElementById('adv-tap-hint').textContent = '';
+    // 両キャラをフェードアウト（adv-char-shown を外すと opacity:0 に戻る）
+    charaLeft.classList.remove('adv-char-shown', 'adv-chara-dim');
+    charaRight.classList.remove('adv-char-shown', 'adv-chara-dim');
+    // flip リセット
+    charaLeft.querySelector('img').classList.remove('adv-img-flip');
+    charaRight.querySelector('img').classList.remove('adv-img-flip');
+
+    if (msg.changeBg) {
+      // 背景フェードアウト → 画像差し替え → フェードイン
+      const bgEl = document.getElementById('adv-bg');
+      bgEl.style.transition = 'opacity 0.5s ease';
+      bgEl.style.opacity    = '0';
+      setTimeout(() => {
+        bgEl.style.backgroundImage = `url('${msg.changeBg}')`;
+        bgEl.style.opacity = '1';
+        if (msg.autoAdvance) {
+          setTimeout(() => { advTextPending = false; advMsgIdx++; showAdvMessage(advMsgIdx); }, 600);
+        }
+      }, 600);
+    } else if (msg.autoAdvance) {
+      setTimeout(() => {
+        advTextPending = false; advMsgIdx++; showAdvMessage(advMsgIdx);
+      }, msg.advanceDelay ?? 800);
+    }
+    return;
+  }
+
+  // ─── 右キャラの登場（初回のみ）───
   if (msg.showRight && !charaRight.classList.contains('adv-char-shown')) {
     if (msg.slideRight) {
       // スライドインしてからテキスト表示（CSSクラスのみ・インラインスタイル不使用）
@@ -1960,6 +2042,42 @@ function showAdvMessage(idx) {
     } else {
       void charaRight.offsetWidth;
       charaRight.classList.add('adv-char-shown');
+    }
+  }
+
+  // ─── 左キャラの登場（初回のみ）← showLeft/slideLeft/flipLeft ───
+  if (msg.showLeft && !charaLeft.classList.contains('adv-char-shown')) {
+    // flip フラグを img に適用（スライド前に設定して反転状態でスライドイン）
+    const leftImg = charaLeft.querySelector('img');
+    if (msg.flipLeft) leftImg.classList.add('adv-img-flip');
+    else              leftImg.classList.remove('adv-img-flip');
+    if (msg.slideLeft) {
+      if (charaRight.classList.contains('adv-char-shown')) {
+        charaRight.classList.toggle('adv-chara-dim', msg.side !== 'right');
+      }
+      document.getElementById('adv-speaker').textContent  = '';
+      document.getElementById('adv-text').textContent     = '';
+      document.getElementById('adv-tap-hint').textContent = '';
+      charaLeft.classList.add('adv-slide-ready');
+      void charaLeft.offsetHeight;
+      charaLeft.classList.add('adv-slide-active');
+      advTextPending = true;
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        charaLeft.classList.remove('adv-slide-ready', 'adv-slide-active');
+        charaLeft.classList.add('adv-char-shown');
+        charaLeft.classList.toggle('adv-chara-dim', msg.side !== 'left');
+        advTextPending = false;
+        _applyText();
+      };
+      charaLeft.addEventListener('transitionend', finish, { once: true });
+      setTimeout(finish, 700);
+      return;
+    } else {
+      void charaLeft.offsetWidth;
+      charaLeft.classList.add('adv-char-shown');
     }
   }
 

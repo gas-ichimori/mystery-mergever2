@@ -1650,6 +1650,8 @@ body {
   opacity: 1;
   transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s ease-out;
 }
+/* キャラ画像の左右反転（ヤスが右キャラ側を向く際に使用） */
+.adv-img-flip { transform: scaleX(-1); }
 /* メッセージボックス */
 #adv-message-box {
   position: absolute;
