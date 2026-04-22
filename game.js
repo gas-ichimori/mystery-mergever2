@@ -1876,7 +1876,7 @@ const ADV_SCENES = {
   scene02: {
     title:         '',
     leftImg:       'img/image_merge_order_chara_00.png',
-    rightImg:      'img/image_merge_order_chara_01.png',
+    rightImg:      'img/image_merge_order_chara_01a.png',
     bg:            'img/image_merge_bg_light.png',
     rightEntrance: 'slide',   // ミユが右からスライドイン
     leftEntrance:  'none',    // ヤスは後から登場
@@ -1947,10 +1947,10 @@ function openAdventureScene(sceneId, callback = null) {
   charaLeft.querySelector('img').classList.remove('adv-img-flip');
   charaRight.querySelector('img').classList.remove('adv-img-flip');
 
-  // 背景設定（backgroundImage のみ inline 上書き、size/position は CSS に委譲）
-  const bgEl = document.getElementById('adv-bg');
-  if (bgEl) {
-    bgEl.style.backgroundImage = scene.bg ? `url('${scene.bg}')` : '';
+  // 背景設定（img.src を直接変更 - CSS backgroundより確実）
+  const bgImg = document.getElementById('adv-bg-img');
+  if (bgImg) {
+    bgImg.src = scene.bg || 'img/image_merge_bg.png';
   }
 
   // スライドイン共通ヘルパー（インラインスタイル不使用・CSSクラスのみ）
@@ -2044,10 +2044,10 @@ function showAdvMessage(idx) {
       el.querySelector('img').classList.remove('adv-img-flip');
     });
 
-    // 背景を即座に切り替え（backgroundImage のみ上書き）
+    // 背景を即座に切り替え（img.src を直接変更）
     if (msg.changeBg) {
-      const bgEl = document.getElementById('adv-bg');
-      bgEl.style.backgroundImage = `url('${msg.changeBg}')`;
+      const bgImg = document.getElementById('adv-bg-img');
+      if (bgImg) bgImg.src = msg.changeBg;
     }
 
     if (msg.autoAdvance) {
