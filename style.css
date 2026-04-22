@@ -1593,7 +1593,10 @@ body {
 #adv-bg {
   position: absolute;
   inset: 0;
-  background: url('img/image_merge_bg.png') center center / cover no-repeat;
+  background-image: url('img/image_merge_bg.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
   z-index: 0;
 }
 /* 背景を少し暗くしてキャラ・テキストを見やすく */

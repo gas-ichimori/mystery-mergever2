@@ -1947,12 +1947,10 @@ function openAdventureScene(sceneId, callback = null) {
   charaLeft.querySelector('img').classList.remove('adv-img-flip');
   charaRight.querySelector('img').classList.remove('adv-img-flip');
 
-  // 背景設定（scene.bg が指定されている場合は上書き、未指定は CSS デフォルト）
+  // 背景設定（backgroundImage のみ inline 上書き、size/position は CSS に委譲）
   const bgEl = document.getElementById('adv-bg');
   if (bgEl) {
-    bgEl.style.transition = '';
-    bgEl.style.opacity    = '1';
-    bgEl.style.background = scene.bg ? `url('${scene.bg}') center / cover no-repeat` : '';
+    bgEl.style.backgroundImage = scene.bg ? `url('${scene.bg}')` : '';
   }
 
   // スライドイン共通ヘルパー（インラインスタイル不使用・CSSクラスのみ）
@@ -2046,10 +2044,10 @@ function showAdvMessage(idx) {
       el.querySelector('img').classList.remove('adv-img-flip');
     });
 
-    // 背景を即座に切り替え（shorthand で統一して競合回避）
+    // 背景を即座に切り替え（backgroundImage のみ上書き）
     if (msg.changeBg) {
       const bgEl = document.getElementById('adv-bg');
-      bgEl.style.background = `url('${msg.changeBg}') center center / cover no-repeat`;
+      bgEl.style.backgroundImage = `url('${msg.changeBg}')`;
     }
 
     if (msg.autoAdvance) {
