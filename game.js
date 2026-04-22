@@ -1860,7 +1860,7 @@ const ADV_SCENES = {
   scene01: {
     title:         '',
     leftImg:       'img/image_merge_order_chara_00.png',
-    rightImg:      'img/image_merge_order_chara_01a.png',
+    rightImg:      'img/image_merge_order_chara_01.png',
     leftEntrance:  'slide',  // ヤスは左からスライドイン
     flipLeft:      true,     // ヤスは左右反転で表示
     rightEntrance: 'none',   // ミユは最初非表示・セリフ時にスライドイン
@@ -1876,7 +1876,7 @@ const ADV_SCENES = {
   scene02: {
     title:         '',
     leftImg:       'img/image_merge_order_chara_00.png',
-    rightImg:      'img/image_merge_order_chara_01a.png',
+    rightImg:      'img/image_merge_order_chara_01.png',
     bg:            'img/image_merge_bg_light.png',
     rightEntrance: 'slide',   // ミユが右からスライドイン
     leftEntrance:  'none',    // ヤスは後から登場
@@ -2046,13 +2046,10 @@ function showAdvMessage(idx) {
       el.querySelector('img').classList.remove('adv-img-flip');
     });
 
-    // 背景を即座に切り替え
+    // 背景を即座に切り替え（shorthand で統一して競合回避）
     if (msg.changeBg) {
       const bgEl = document.getElementById('adv-bg');
-      bgEl.style.backgroundImage    = `url('${msg.changeBg}')`;
-      bgEl.style.backgroundSize     = 'cover';
-      bgEl.style.backgroundPosition = 'center center';
-      bgEl.style.backgroundRepeat   = 'no-repeat';
+      bgEl.style.background = `url('${msg.changeBg}') center center / cover no-repeat`;
     }
 
     if (msg.autoAdvance) {
