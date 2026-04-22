@@ -1639,6 +1639,53 @@ function showToastNearPanel(msg, panelEl) {
   setTimeout(() => el.remove(), 2100);
 }
 
+// ナビパネルの直上（盤面下部）にトーストを表示（ジェネレーターLvアップ体力ボーナスなど）
+function showAboveNaviToast(msg) {
+  const panel = document.getElementById('navi-hint-panel');
+  let topY;
+  if (panel && !panel.classList.contains('hidden')) {
+    const rect = panel.getBoundingClientRect();
+    topY = rect.top - 8;
+  } else {
+    const board = document.getElementById('event-board-wrap');
+    const rect = board?.getBoundingClientRect();
+    topY = rect ? rect.bottom - 40 : window.innerHeight - 80;
+  }
+  const el = document.createElement('div');
+  el.textContent = msg;
+  el.style.cssText = `
+    position:fixed; left:50%; top:${topY}px;
+    transform:translate(-50%, -100%);
+    background:rgba(0,0,0,0.82); color:#fff; padding:6px 14px;
+    border-radius:16px; font-size:12px; z-index:500;
+    pointer-events:none; max-width:80vw; text-align:center;
+    white-space:normal; word-break:break-all;
+    animation:toast-pop 0.25s ease-out;
+  `;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2000);
+}
+
+// 依頼人パネルの中央にトーストを表示（依頼完了メッセージ）
+function showRewardInPanel(msg, panelEl) {
+  if (!panelEl) { showToast(msg); return; }
+  const rect = panelEl.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.textContent = msg;
+  el.style.cssText = `
+    position:fixed;
+    left:${rect.left + rect.width / 2}px;
+    top:${rect.top + rect.height / 2}px;
+    transform:translate(-50%, -50%);
+    background:rgba(10,30,70,0.92); color:#fff; padding:8px 18px;
+    border-radius:20px; font-size:14px; font-weight:bold;
+    pointer-events:none; z-index:9999; white-space:nowrap;
+    animation:toast-pop 2s ease-out forwards;
+  `;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2100);
+}
+
 function showCellToast(msg, cellIdx, isEventBoard) {
   const boardId = isEventBoard ? 'event-board' : 'board';
   const cells = document.querySelectorAll(`#${boardId} .cell`);
@@ -1813,12 +1860,13 @@ const ADV_SCENES = {
     leftImg:       'img/image_merge_order_chara_00.png',
     rightImg:      'img/image_merge_order_chara_01a.png',
     leftEntrance:  'slide',  // ヤスは左からスライドイン
+    flipLeft:      true,     // ヤスは左右反転で表示
     rightEntrance: 'none',   // ミユは最初非表示・セリフ時にスライドイン
     autoClose:     false,
     script: [
       { speaker: 'ヤス', text: 'ご依頼内容をお聞かせください。',                          side: 'left'                               },
       { speaker: 'ミユ', text: '猫が居なくなっちゃったの・・・。\n探してもらえますか？',   side: 'right', showRight: true, slideRight: true },
-      { speaker: 'ヤス', text: 'それは、困りましたね。\n早速、依頼を承ります。',            side: 'left'                               },
+      { speaker: 'ヤス', text: 'それは、困りましたね。\n早速、探しましょう。',              side: 'left'                               },
       { speaker: 'ミユ', text: 'ありがとうございます！',                                   side: 'right'                              },
     ],
   },
@@ -1949,6 +1997,7 @@ function openAdventureScene(sceneId, callback = null) {
   // 左キャラ: entrance に応じた処理
   if (scene.leftEntrance === 'slide') {
     advTextPending = true;
+    if (scene.flipLeft) charaLeft.querySelector('img').classList.add('adv-img-flip');
     _slideIn(charaLeft, () => {
       _startMessages();
     });
@@ -3254,7 +3303,7 @@ function showRewardNearBtn(text, btnEl) {
   setTimeout(() => el.remove(), 2100);
 }
 
-function completeEventRequest(index, btnEl) {
+function completeEventRequest(index) {
   const req = eventState.requests[index];
   if (!req) return;
   if (!eventRequestCompletable(req)) { showToast('該当アイテムがありません'); return; }
@@ -3272,8 +3321,7 @@ function completeEventRequest(index, btnEl) {
 
   state.coin += req.coin;
   state.requestCompletedTotal++;
-  if (btnEl) showRewardNearBtn(`依頼完了！ 💰+${req.coin.toLocaleString()}`, btnEl);
-  else showToast(`依頼完了！ 💰+${req.coin.toLocaleString()}`);
+  showRewardInPanel(`依頼完了！ 💰+${req.coin.toLocaleString()}`, document.getElementById('event-req-panel'));
   if (state.requestCompletedTotal % 10 === 0) {
     addEnergy(25, `依頼${state.requestCompletedTotal}回達成ボーナス！`);
   }
@@ -3484,7 +3532,7 @@ function renderEventRequest() {
     if (completable) {
       div.querySelector('.req-complete-btn').addEventListener('click', e => {
         e.stopPropagation();
-        completeEventRequest(i, e.currentTarget);
+        completeEventRequest(i);
       });
     }
     panel.appendChild(div);
@@ -3902,16 +3950,31 @@ function doEventMerge(fromIdx, toIdx) {
 
   // 結果アイテム（霧フラグなし＝通常アイテム）
   const toWasFog = !!toItem?.isFog;
-  eventState.board[toIdx]   = chainId !== undefined ? { chainId, stage: nextStage } : { stage: nextStage };
+  const tutStepNow = currentTutStep();
+  // 第一章Lv1はアップもしゃぼん玉もしない
+  const isLv1Ch1 = chainId === undefined && nextStage === 1;
+
+  // 5%〜10%の確率でワンランクアップ（Lv1/チュートリアル/霧マージは除外）
+  let finalStage = nextStage;
+  if (!tutStepNow && !isGenMergeTutActive() && !toWasFog && !isLv1Ch1) {
+    const upProb = 0.05 + Math.random() * 0.05;
+    if (Math.random() < upProb) {
+      const up = Math.min(nextStage + 1, maxStage);
+      if (up > nextStage) finalStage = up;
+    }
+  }
+
+  eventState.board[toIdx]   = chainId !== undefined ? { chainId, stage: finalStage } : { stage: finalStage };
   eventState.board[fromIdx] = null;
   eventState.selectedCell   = null;
   // 霧セルがマージされたら隣接霧セルをアンロック
   if (toWasFog) unlockAdjacentFogCells(toIdx);
 
   if (chainId === undefined) {
-    discoverEventItem(nextStage);
+    discoverEventItem(finalStage);
+    if (finalStage !== nextStage) discoverEventItem(nextStage);
 
-    // Lv4/8/12 初回到達でジェネレーター2枚目タイルを自動出現（1ステージにつき1回のみ）
+    // Lv4/8/12 初回到達でジェネレーター2枚目タイルを自動出現（ベースnextStageで判定）
     if ((nextStage === 4 || nextStage === 8 || nextStage === 12) &&
         !eventState.genUpTriggered.has(nextStage)) {
       eventState.genUpTriggered.add(nextStage); // 同じステージでは二度と出現しない
@@ -3932,7 +3995,7 @@ function doEventMerge(fromIdx, toIdx) {
       }
     }
 
-    // Lv8 到達で製造機ジェネレーター解放
+    // Lv8 到達で製造機ジェネレーター解放（ベースnextStageで判定）
     if (nextStage === 8 && !eventState.fireGenUnlocked) {
       unlockFireGenerator();
     }
@@ -3940,19 +4003,17 @@ function doEventMerge(fromIdx, toIdx) {
 
   // 製造機アイテム（第二章）の発見トラッキングとLvアップ判定
   if (chainId === SEIZO_CHAIN_ID) {
-    discoverSeizoItem(nextStage); // 内部で checkSeizoGenLevelUp も呼ぶ
+    discoverSeizoItem(finalStage); // 内部で checkSeizoGenLevelUp も呼ぶ
   }
 
-  // 5%〜25%の確率でしゃぼん玉アイテムを追加出現（チュートリアル・霧マージ中は除く）
-  const tutStepNow = currentTutStep();
-  const bubbleProb = 0.05 + Math.random() * 0.20;
-  if (!tutStepNow && !isGenMergeTutActive() && !toWasFog && Math.random() < bubbleProb) {
+  // 5%〜10%の確率でしゃぼん玉アイテムを追加出現（Lv1/チュートリアル/霧マージは除外）
+  const bubbleProb = 0.05 + Math.random() * 0.05;
+  if (!tutStepNow && !isGenMergeTutActive() && !toWasFog && !isLv1Ch1 && Math.random() < bubbleProb) {
     const bubbleSlot = findNearestEmptyEventCell(toIdx);
     if (bubbleSlot !== -1) {
-      const bubbleItem = chainId !== undefined
-        ? { chainId, stage: nextStage, isBubble: true, bubbleTimestamp: Date.now() }
-        : { stage: nextStage, isBubble: true, bubbleTimestamp: Date.now() };
-      eventState.board[bubbleSlot] = bubbleItem;
+      eventState.board[bubbleSlot] = chainId !== undefined
+        ? { chainId, stage: finalStage, isBubble: true, bubbleTimestamp: Date.now() }
+        : { stage: finalStage, isBubble: true, bubbleTimestamp: Date.now() };
     }
   }
 
@@ -3993,7 +4054,8 @@ function mergeEventGenerators(fromIdx, toIdx) {
   eventState.selectedCell   = null;
   discoverGen('ch1', newLevel); // Lvアップで新レベルを発見
   showCellToast(`第一章ジェネレーター Lv${newLevel + 1} にレベルアップ！`, toIdx, true);
-  addEnergy(25, 'ジェネレーターLvアップボーナス！');
+  state.energy += 25; renderHeader();
+  showAboveNaviToast('⚡ +25 ジェネレーターLvアップボーナス！');
   // Lvアップ時に出力Lvを自動で新しい最大値に設定
   eventState.genPowerLevel = getGenMaxAvailablePowerLv(newLevel);
   // ジェネレーターマージ誘導チュートリアルのフォーカスステップを完了
