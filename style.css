@@ -1688,6 +1688,24 @@ body {
   0%, 100% { opacity: 0.4; }
   50%       { opacity: 1;   }
 }
+/* センター画像（猫など画面中央に登場するアイテム） */
+#adv-center-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+#adv-center-wrap.adv-center-shown { opacity: 1; }
+#adv-center-img {
+  width: clamp(90px, 26vw, 150px);
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.8));
+}
 /* フェードアウト */
 #adventure-screen.adv-fade-out {
   animation: adv-fadeout 0.8s ease-out forwards;

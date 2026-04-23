@@ -191,6 +191,7 @@ let state = {
   selectedCell: null,
   playerLevel: 1,   // プレイヤーレベル
   playerXP: 0,      // 現レベル内の経験値（コイン換算）
+  storyCount: 0,    // ストーリー進行回数（コイン支払い回数）
   pendingUse: null,
   // 発見済みアイテム管理: discovered[chainId][stage] = true
   discovered: {},
@@ -1906,6 +1907,43 @@ const ADV_SCENES = {
       { speaker: 'ヤス', text: 'わかりました...すぐに探しましょう！', side: 'left' },
     ],
   },
+  // 第一章スライド02（プレイヤーLv1・2回目のコイン支払い時）
+  scene03: {
+    title:         '',
+    leftImg:       'img/image_merge_order_chara_00.png',
+    rightImg:      'img/image_merge_order_chara_01a.png',
+    bg:            'img/image_merge_bg_road_light02.png',
+    leftEntrance:  'slide',  // ヤス（反転）が左からスライドイン
+    flipLeft:      true,
+    rightEntrance: 'none',   // ミユは後から登場
+    autoClose:     false,
+    script: [
+      // [0] ヤス（反転）スライドイン後
+      { speaker: 'ヤス', text: '…しっ！静かに...', side: 'left' },
+      // [1]
+      { speaker: 'ヤス', text: 'あの子ですね？', side: 'left' },
+      // [2] ヤス暗転 + 猫が画面中央にフェードイン（タップで次へ）
+      { showCenter: 'img/image_merge_icon1_02.png' },
+      // [3] ミユが右からスライドイン
+      { speaker: 'ミユ', text: 'ミケ！！', side: 'right', showRight: true, slideRight: true },
+      // [4] ミユ画像を01bに切り替えてセリフ
+      { speaker: 'ミユ', text: 'よかった…ありがとう…！', side: 'right',
+        changeRightImg: 'img/image_merge_order_chara_01b.png' },
+      // [5] 全消去・暗転（背景も黒に）
+      { hideAll: true, autoAdvance: true, advanceDelay: 600 },
+      // [6] hiruma背景に切り替え
+      { setBg: 'img/image_merge_bg_hiruma.png', autoAdvance: true, advanceDelay: 300 },
+      // [7] ヤス（反転）再スライドイン
+      { speaker: 'ヤス', text: '…おかしいですね。', side: 'left',
+        showLeft: true, slideLeft: true, flipLeft: true },
+      // [8]
+      { speaker: 'ヤス', text: 'こんな場所まで来れるとは思いませんね。', side: 'left' },
+      // [9]
+      { speaker: 'ヤス', text: 'どういうことでしょう。', side: 'left' },
+      // [10] 最終
+      { speaker: 'ヤス', text: 'まさか...', side: 'left' },
+    ],
+  },
 };
 
 let advMsgIdx       = 0;
@@ -1946,6 +1984,15 @@ function openAdventureScene(sceneId, callback = null) {
   // 反転フラグリセット
   charaLeft.querySelector('img').classList.remove('adv-img-flip');
   charaRight.querySelector('img').classList.remove('adv-img-flip');
+
+  // センター画像リセット
+  const centerWrap = document.getElementById('adv-center-wrap');
+  if (centerWrap) {
+    centerWrap.classList.remove('adv-center-shown');
+    centerWrap.classList.add('hidden');
+    const ci = centerWrap.querySelector('img');
+    if (ci) ci.src = '';
+  }
 
   // 背景設定（全プロパティをインラインで設定してCSS競合を完全排除）
   const advScreen = document.getElementById('adventure-screen');
@@ -2047,18 +2094,42 @@ function showAdvMessage(idx) {
     });
 
     // 背景を即座に切り替え（全プロパティをインラインで上書き）
+    const scr = document.getElementById('adventure-screen');
     if (msg.changeBg) {
-      const scr = document.getElementById('adventure-screen');
       scr.style.backgroundImage    = `url('${msg.changeBg}')`;
       scr.style.backgroundSize     = 'cover';
       scr.style.backgroundPosition = 'center center';
       scr.style.backgroundRepeat   = 'no-repeat';
+    } else {
+      scr.style.backgroundImage = '';  // 背景を黒（background-color: #000）に戻す
     }
+
+    // センター画像も消去
+    const cw = document.getElementById('adv-center-wrap');
+    if (cw) { cw.classList.remove('adv-center-shown'); cw.classList.add('hidden'); }
 
     if (msg.autoAdvance) {
       setTimeout(() => {
         advTextPending = false; advMsgIdx++; showAdvMessage(advMsgIdx);
       }, msg.advanceDelay ?? 400);
+    }
+    return;
+  }
+
+  // ─── 背景のみ変更（setBg）───
+  if (msg.setBg !== undefined) {
+    const scr = document.getElementById('adventure-screen');
+    if (msg.setBg) {
+      scr.style.backgroundImage    = `url('${msg.setBg}')`;
+      scr.style.backgroundSize     = 'cover';
+      scr.style.backgroundPosition = 'center center';
+      scr.style.backgroundRepeat   = 'no-repeat';
+    } else {
+      scr.style.backgroundImage = '';
+    }
+    if (msg.autoAdvance) {
+      advTextPending = true;
+      setTimeout(() => { advTextPending = false; advMsgIdx++; showAdvMessage(advMsgIdx); }, msg.advanceDelay ?? 300);
     }
     return;
   }
@@ -2137,7 +2208,23 @@ function showAdvMessage(idx) {
     }
   }
 
-  // 話者ハイライト / 非話者ディム
+  // ─── 右キャラ画像切り替え（changeRightImg）───
+  if (msg.changeRightImg) {
+    document.querySelector('#adv-chara-right img').src = msg.changeRightImg;
+  }
+
+  // ─── 中央画像フェードイン（showCenter）───
+  if (msg.showCenter) {
+    const wrap = document.getElementById('adv-center-wrap');
+    if (wrap) {
+      wrap.querySelector('img').src = msg.showCenter;
+      wrap.classList.remove('hidden');
+      void wrap.offsetHeight;
+      wrap.classList.add('adv-center-shown');
+    }
+  }
+
+  // 話者ハイライト / 非話者ディム（side未指定時は全員ディム）
   if (charaLeft.classList.contains('adv-char-shown'))
     charaLeft.classList.toggle('adv-chara-dim', msg.side !== 'left');
   if (charaRight.classList.contains('adv-char-shown')) {
@@ -2189,6 +2276,10 @@ document.getElementById('debug-adv-scene01').addEventListener('click', () => {
 document.getElementById('debug-adv-scene02').addEventListener('click', () => {
   document.getElementById('debug-screen').classList.add('hidden');
   openAdventureScene('scene02');
+});
+document.getElementById('debug-adv-scene03').addEventListener('click', () => {
+  document.getElementById('debug-screen').classList.add('hidden');
+  openAdventureScene('scene03');
 });
 
 document.getElementById('story-btn').addEventListener('click', () => {
@@ -3249,6 +3340,7 @@ function progressStory() {
   if (state.coin < cost) { showToast('コインが足りません'); return; }
   state.coin    -= cost;
   state.playerXP += cost;
+  state.storyCount++;  // 支払い回数をカウントアップ
 
   // レベルアップ判定（複数回上がる場合も対応）
   let leveledUp = false;
@@ -3268,7 +3360,13 @@ function progressStory() {
   }
 
   renderEventHeader();
-  openAdventureScene('scene02');
+
+  // 支払い回数に応じてシーンを選択
+  let sceneId;
+  if (state.storyCount === 1) sceneId = 'scene02';
+  else if (state.storyCount === 2) sceneId = 'scene03';
+  else sceneId = 'scene02'; // 未実装分はscene02をフォールバック
+  openAdventureScene(sceneId);
 }
 
 // ========================================
