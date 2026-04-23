@@ -1907,6 +1907,48 @@ const ADV_SCENES = {
       { speaker: 'ヤス', text: 'わかりました...すぐに探しましょう！', side: 'left' },
     ],
   },
+  // 第一章スライド04（プレイヤーLv1・4回目のコイン支払い時）
+  scene05: {
+    title:         '',
+    leftImg:       'img/image_merge_order_chara_00.png',
+    rightImg:      'img/image_merge_order_chara_03.png',
+    right2Img:     'img/image_merge_order_chara_02.png',   // ナナコ
+    bg:            'img/image_merge_bg_hiruma.png',
+    leftEntrance:  'fade',   // ヤス（反転）即表示
+    flipLeft:      true,
+    rightEntrance: 'fade',   // ケンイチ即表示
+    right2Entrance: 'none',  // ナナコは後から登場
+    autoClose:     false,
+    script: [
+      // [0] ドアノック（サウンドナレーション）
+      { sound: 'トントン...' },
+      // [1] ナナコが右からスライドイン（ケンイチも左にずれる）
+      { speaker: 'ナナコ', text: '突然すみません！...ケンイチの妻です...', side: 'right2',
+        showRight2: true, slideRight2: true, shiftRight: true },
+      // [2]
+      { speaker: 'ヤス', text: 'どうされました？...', side: 'left' },
+      // [3] 中央にダンボールアイテム表示
+      { showCenter: 'img/image_merge_icon1_06.png' },
+      // [4]
+      { speaker: 'ナナコ', text: '実は、届いた荷物に身に覚えがなくて...', side: 'right2' },
+      // [5]
+      { speaker: 'ヤス', text: '荷物ですか？...', side: 'left' },
+      // [6]
+      { speaker: 'ケンイチ', text: '警察には、届けたのか？...', side: 'right' },
+      // [7]
+      { speaker: 'ナナコ', text: 'まだなの...アナタが娘のお礼に探偵事務所に行くと聞いて、慌てて付いてきたから...', side: 'right2' },
+      // [8]
+      { speaker: 'ヤス', text: 'ちなみに、中身はご覧になりましたか？', side: 'left' },
+      // [9]
+      { speaker: 'ナナコ', text: 'いえ、怖くて開けてません...ただ、かなり重いものが入っている気がしてます...', side: 'right2' },
+      // [10]
+      { speaker: 'ヤス', text: '配送業社の方にもお伝えしましたか？...', side: 'left' },
+      // [11]
+      { speaker: 'ナナコ', text: 'それが、いつもと違う配送業社だったんです...ですので、お伝えはまだ...', side: 'right2' },
+      // [12] 最終
+      { speaker: 'ヤス', text: 'なるほど...', side: 'left' },
+    ],
+  },
   // 第一章スライド03（プレイヤーLv1・3回目のコイン支払い時）
   scene04: {
     title:         '',
@@ -2002,15 +2044,25 @@ function openAdventureScene(sceneId, callback = null) {
   // キャラ画像セット
   document.querySelector('#adv-chara-left img').src  = scene.leftImg;
   document.querySelector('#adv-chara-right img').src = scene.rightImg;
+  const right2El = document.getElementById('adv-chara-right2');
+  if (right2El) {
+    right2El.querySelector('img').src = scene.right2Img || '';
+  }
 
-  const charaLeft  = document.getElementById('adv-chara-left');
-  const charaRight = document.getElementById('adv-chara-right');
+  const charaLeft   = document.getElementById('adv-chara-left');
+  const charaRight  = document.getElementById('adv-chara-right');
+  const charaRight2 = document.getElementById('adv-chara-right2');
 
   // 状態リセット（インラインスタイルも含めてクリア）
   charaLeft.classList.remove('adv-char-shown', 'adv-chara-dim', 'adv-slide-ready', 'adv-slide-active');
-  charaRight.classList.remove('adv-char-shown', 'adv-chara-dim', 'adv-slide-ready', 'adv-slide-active');
+  charaRight.classList.remove('adv-char-shown', 'adv-chara-dim', 'adv-slide-ready', 'adv-slide-active', 'adv-shifted');
   charaLeft.style.cssText  = '';
   charaRight.style.cssText = '';
+  if (charaRight2) {
+    charaRight2.classList.remove('adv-char-shown', 'adv-chara-dim', 'adv-slide-ready', 'adv-slide-active');
+    charaRight2.style.cssText = '';
+    charaRight2.querySelector('img').classList.remove('adv-img-flip');
+  }
   // 反転フラグリセット
   charaLeft.querySelector('img').classList.remove('adv-img-flip');
   charaRight.querySelector('img').classList.remove('adv-img-flip');
@@ -2085,7 +2137,8 @@ function openAdventureScene(sceneId, callback = null) {
     // rightEntrance が 'slide' でない場合は即開始
     if (scene.rightEntrance !== 'slide') _startMessages();
   } else {
-    // default/fade: 即表示
+    // default/fade: 即表示（flipLeftも適用）
+    if (scene.flipLeft) charaLeft.querySelector('img').classList.add('adv-img-flip');
     void charaLeft.offsetHeight;
     charaLeft.classList.add('adv-char-shown');
     _startMessages();
@@ -2097,11 +2150,12 @@ function showAdvMessage(idx) {
   const msg    = scene.script[idx];
   const isLast = idx >= scene.script.length - 1;
 
-  const charaLeft  = document.getElementById('adv-chara-left');
-  const charaRight = document.getElementById('adv-chara-right');
+  const charaLeft   = document.getElementById('adv-chara-left');
+  const charaRight  = document.getElementById('adv-chara-right');
+  const charaRight2 = document.getElementById('adv-chara-right2');
 
   function _applyText() {
-    document.getElementById('adv-speaker').textContent  = msg.speaker;
+    document.getElementById('adv-speaker').textContent  = msg.speaker ?? '';
     document.getElementById('adv-text').textContent     = msg.text;
     document.getElementById('adv-tap-hint').textContent = '▼ タップで続ける';
     if (isLast && scene.autoClose) {
@@ -2115,11 +2169,12 @@ function showAdvMessage(idx) {
     document.getElementById('adv-speaker').textContent  = '';
     document.getElementById('adv-text').textContent     = '';
     document.getElementById('adv-tap-hint').textContent = '';
-    // 両キャラを即座に非表示（CSS transitionを無効化してフラッシュ防止）
-    [charaLeft, charaRight].forEach(el => {
+    // 全キャラを即座に非表示（CSS transitionを無効化してフラッシュ防止）
+    [charaLeft, charaRight, charaRight2].forEach(el => {
+      if (!el) return;
       el.style.transition = 'none';
       el.style.opacity    = '0';
-      el.classList.remove('adv-char-shown', 'adv-chara-dim');
+      el.classList.remove('adv-char-shown', 'adv-chara-dim', 'adv-shifted');
       el.querySelector('img').classList.remove('adv-img-flip');
     });
 
@@ -2162,6 +2217,50 @@ function showAdvMessage(idx) {
       setTimeout(() => { advTextPending = false; advMsgIdx++; showAdvMessage(advMsgIdx); }, msg.advanceDelay ?? 300);
     }
     return;
+  }
+
+  // ─── サウンド・ナレーション（sound）───
+  if (msg.sound !== undefined) {
+    document.getElementById('adv-speaker').textContent  = '';
+    document.getElementById('adv-text').textContent     = msg.sound;
+    document.getElementById('adv-tap-hint').textContent = '▼ タップで続ける';
+    return;
+  }
+
+  // ─── ケンイチ（right）を左にずらす（shiftRight）───
+  if (msg.shiftRight && charaRight) {
+    charaRight.classList.add('adv-shifted');
+  }
+
+  // ─── 第3キャラ（right2）の登場（初回のみ）───
+  if (msg.showRight2 && charaRight2 && !charaRight2.classList.contains('adv-char-shown')) {
+    if (msg.slideRight2) {
+      charaRight2.style.transition = '';
+      charaRight2.style.opacity    = '';
+      document.getElementById('adv-speaker').textContent  = '';
+      document.getElementById('adv-text').textContent     = '';
+      document.getElementById('adv-tap-hint').textContent = '';
+      charaRight2.classList.add('adv-slide-ready');
+      void charaRight2.offsetHeight;
+      charaRight2.classList.add('adv-slide-active');
+      advTextPending = true;
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        charaRight2.classList.remove('adv-slide-ready', 'adv-slide-active');
+        charaRight2.classList.add('adv-char-shown');
+        charaRight2.classList.toggle('adv-chara-dim', msg.side !== 'right2');
+        advTextPending = false;
+        _applyText();
+      };
+      charaRight2.addEventListener('transitionend', finish, { once: true });
+      setTimeout(finish, 700);
+      return;
+    } else {
+      void charaRight2.offsetWidth;
+      charaRight2.classList.add('adv-char-shown');
+    }
   }
 
   // ─── 右キャラの登場（初回のみ）───
@@ -2261,9 +2360,10 @@ function showAdvMessage(idx) {
   // 話者ハイライト / 非話者ディム（side未指定時は全員ディム）
   if (charaLeft.classList.contains('adv-char-shown'))
     charaLeft.classList.toggle('adv-chara-dim', msg.side !== 'left');
-  if (charaRight.classList.contains('adv-char-shown')) {
+  if (charaRight.classList.contains('adv-char-shown'))
     charaRight.classList.toggle('adv-chara-dim', msg.side !== 'right');
-  }
+  if (charaRight2 && charaRight2.classList.contains('adv-char-shown'))
+    charaRight2.classList.toggle('adv-chara-dim', msg.side !== 'right2');
 
   _applyText();
 }
@@ -2318,6 +2418,10 @@ document.getElementById('debug-adv-scene03').addEventListener('click', () => {
 document.getElementById('debug-adv-scene04').addEventListener('click', () => {
   document.getElementById('debug-screen').classList.add('hidden');
   openAdventureScene('scene04');
+});
+document.getElementById('debug-adv-scene05').addEventListener('click', () => {
+  document.getElementById('debug-screen').classList.add('hidden');
+  openAdventureScene('scene05');
 });
 
 document.getElementById('story-btn').addEventListener('click', () => {
@@ -3404,6 +3508,7 @@ function progressStory() {
   if      (state.storyCount === 1) sceneId = 'scene02';
   else if (state.storyCount === 2) sceneId = 'scene03';
   else if (state.storyCount === 3) sceneId = 'scene04';
+  else if (state.storyCount === 4) sceneId = 'scene05';
   else sceneId = 'scene02'; // 未実装分はフォールバック
   openAdventureScene(sceneId);
 }

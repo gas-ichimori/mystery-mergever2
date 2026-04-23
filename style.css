@@ -1616,36 +1616,45 @@ body {
 }
 /* キャラクター共通：初期は非表示 */
 #adv-chara-left,
-#adv-chara-right {
+#adv-chara-right,
+#adv-chara-right2 {
   position: absolute;
   bottom: 175px;
   z-index: 2;
   opacity: 0;
   transition: opacity 0.45s ease-out, filter 0.3s;
 }
-#adv-chara-left  { left: -4px; }
-#adv-chara-right { right: -4px; }
+#adv-chara-left   { left: -4px; }
+#adv-chara-right  { right: -4px; }
+#adv-chara-right2 { right: -4px; z-index: 3; } /* 手前に重なる */
+/* ケンイチが左にずれてナナコと並ぶ */
+#adv-chara-right.adv-shifted { right: 24%; }
 #adv-chara-left img,
-#adv-chara-right img {
+#adv-chara-right img,
+#adv-chara-right2 img {
   height: clamp(160px, 42vw, 280px);
   object-fit: contain;
   display: block;
 }
 /* 表示状態（ID+クラスで詳細度1-1-0 → base IDセレクタ1-0-0に勝つ） */
 #adv-chara-left.adv-char-shown,
-#adv-chara-right.adv-char-shown { opacity: 1; }
+#adv-chara-right.adv-char-shown,
+#adv-chara-right2.adv-char-shown { opacity: 1; }
 /* 非話者を暗く（ID+クラスで高い詳細度） */
 #adv-chara-left.adv-chara-dim,
-#adv-chara-right.adv-chara-dim {
+#adv-chara-right.adv-chara-dim,
+#adv-chara-right2.adv-chara-dim {
   opacity: 0.65;
   filter: brightness(0.72);
 }
 /* スライドイン: 初期位置（adv-slide-ready） */
-#adv-chara-left.adv-slide-ready  { transform: translateX(-110%); opacity: 0; }
-#adv-chara-right.adv-slide-ready { transform: translateX(110%);  opacity: 0; }
+#adv-chara-left.adv-slide-ready   { transform: translateX(-110%); opacity: 0; }
+#adv-chara-right.adv-slide-ready,
+#adv-chara-right2.adv-slide-ready { transform: translateX(110%);  opacity: 0; }
 /* スライドイン: ターゲット位置（adv-slide-active）※CSS selectorが後に来るため勝つ */
 #adv-chara-left.adv-slide-active,
-#adv-chara-right.adv-slide-active {
+#adv-chara-right.adv-slide-active,
+#adv-chara-right2.adv-slide-active {
   transform: translateX(0);
   opacity: 1;
   transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s ease-out;
