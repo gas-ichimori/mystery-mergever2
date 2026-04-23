@@ -2250,6 +2250,11 @@ function showAdvMessage(idx) {
         done = true;
         charaRight2.classList.remove('adv-slide-ready', 'adv-slide-active');
         charaRight2.classList.add('adv-char-shown');
+        // 話者（right2）以外を暗転
+        if (charaLeft.classList.contains('adv-char-shown'))
+          charaLeft.classList.toggle('adv-chara-dim', msg.side !== 'left');
+        if (charaRight.classList.contains('adv-char-shown'))
+          charaRight.classList.toggle('adv-chara-dim', msg.side !== 'right');
         charaRight2.classList.toggle('adv-chara-dim', msg.side !== 'right2');
         advTextPending = false;
         _applyText();
