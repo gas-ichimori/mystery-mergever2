@@ -1706,6 +1706,21 @@ body {
   display: block;
   filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.8));
 }
+/* ブルブル振動アニメーション */
+@keyframes adv-center-shake {
+  0%   { transform: translateX(0)    rotate(0deg);  }
+  12%  { transform: translateX(-6px) rotate(-4deg); }
+  25%  { transform: translateX(6px)  rotate(4deg);  }
+  37%  { transform: translateX(-6px) rotate(-4deg); }
+  50%  { transform: translateX(6px)  rotate(4deg);  }
+  62%  { transform: translateX(-4px) rotate(-2deg); }
+  75%  { transform: translateX(4px)  rotate(2deg);  }
+  87%  { transform: translateX(-2px) rotate(-1deg); }
+  100% { transform: translateX(0)    rotate(0deg);  }
+}
+#adv-center-wrap.adv-center-shaking #adv-center-img {
+  animation: adv-center-shake 0.55s ease-in-out 2;
+}
 /* フェードアウト */
 #adventure-screen.adv-fade-out {
   animation: adv-fadeout 0.8s ease-out forwards;

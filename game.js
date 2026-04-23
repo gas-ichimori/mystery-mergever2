@@ -1907,6 +1907,36 @@ const ADV_SCENES = {
       { speaker: 'ヤス', text: 'わかりました...すぐに探しましょう！', side: 'left' },
     ],
   },
+  // 第一章スライド03（プレイヤーLv1・3回目のコイン支払い時）
+  scene04: {
+    title:         '',
+    leftImg:       'img/image_merge_order_chara_00.png',
+    rightImg:      'img/image_merge_order_chara_03.png',
+    bg:            'img/image_merge_bg_hiruma.png',
+    leftEntrance:  'slide',   // ヤス（反転）が左からスライドイン
+    flipLeft:      true,
+    rightEntrance: 'none',    // ケンイチは後から登場
+    autoClose:     false,
+    script: [
+      // [0] ヤス（反転）スライドイン
+      { speaker: 'ヤス', text: '次の方、どうぞ！...', side: 'left' },
+      // [1] ケンイチが右からスライドイン
+      { speaker: 'ケンイチ', text: '先日は、娘がご迷惑をおかけしました...', side: 'right',
+        showRight: true, slideRight: true },
+      // [2]
+      { speaker: 'ヤス', text: 'いえ、無事で何よりでした...', side: 'left' },
+      // [3]
+      { speaker: 'ケンイチ', text: '本当に助かりました...', side: 'right' },
+      // [4]
+      { speaker: 'ケンイチ', text: 'あの子にとって、とても大切な...', side: 'right' },
+      // [5] スマートフォンアイコンが中央にフェードイン → 振動
+      { showCenter: 'img/image_merge_icon2_09.png', shakeCenter: true },
+      // [6] ケンイチがスマートフォンに気づく（ト書き）
+      { speaker: 'ケンイチ', text: '（スマートフォンを見る）', side: 'right' },
+      // [7] 最終
+      { speaker: 'ケンイチ', text: 'あれ？...おかしいな...荷物が...', side: 'right' },
+    ],
+  },
   // 第一章スライド02（プレイヤーLv1・2回目のコイン支払い時）
   scene03: {
     title:         '',
@@ -1988,7 +2018,7 @@ function openAdventureScene(sceneId, callback = null) {
   // センター画像リセット
   const centerWrap = document.getElementById('adv-center-wrap');
   if (centerWrap) {
-    centerWrap.classList.remove('adv-center-shown');
+    centerWrap.classList.remove('adv-center-shown', 'adv-center-shaking');
     centerWrap.classList.add('hidden');
     const ci = centerWrap.querySelector('img');
     if (ci) ci.src = '';
@@ -2106,7 +2136,7 @@ function showAdvMessage(idx) {
 
     // センター画像も消去
     const cw = document.getElementById('adv-center-wrap');
-    if (cw) { cw.classList.remove('adv-center-shown'); cw.classList.add('hidden'); }
+    if (cw) { cw.classList.remove('adv-center-shown', 'adv-center-shaking'); cw.classList.add('hidden'); }
 
     if (msg.autoAdvance) {
       setTimeout(() => {
@@ -2218,9 +2248,13 @@ function showAdvMessage(idx) {
     const wrap = document.getElementById('adv-center-wrap');
     if (wrap) {
       wrap.querySelector('img').src = msg.showCenter;
-      wrap.classList.remove('hidden');
+      wrap.classList.remove('hidden', 'adv-center-shaking');
       void wrap.offsetHeight;
       wrap.classList.add('adv-center-shown');
+      if (msg.shakeCenter) {
+        // フェードイン完了後（0.6s）に振動アニメーション開始
+        setTimeout(() => wrap.classList.add('adv-center-shaking'), 600);
+      }
     }
   }
 
@@ -2280,6 +2314,10 @@ document.getElementById('debug-adv-scene02').addEventListener('click', () => {
 document.getElementById('debug-adv-scene03').addEventListener('click', () => {
   document.getElementById('debug-screen').classList.add('hidden');
   openAdventureScene('scene03');
+});
+document.getElementById('debug-adv-scene04').addEventListener('click', () => {
+  document.getElementById('debug-screen').classList.add('hidden');
+  openAdventureScene('scene04');
 });
 
 document.getElementById('story-btn').addEventListener('click', () => {
@@ -3363,9 +3401,10 @@ function progressStory() {
 
   // 支払い回数に応じてシーンを選択
   let sceneId;
-  if (state.storyCount === 1) sceneId = 'scene02';
+  if      (state.storyCount === 1) sceneId = 'scene02';
   else if (state.storyCount === 2) sceneId = 'scene03';
-  else sceneId = 'scene02'; // 未実装分はscene02をフォールバック
+  else if (state.storyCount === 3) sceneId = 'scene04';
+  else sceneId = 'scene02'; // 未実装分はフォールバック
   openAdventureScene(sceneId);
 }
 
