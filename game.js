@@ -1907,6 +1907,46 @@ const ADV_SCENES = {
       { speaker: 'ヤス', text: 'わかりました...すぐに探しましょう！', side: 'left' },
     ],
   },
+  // 第一章スライド05（プレイヤーLv1・5回目のコイン支払い時）
+  scene06: {
+    title:         '',
+    leftImg:       'img/image_merge_order_chara_00.png',
+    rightImg:      'img/image_merge_order_chara_03.png',
+    right2Img:     'img/image_merge_order_chara_02.png',
+    bg:            'img/image_merge_bg_hiruma.png',
+    leftEntrance:  'fade',   // ヤス（反転）即表示
+    flipLeft:      true,
+    rightEntrance: 'fade',   // ケンイチ即表示
+    rightShifted:  true,     // ケンイチは左にずれた状態でスタート
+    right2Entrance: 'fade',  // ナナコ即表示
+    autoClose:     false,
+    script: [
+      // [0]
+      { speaker: 'ヤス', text: '配達記録か何かお持ちですか？...', side: 'left' },
+      // [1]
+      { speaker: 'ナナコ', text: 'はい...こちらでしょうか？...', side: 'right2' },
+      // [2] ヤスが確認する（ト書き）
+      { speaker: 'ヤス', text: '（配達記録の担当者名を確認する）', side: 'left' },
+      // [3]
+      { speaker: 'ケンイチ', text: '...？...どうかされましたか？...', side: 'right' },
+      // [4]
+      { speaker: 'ヤス', text: 'いえ...何でもありません...', side: 'left' },
+      // [5]
+      { speaker: 'ヤス', text: '奥様...配達記録ありがとうございました...', side: 'left' },
+      // [6]
+      { speaker: 'ナナコ', text: 'こちら、どうしたら良いでしょうか？...', side: 'right2' },
+      // [7]
+      { speaker: 'ヤス', text: 'その前に...ひとつ伺ってもよろしいですか？', side: 'left' },
+      // [8]
+      { speaker: 'ナナコ', text: '...何でしょうか？...', side: 'right2' },
+      // [9]
+      { speaker: 'ヤス', text: '猫のミケが居なくなったのは、配達の前ですか？後ですか？...', side: 'left' },
+      // [10]
+      { speaker: 'ナナコ', text: 'わたしの記憶では...後だったかと思います...', side: 'right2' },
+      // [11] 最終
+      { speaker: 'ヤス', text: 'そうですか...', side: 'left' },
+    ],
+  },
   // 第一章スライド04（プレイヤーLv1・4回目のコイン支払い時）
   scene05: {
     title:         '',
@@ -2108,6 +2148,18 @@ function openAdventureScene(sceneId, callback = null) {
     _msgStarted = true;
     advTextPending = false;
     showAdvMessage(0);
+  }
+
+  // ケンイチ事前シフト（right2が既に居るシーン用）
+  if (scene.rightShifted) charaRight.classList.add('adv-shifted');
+
+  // right2キャラ: entrance に応じた処理
+  if (charaRight2) {
+    if (scene.right2Entrance === 'fade') {
+      void charaRight2.offsetHeight;
+      charaRight2.classList.add('adv-char-shown');
+    }
+    // 'none': 非表示のまま（showRight2 で後から登場）
   }
 
   // 右キャラ: entrance に応じた処理
@@ -2427,6 +2479,10 @@ document.getElementById('debug-adv-scene04').addEventListener('click', () => {
 document.getElementById('debug-adv-scene05').addEventListener('click', () => {
   document.getElementById('debug-screen').classList.add('hidden');
   openAdventureScene('scene05');
+});
+document.getElementById('debug-adv-scene06').addEventListener('click', () => {
+  document.getElementById('debug-screen').classList.add('hidden');
+  openAdventureScene('scene06');
 });
 
 document.getElementById('story-btn').addEventListener('click', () => {
@@ -3514,6 +3570,7 @@ function progressStory() {
   else if (state.storyCount === 2) sceneId = 'scene03';
   else if (state.storyCount === 3) sceneId = 'scene04';
   else if (state.storyCount === 4) sceneId = 'scene05';
+  else if (state.storyCount === 5) sceneId = 'scene06';
   else sceneId = 'scene02'; // 未実装分はフォールバック
   openAdventureScene(sceneId);
 }
