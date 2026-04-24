@@ -1615,7 +1615,7 @@ body {
 /* スタートボタン：画面下部に中央配置 */
 #title-start-btn {
   position: absolute;
-  bottom: 10%;
+  bottom: 14%;
   left: 50%;
   transform: translateX(-50%);
   width: clamp(180px, 52vw, 280px);
