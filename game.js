@@ -5011,6 +5011,13 @@ window.addEventListener('resize', updateStickyHeights);
 initGame();
 initEventMap();
 
+// タイトル画面スタートボタン
+document.getElementById('title-start-btn').addEventListener('click', () => {
+  const ts = document.getElementById('title-screen');
+  ts.classList.add('title-fade-out');
+  setTimeout(() => ts.classList.add('hidden'), 600);
+});
+
 // 起動時にイベントマップ①を最初に表示
 document.getElementById('event-screen').classList.remove('hidden');
 renderEventBoard();
