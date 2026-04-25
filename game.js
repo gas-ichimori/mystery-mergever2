@@ -5011,8 +5011,22 @@ window.addEventListener('resize', updateStickyHeights);
 initGame();
 initEventMap();
 
+// フル画面 + 縦向きロック要求（ユーザー操作起因が必須のため、スタートボタン押下時に実行）
+function requestAppFullscreen() {
+  // Fullscreen API（Android Chrome 等で有効）
+  const el = document.documentElement;
+  if (el.requestFullscreen)             el.requestFullscreen();
+  else if (el.webkitRequestFullscreen)  el.webkitRequestFullscreen();
+
+  // 縦向き（portrait）固定
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('portrait').catch(() => {});
+  }
+}
+
 // タイトル画面スタートボタン
 document.getElementById('title-start-btn').addEventListener('click', () => {
+  requestAppFullscreen();
   const ts = document.getElementById('title-screen');
   ts.classList.add('title-fade-out');
   setTimeout(() => ts.classList.add('hidden'), 600);
