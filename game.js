@@ -1873,6 +1873,27 @@ const ADV_SCENES = {
       { speaker: 'ミユ', text: 'ありがとうございます！',                                   side: 'right'                              },
     ],
   },
+  // 第一章スライド06（6回目のコイン支払い時）
+  scene07: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade',
+    flipLeft:     true,
+    autoClose:    false,
+    script: [
+      // [0]
+      { speaker: 'ヤス', text: '配達記録の会社名...「ハヤブサ便」...ですね。', side: 'left' },
+      // [1]
+      { speaker: 'ヤス', text: '（記録を調べる）', side: 'left' },
+      // [2] 伏線①：名前を見て一瞬「間」を置く
+      { speaker: 'ヤス', text: '担当者は...シンジ...という方です。', side: 'left' },
+      // [3]
+      { speaker: 'ヤス', text: '...なるほど。', side: 'left' },
+      // [4]
+      { speaker: 'ヤス', text: '少し...調べてみましょうか。', side: 'left' },
+    ],
+  },
   // 第一章スライド01（2,000コインで解放）
   scene02: {
     title:         '',
@@ -2483,6 +2504,10 @@ document.getElementById('debug-adv-scene05').addEventListener('click', () => {
 document.getElementById('debug-adv-scene06').addEventListener('click', () => {
   document.getElementById('debug-screen').classList.add('hidden');
   openAdventureScene('scene06');
+});
+document.getElementById('debug-adv-scene07').addEventListener('click', () => {
+  document.getElementById('debug-screen').classList.add('hidden');
+  openAdventureScene('scene07');
 });
 
 document.getElementById('story-btn').addEventListener('click', () => {
@@ -3571,6 +3596,7 @@ function progressStory() {
   else if (state.storyCount === 3) sceneId = 'scene04';
   else if (state.storyCount === 4) sceneId = 'scene05';
   else if (state.storyCount === 5) sceneId = 'scene06';
+  else if (state.storyCount === 6) sceneId = 'scene07';
   else sceneId = 'scene02'; // 未実装分はフォールバック
   openAdventureScene(sceneId);
 }
