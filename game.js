@@ -2035,8 +2035,30 @@ const ADV_SCENES = {
       { speaker: 'ヤス', text: '...昼間とは、まるで別の顔だ。', side: 'left' },
     ],
   },
-  // 第一章スライド14（14回目のコイン支払い時）シンジ対峙・豹変
+  // 第一章スライド14（14回目のコイン支払い時）証拠の整理
   scene15: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade',
+    flipLeft:     true,
+    autoClose:    false,
+    script: [
+      { speaker: 'ヤス', text: '...整理しましょう。', side: 'left' },
+      { speaker: 'ヤス', text: 'ナナコさんへ届けられた荷物...中に入っていたのは、漬物石のような大きな石だった。', side: 'left' },
+      // 謎の石を中央表示（※石のアイコン画像が必要。現在は仮置き）
+      { showCenter: 'img/image_merge_icon1_07.png' },
+      { speaker: 'ヤス', text: '差出人不明。そして、配達のタイミングでミケが姿を消した。', side: 'left' },
+      { speaker: 'ヤス', text: '...荷物を届けると同時に、猫を連れ去った。そういうことです。', side: 'left' },
+      { speaker: 'ヤス', text: 'それから、ミサキさんへのストーカー行為。配達ルートを使い、行動を把握していた。', side: 'left' },
+      { speaker: 'ヤス', text: 'ケンイチさんへの嫌がらせも、配達の仕事を装って近づいていた。', side: 'left' },
+      // 謎の石への含み（別章への伏線）
+      { speaker: 'ヤス', text: '...この石だけは、少し気になりますね。', side: 'left' },
+      { speaker: 'ヤス', text: '全てに、シンジさんが関わっている。', side: 'left' },
+    ],
+  },
+  // 第一章スライド15（15回目のコイン支払い時）シンジ対峙・豹変
+  scene16: {
     title:        '',
     leftImg:      'img/image_merge_order_chara_00.png',
     rightImg:     'img/image_merge_order_chara_05aa.png',
@@ -2049,39 +2071,44 @@ const ADV_SCENES = {
       { speaker: 'シンジ', text: '...呼びましたか？', side: 'right' },
       { speaker: 'ヤス',   text: 'はい。確認したいことがあって。', side: 'left' },
       { speaker: 'シンジ', text: '何でしょう？', side: 'right' },
-      { speaker: 'ヤス',   text: 'ナナコさんに届けた荷物...中身は何ですか？', side: 'left' },
-      { speaker: 'シンジ', text: '...荷物、ですか？配達の仕事ですから、色々と運びますよ。', side: 'right' },
-      { speaker: 'ヤス',   text: '差出人不明で届けた荷物です。それから、ケンイチさんへの嫌がらせ。ミサキさんへのストーカー行為。', side: 'left' },
-      { speaker: 'シンジ', text: '...（沈黙）...それが、何か？', side: 'right' },
-      { speaker: 'ヤス',   text: 'あなたがやったことです。', side: 'left' },
-      // 豹変：表の顔→裏の顔に画像切り替え
-      { speaker: 'シンジ', text: '...（長い沈黙）...ハ。', side: 'right', changeRightImg: 'img/image_merge_order_chara_05a.png' },
-      { speaker: 'シンジ', text: '全部わかってるんですか。...別にいいですよ。ミサキが裏切るのが悪いんで。', side: 'right' },
-      { speaker: 'ヤス',   text: 'ケンイチさんの家族まで巻き込んだのは、なぜですか。', side: 'left' },
-      { speaker: 'シンジ', text: 'あの男に、ちゃんと痛い目を見てもらいたかったんで。それだけです。', side: 'right' },
+      // 証拠①：謎の石
+      { speaker: 'ヤス',   text: 'ナナコさんへ届けた荷物の中身...あの石は、何ですか？', side: 'left' },
+      { speaker: 'シンジ', text: '...荷物、ですか？いろいろ運びますから。', side: 'right' },
+      { speaker: 'ヤス',   text: '差出人はあなたです。配達記録に、あなたの担当便として残っている。', side: 'left' },
+      { speaker: 'シンジ', text: '...（沈黙）', side: 'right' },
+      // 証拠②：猫の誘拐
+      { speaker: 'ヤス',   text: 'その荷物を届けた日の夜、ミケがいなくなっています。配達ルートの記録と、移動時間が一致している。', side: 'left' },
+      { speaker: 'シンジ', text: '...それは...たまたまじゃないですか。', side: 'right' },
+      // 証拠③：ストーカー
+      { speaker: 'ヤス',   text: 'ミサキさんへの接触も、全て配達の仕事に紛れている。同じルートに、週に３回以上。', side: 'left' },
+      { speaker: 'シンジ', text: '...（長い沈黙）', side: 'right' },
+      // 豹変：表の顔→裏の顔
+      { speaker: 'シンジ', text: '...ハ。', side: 'right', changeRightImg: 'img/image_merge_order_chara_05a.png' },
+      { speaker: 'シンジ', text: '全部わかってるんですね。...まあ、いいですよ。ミサキが裏切ったのが悪いんで。', side: 'right' },
+      { speaker: 'ヤス',   text: 'ケンイチさんの家族まで巻き込んだのは。', side: 'left' },
+      { speaker: 'シンジ', text: 'あの男にも、痛い目を見てもらわないといけなかった。それだけです。', side: 'right' },
     ],
   },
-  // 第一章スライド15・完結（15回目のコイン支払い時）逃走
-  scene16: {
+  // 第一章スライド16・完結（16回目のコイン支払い時）逃走
+  scene17: {
     title:        '',
     leftImg:      'img/image_merge_order_chara_00.png',
     rightImg:     'img/image_merge_order_chara_05a.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    bg:           'img/image_merge_bg_light.png',
     leftEntrance: 'fade',
     flipLeft:     true,
     rightEntrance:'fade',
     autoClose:    false,
     script: [
       { speaker: 'ヤス',   text: '警察に連絡します。動かないでください。', side: 'left' },
-      { speaker: 'シンジ', text: '...少しだけ、外の空気を吸っていいですか。', side: 'right' },
-      { speaker: 'ヤス',   text: '...（間）...わかりました。', side: 'left' },
-      // シンジが去る
-      { hideAll: true, autoAdvance: true, advanceDelay: 1000 },
-      // ヤスが独り言
-      { speaker: 'ヤス', text: '...行きましたか。', side: 'left', showLeft: true, slideLeft: true, flipLeft: true },
-      // 伏線④：短く、静かに
-      { speaker: 'ヤス', text: 'ミサキさん、ケンイチさん...それぞれに、連絡を入れましょう。', side: 'left' },
-      { speaker: 'ヤス', text: '...さて。', side: 'left' },
+      { speaker: 'シンジ', text: '...少しだけ、外の空気を吸ってきていいですか。', side: 'right' },
+      { speaker: 'ヤス',   text: '...わかりました。', side: 'left' },
+      // シンジが去る・わざとらしい沈黙
+      { hideAll: true, autoAdvance: true, advanceDelay: 1200 },
+      { hideAll: true, autoAdvance: true, advanceDelay: 1200 },
+      { hideAll: true, autoAdvance: true, advanceDelay: 1200 },
+      // ヤスが静かに現れる
+      { speaker: 'ヤス', text: '...行かれましたね。', side: 'left', showLeft: true, slideLeft: true, flipLeft: true },
     ],
   },
   // 第一章スライド01（2,000コインで解放）
@@ -2734,6 +2761,10 @@ document.getElementById('debug-adv-scene15').addEventListener('click', () => {
 document.getElementById('debug-adv-scene16').addEventListener('click', () => {
   document.getElementById('debug-screen').classList.add('hidden');
   openAdventureScene('scene16');
+});
+document.getElementById('debug-adv-scene17').addEventListener('click', () => {
+  document.getElementById('debug-screen').classList.add('hidden');
+  openAdventureScene('scene17');
 });
 
 document.getElementById('story-btn').addEventListener('click', () => {
@@ -3832,6 +3863,7 @@ function progressStory() {
   else if (state.storyCount === 13) sceneId = 'scene14';
   else if (state.storyCount === 14) sceneId = 'scene15';
   else if (state.storyCount === 15) sceneId = 'scene16';
+  else if (state.storyCount === 16) sceneId = 'scene17';
   else sceneId = 'scene02'; // 未実装分はフォールバック
   openAdventureScene(sceneId);
 }
