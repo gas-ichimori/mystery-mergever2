@@ -33,12 +33,12 @@ const CHAINS = [
   // チェーン10：第一章（チュートリアル・メインゲーム共通）
   { name: '第一章', stages: ['📝','🐱','📔','📒','📕','📗','📘','📙','📚','🗂️','🗃️','🏆'],
     stageImages: [
-      'img/image_merge_icon1_01.png','img/image_merge_icon1_02.png',
-      'img/image_merge_icon1_03.png','img/image_merge_icon1_04.png',
-      'img/image_merge_icon1_05.png','img/image_merge_icon1_06.png',
-      'img/image_merge_icon1_07.png','img/image_merge_icon1_08.png',
-      'img/image_merge_icon1_09.png','img/image_merge_icon1_10.png',
-      'img/image_merge_icon1_11.png','img/image_merge_icon1_12.png',
+      'img/Chapter1/Icon/image_merge_icon1_01.png','img/Chapter1/Icon/image_merge_icon1_02.png',
+      'img/Chapter1/Icon/image_merge_icon1_03.png','img/Chapter1/Icon/image_merge_icon1_04.png',
+      'img/Chapter1/Icon/image_merge_icon1_05.png','img/Chapter1/Icon/image_merge_icon1_06.png',
+      'img/Chapter1/Icon/image_merge_icon1_07.png','img/Chapter1/Icon/image_merge_icon1_08.png',
+      'img/Chapter1/Icon/image_merge_icon1_09.png','img/Chapter1/Icon/image_merge_icon1_10.png',
+      'img/Chapter1/Icon/image_merge_icon1_11.png','img/Chapter1/Icon/image_merge_icon1_12.png',
     ],
     stageNames: [
       'メモ帳','猫','猫のおもちゃ','足跡',
@@ -50,14 +50,14 @@ const CHAINS = [
   { name: '第二章',
     stages: ['🔧','⚙️','🪛','🔩','🛠️','⚒️','⚔️','🗡️','🏹','🪃','🛡️','⚜️','👑','🏆','✨'],
     stageImages: [
-      'img/image_merge_icon2_01.png','img/image_merge_icon2_02.png',
-      'img/image_merge_icon2_03.png','img/image_merge_icon2_04.png',
-      'img/image_merge_icon2_05.png','img/image_merge_icon2_06.png',
-      'img/image_merge_icon2_07.png','img/image_merge_icon2_08.png',
-      'img/image_merge_icon2_09.png','img/image_merge_icon2_10.png',
-      'img/image_merge_icon2_11.png','img/image_merge_icon2_12.png',
-      'img/image_merge_icon2_13.png','img/image_merge_icon2_14.png',
-      'img/image_merge_icon2_15.png',
+      'img/Chapter2/Icon/image_merge_icon2_01.png','img/Chapter2/Icon/image_merge_icon2_02.png',
+      'img/Chapter2/Icon/image_merge_icon2_03.png','img/Chapter2/Icon/image_merge_icon2_04.png',
+      'img/Chapter2/Icon/image_merge_icon2_05.png','img/Chapter2/Icon/image_merge_icon2_06.png',
+      'img/Chapter2/Icon/image_merge_icon2_07.png','img/Chapter2/Icon/image_merge_icon2_08.png',
+      'img/Chapter2/Icon/image_merge_icon2_09.png','img/Chapter2/Icon/image_merge_icon2_10.png',
+      'img/Chapter2/Icon/image_merge_icon2_11.png','img/Chapter2/Icon/image_merge_icon2_12.png',
+      'img/Chapter2/Icon/image_merge_icon2_13.png','img/Chapter2/Icon/image_merge_icon2_14.png',
+      'img/Chapter2/Icon/image_merge_icon2_15.png',
     ],
     stageNames: [
       '鍵','鍵束','ICカード','ドアノブ','ドアチェーン',
@@ -141,11 +141,11 @@ const COIN_REWARD   = [0, 10, 20, 30, 40, 100]; // インデックス = coinLv
 const COIN_EMOJI    = ['', '🪙', '🪙', '🪙', '🪙', '💰'];
 const COIN_IMAGES   = [
   null,
-  'img/image_merge_icon_coin01.png',
-  'img/image_merge_icon_coin02.png',
-  'img/image_merge_icon_coin03.png',
-  'img/image_merge_icon_coin04.png',
-  'img/image_merge_icon_coin04.png', // Lv5: Lv4画像 + 煙アニメーション
+  'img/UI/image_merge_icon_coin01.png',
+  'img/UI/image_merge_icon_coin02.png',
+  'img/UI/image_merge_icon_coin03.png',
+  'img/UI/image_merge_icon_coin04.png',
+  'img/UI/image_merge_icon_coin04.png', // Lv5: Lv4画像 + 煙アニメーション
 ];
 // しゃぼん玉がコインに変わるまでの時間（ミリ秒）
 const BUBBLE_COIN_DELAY_MS = 40000;
@@ -988,18 +988,18 @@ function getMaxPowerLevel(chainId) {
 // 依頼人定義（画像対応）
 const REQUESTERS = [
   // 第一章（id: 0-5）
-  { id: 0, name: '依頼人①', img: 'img/image_merge_order_chara_00.png' },
-  { id: 1, name: '依頼人②', img: 'img/image_merge_order_chara_01a.png' },
-  { id: 2, name: '依頼人③', img: 'img/image_merge_order_chara_02.png' },
-  { id: 3, name: '依頼人④', img: 'img/image_merge_order_chara_03.png' },
-  { id: 4, name: '依頼人⑤', img: 'img/image_merge_order_chara_04.png' },
-  { id: 5, name: '依頼人⑥', img: 'img/image_merge_order_chara_05.png' },
+  { id: 0, name: '依頼人①', img: 'img/Chapter1/Chara/image_merge_order_chara_00.png' },
+  { id: 1, name: '依頼人②', img: 'img/Chapter1/Chara/image_merge_order_chara_01a.png' },
+  { id: 2, name: '依頼人③', img: 'img/Chapter1/Chara/image_merge_order_chara_02.png' },
+  { id: 3, name: '依頼人④', img: 'img/Chapter1/Chara/image_merge_order_chara_03.png' },
+  { id: 4, name: '依頼人⑤', img: 'img/Chapter1/Chara/image_merge_order_chara_04.png' },
+  { id: 5, name: '依頼人⑥', img: 'img/Chapter1/Chara/image_merge_order_chara_05.png' },
   // 第二章（id: 6-10）
-  { id: 6,  name: 'ジン',   img: 'img/image_merge_order_chara_06a.png' },
-  { id: 7,  name: 'リナ',   img: 'img/image_merge_order_chara_07.png' },
-  { id: 8,  name: 'ユウ',   img: 'img/image_merge_order_chara_08.png' },
-  { id: 9,  name: 'ハルト', img: 'img/image_merge_order_chara_09a.png' },
-  { id: 10, name: 'タツオ', img: 'img/image_merge_order_chara_10.png' },
+  { id: 6,  name: 'ジン',   img: 'img/Chapter2/Chara/image_merge_order_chara_06a.png' },
+  { id: 7,  name: 'リナ',   img: 'img/Chapter2/Chara/image_merge_order_chara_07.png' },
+  { id: 8,  name: 'ユウ',   img: 'img/Chapter2/Chara/image_merge_order_chara_08.png' },
+  { id: 9,  name: 'ハルト', img: 'img/Chapter2/Chara/image_merge_order_chara_09a.png' },
+  { id: 10, name: 'タツオ', img: 'img/Chapter2/Chara/image_merge_order_chara_10.png' },
 ];
 
 const STAGE_RANGE = [
@@ -1713,17 +1713,17 @@ function showCellToast(msg, cellIdx, isEventBoard) {
 // 登場人物データ
 // ========================================
 const CHARACTERS = [
-  { img: 'img/image_merge_order_chara_00.png',  name: 'ヤス',     age: '29歳', desc: '探偵事務所の助手' },
-  { img: 'img/image_merge_order_chara_01a.png', name: 'ミユ',     age: '9歳',  desc: '猫を探している女の子' },
-  { img: 'img/image_merge_order_chara_02.png',  name: 'ナナコ',   age: '28歳', desc: 'ケンイチの妻' },
-  { img: 'img/image_merge_order_chara_03.png',  name: 'ケンイチ', age: '34歳', desc: 'ナナコの夫' },
-  { img: 'img/image_merge_order_chara_04.png',  name: 'ミサキ',   age: '27歳', desc: '会社員' },
-  { img: 'img/image_merge_order_chara_05.png',  name: 'シンジ',   age: '27歳', desc: '配達員' },
-  { img: 'img/image_merge_order_chara_06a.png',  name: 'ジン',     age: '39歳', desc: '不動産管理会社勤務' },
-  { img: 'img/image_merge_order_chara_07.png',  name: 'リナ',     age: '37歳', desc: 'シングルマザー' },
-  { img: 'img/image_merge_order_chara_08.png',  name: 'ユウ',     age: '10歳', desc: 'リナの子供' },
-  { img: 'img/image_merge_order_chara_09a.png',  name: 'ハルト',   age: '20歳', desc: '大学生' },
-  { img: 'img/image_merge_order_chara_10.png',  name: 'タツオ',   age: '44歳', desc: '警備員' },
+  { img: 'img/Chapter1/Chara/image_merge_order_chara_00.png',  name: 'ヤス',     age: '29歳', desc: '探偵事務所の助手' },
+  { img: 'img/Chapter1/Chara/image_merge_order_chara_01a.png', name: 'ミユ',     age: '9歳',  desc: '猫を探している女の子' },
+  { img: 'img/Chapter1/Chara/image_merge_order_chara_02.png',  name: 'ナナコ',   age: '28歳', desc: 'ケンイチの妻' },
+  { img: 'img/Chapter1/Chara/image_merge_order_chara_03.png',  name: 'ケンイチ', age: '34歳', desc: 'ナナコの夫' },
+  { img: 'img/Chapter1/Chara/image_merge_order_chara_04.png',  name: 'ミサキ',   age: '27歳', desc: '会社員' },
+  { img: 'img/Chapter1/Chara/image_merge_order_chara_05.png',  name: 'シンジ',   age: '27歳', desc: '配達員' },
+  { img: 'img/Chapter2/Chara/image_merge_order_chara_06a.png',  name: 'ジン',     age: '39歳', desc: '不動産管理会社勤務' },
+  { img: 'img/Chapter2/Chara/image_merge_order_chara_07.png',  name: 'リナ',     age: '37歳', desc: 'シングルマザー' },
+  { img: 'img/Chapter2/Chara/image_merge_order_chara_08.png',  name: 'ユウ',     age: '10歳', desc: 'リナの子供' },
+  { img: 'img/Chapter2/Chara/image_merge_order_chara_09a.png',  name: 'ハルト',   age: '20歳', desc: '大学生' },
+  { img: 'img/Chapter2/Chara/image_merge_order_chara_10.png',  name: 'タツオ',   age: '44歳', desc: '警備員' },
 ];
 
 function renderCharacters() {
@@ -1847,8 +1847,8 @@ const ADV_SCENES = {
   // デバッグ確認用テストシーン
   test: {
     title:         'アドベンチャーシーンテスト',
-    leftImg:       'img/image_merge_order_chara_00.png',
-    rightImg:      'img/image_merge_order_chara_01a.png',
+    leftImg:       'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:      'img/Chapter1/Chara/image_merge_order_chara_01a.png',
     rightEntrance: 'slide',  // 右からスライドイン
     autoClose:     false,
     script: [
@@ -1860,8 +1860,8 @@ const ADV_SCENES = {
   // チュートリアル#2の直後に挿入されるシーン
   scene01: {
     title:         '',
-    leftImg:       'img/image_merge_order_chara_00.png',
-    rightImg:      'img/image_merge_order_chara_01.png',
+    leftImg:       'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:      'img/Chapter1/Chara/image_merge_order_chara_01.png',
     leftEntrance:  'slide',  // ヤスは左からスライドイン
     flipLeft:      true,     // ヤスは左右反転で表示
     rightEntrance: 'none',   // ミユは最初非表示・セリフ時にスライドイン
@@ -1876,8 +1876,8 @@ const ADV_SCENES = {
   // 第一章スライド06（6回目のコイン支払い時）
   scene07: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade',
     flipLeft:     true,
     autoClose:    false,
@@ -1897,9 +1897,9 @@ const ADV_SCENES = {
   // 第一章スライド07（7回目のコイン支払い時）
   scene08: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_05aa.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter1/Chara/image_merge_order_chara_05aa.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade',
     flipLeft:     true,
     rightEntrance:'slide',
@@ -1921,9 +1921,9 @@ const ADV_SCENES = {
   // 第一章スライド08（8回目のコイン支払い時）
   scene09: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_04.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter1/Chara/image_merge_order_chara_04.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade',
     flipLeft:     true,
     rightEntrance:'slide',
@@ -1943,9 +1943,9 @@ const ADV_SCENES = {
   // 第一章スライド09（9回目のコイン支払い時）
   scene10: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_04.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter1/Chara/image_merge_order_chara_04.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade',
     flipLeft:     true,
     rightEntrance:'fade',
@@ -1964,9 +1964,9 @@ const ADV_SCENES = {
   // 第一章スライド10（10回目のコイン支払い時）
   scene11: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_03.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter1/Chara/image_merge_order_chara_03.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade',
     flipLeft:     true,
     rightEntrance:'slide',
@@ -1986,8 +1986,8 @@ const ADV_SCENES = {
   // 第一章スライド11（11回目のコイン支払い時）不倫現場を目撃
   scene12: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    bg:           'img/image_merge_bg_road_night.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    bg:           'img/bg/image_merge_bg_road_night.png',
     leftEntrance: 'fade',
     flipLeft:     true,
     autoClose:    false,
@@ -2001,9 +2001,9 @@ const ADV_SCENES = {
   // 第一章スライド12（12回目のコイン支払い時）ミサキに突きつける
   scene13: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_04.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter1/Chara/image_merge_order_chara_04.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade',
     flipLeft:     true,
     rightEntrance:'fade',
@@ -2022,8 +2022,8 @@ const ADV_SCENES = {
   // 第一章スライド13（13回目のコイン支払い時）夜のシンジ尾行
   scene14: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    bg:           'img/image_merge_bg_road_night.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    bg:           'img/bg/image_merge_bg_road_night.png',
     leftEntrance: 'fade',
     flipLeft:     true,
     autoClose:    false,
@@ -2038,8 +2038,8 @@ const ADV_SCENES = {
   // 第一章スライド14（14回目のコイン支払い時）証拠の整理
   scene15: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade',
     flipLeft:     true,
     autoClose:    false,
@@ -2047,7 +2047,7 @@ const ADV_SCENES = {
       { speaker: 'ヤス', text: '...整理しましょう。', side: 'left' },
       { speaker: 'ヤス', text: 'ナナコさんへ届けられた荷物...中に入っていたのは、漬物石のような大きな石だった。', side: 'left' },
       // 謎の石を中央表示（※石のアイコン画像が必要。現在は仮置き）
-      { showCenter: 'img/image_merge_icon1_07.png' },
+      { showCenter: 'img/Chapter1/Icon/image_merge_icon1_07.png' },
       { speaker: 'ヤス', text: '差出人不明。そして、配達のタイミングでミケが姿を消した。', side: 'left' },
       { speaker: 'ヤス', text: '...荷物を届けると同時に、猫を連れ去った。そういうことです。', side: 'left' },
       { speaker: 'ヤス', text: 'それから、ミサキさんへのストーカー行為。配達ルートを使い、行動を把握していた。', side: 'left' },
@@ -2060,9 +2060,9 @@ const ADV_SCENES = {
   // 第一章スライド15（15回目のコイン支払い時）シンジ対峙・豹変
   scene16: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_05aa.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter1/Chara/image_merge_order_chara_05aa.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade',
     flipLeft:     true,
     rightEntrance:'slide',
@@ -2083,7 +2083,7 @@ const ADV_SCENES = {
       { speaker: 'ヤス',   text: 'ミサキさんへの接触も、全て配達の仕事に紛れている。同じルートに、週に３回以上。', side: 'left' },
       { speaker: 'シンジ', text: '...（長い沈黙）', side: 'right' },
       // 豹変：表の顔→裏の顔
-      { speaker: 'シンジ', text: '...ハ。', side: 'right', changeRightImg: 'img/image_merge_order_chara_05a.png' },
+      { speaker: 'シンジ', text: '...ハ。', side: 'right', changeRightImg: 'img/Chapter1/Chara/image_merge_order_chara_05a.png' },
       { speaker: 'シンジ', text: '全部わかってるんですね。...まあ、いいですよ。ミサキが裏切ったのが悪いんで。', side: 'right' },
       { speaker: 'ヤス',   text: 'ケンイチさんの家族まで巻き込んだのは。', side: 'left' },
       { speaker: 'シンジ', text: 'あの男にも、痛い目を見てもらわないといけなかった。それだけです。', side: 'right' },
@@ -2092,9 +2092,9 @@ const ADV_SCENES = {
   // 第一章スライド16・完結（16回目のコイン支払い時）逃走
   scene17: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_05a.png',
-    bg:           'img/image_merge_bg_light.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter1/Chara/image_merge_order_chara_05a.png',
+    bg:           'img/bg/image_merge_bg_light.png',
     leftEntrance: 'fade',
     flipLeft:     true,
     rightEntrance:'fade',
@@ -2106,7 +2106,7 @@ const ADV_SCENES = {
       // シンジが去る
       { hideAll: true, autoAdvance: true, advanceDelay: 600 },
       // 背景を戻してから沈黙の「...」を表示
-      { setBg: 'img/image_merge_bg_light.png', autoAdvance: true, advanceDelay: 300 },
+      { setBg: 'img/bg/image_merge_bg_light.png', autoAdvance: true, advanceDelay: 300 },
       { sound: '...', autoAdvance: true, advanceDelay: 1200 },
       { sound: '...', autoAdvance: true, advanceDelay: 1200 },
       { sound: '...', autoAdvance: true, advanceDelay: 1200 },
@@ -2118,9 +2118,9 @@ const ADV_SCENES = {
   // 第二章 Scene01（17回目のコイン支払い時）リナ来訪
   c2s01: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_07.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_07.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'slide', autoClose: false,
     script: [
@@ -2137,14 +2137,14 @@ const ADV_SCENES = {
   // 第二章 Scene02（18回目）現場へ
   c2s02: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_07.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_07.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'fade', autoClose: false,
     script: [
       // 背景チェンジ→マンション外（仮: road_light）
-      { hideAll: true, changeBg: 'img/image_merge_bg_road_light.png', autoAdvance: true },
+      { hideAll: true, changeBg: 'img/bg/image_merge_bg_road_light.png', autoAdvance: true },
       { speaker: 'リナ',  text: 'ここです...「サンライズ ヒルズ」というマンションです。', side: 'right', showRight: true, slideRight: true },
       { speaker: 'ヤス',  text: '管理会社はどちらですか？', side: 'left', showLeft: true, slideLeft: true, flipLeft: true },
       { speaker: 'リナ',  text: '「エバーグリーン不動産」さんです...担当の方は、ジンさんという方で...', side: 'right' },
@@ -2156,9 +2156,9 @@ const ADV_SCENES = {
   // 第二章 Scene03（19回目）タツオと初接触
   c2s03: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_10.png',
-    bg:           'img/image_merge_bg_road_light.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_10.png',
+    bg:           'img/bg/image_merge_bg_road_light.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'slide', autoClose: false,
     script: [
@@ -2174,9 +2174,9 @@ const ADV_SCENES = {
   // 第二章 Scene04（20回目）リナの部屋
   c2s04: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_07.png',
-    bg:           'img/image_merge_bg_light.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_07.png',
+    bg:           'img/bg/image_merge_bg_light.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'fade', autoClose: false,
     script: [
@@ -2193,10 +2193,10 @@ const ADV_SCENES = {
   // 第二章 Scene05（21回目）ユウの証言①
   c2s05: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_07.png',
-    right2Img:    'img/image_merge_order_chara_08.png',
-    bg:           'img/image_merge_bg_light.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_07.png',
+    right2Img:    'img/Chapter2/Chara/image_merge_order_chara_08.png',
+    bg:           'img/bg/image_merge_bg_light.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'fade',
     right2Entrance:'none', autoClose: false,
@@ -2214,9 +2214,9 @@ const ADV_SCENES = {
   // 第二章 Scene06（22回目）タツオを再び訪ねる
   c2s06: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_10.png',
-    bg:           'img/image_merge_bg_road_light.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_10.png',
+    bg:           'img/bg/image_merge_bg_road_light.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'fade', autoClose: false,
     script: [
@@ -2234,9 +2234,9 @@ const ADV_SCENES = {
   // 第二章 Scene07（23回目）ハルトと出会う
   c2s07: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_09a.png',
-    bg:           'img/image_merge_bg_road_light.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_09a.png',
+    bg:           'img/bg/image_merge_bg_road_light.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'slide', autoClose: false,
     script: [
@@ -2254,9 +2254,9 @@ const ADV_SCENES = {
   // 第二章 Scene08（24回目）ハルトが語る
   c2s08: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_09a.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_09a.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'slide', autoClose: false,
     script: [
@@ -2273,9 +2273,9 @@ const ADV_SCENES = {
   // 第二章 Scene09（25回目）ジン来訪・調査依頼・ヤスの囁き
   c2s09: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_06a.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_06a.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'slide', autoClose: false,
     script: [
@@ -2296,8 +2296,8 @@ const ADV_SCENES = {
   // 第二章 Scene10（26回目）ジンが去った後・ヤス独り言
   c2s10: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     autoClose:    false,
     script: [
@@ -2309,9 +2309,9 @@ const ADV_SCENES = {
   // 第二章 Scene11（27回目）リナが過去を語る
   c2s11: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_07.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_07.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'fade', autoClose: false,
     script: [
@@ -2327,9 +2327,9 @@ const ADV_SCENES = {
   // 第二章 Scene12（28回目）タツオが重い口を開く
   c2s12: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_10.png',
-    bg:           'img/image_merge_bg_road_light.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_10.png',
+    bg:           'img/bg/image_merge_bg_road_light.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'fade', autoClose: false,
     script: [
@@ -2347,9 +2347,9 @@ const ADV_SCENES = {
   // 第二章 Scene13（29回目）ハルトが内情を暴露
   c2s13: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_09a.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_09a.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'fade', autoClose: false,
     script: [
@@ -2367,10 +2367,10 @@ const ADV_SCENES = {
   // 第二章 Scene14（30回目）ユウの証言②
   c2s14: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_07.png',
-    right2Img:    'img/image_merge_order_chara_08.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_07.png',
+    right2Img:    'img/Chapter2/Chara/image_merge_order_chara_08.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'fade',
     right2Entrance:'fade',
@@ -2391,8 +2391,8 @@ const ADV_SCENES = {
   // 第二章 Scene15（31回目）証拠を整理・ヤス独り言
   c2s15: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     autoClose:    false,
     script: [
@@ -2405,8 +2405,8 @@ const ADV_SCENES = {
   // 第二章 Scene15b（32回目）夜間証拠収集
   c2s15b: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    bg:           'img/image_merge_bg_road_night.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    bg:           'img/bg/image_merge_bg_road_night.png',
     leftEntrance: 'fade', flipLeft: true,
     autoClose:    false,
     script: [
@@ -2419,9 +2419,9 @@ const ADV_SCENES = {
   // 第二章 Scene16（33回目）ジンに問い詰める①
   c2s16: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_06a.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_06a.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'slide', autoClose: false,
     script: [
@@ -2437,9 +2437,9 @@ const ADV_SCENES = {
   // 第二章 Scene17（34回目）ジンが吐露
   c2s17: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_06a.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_06a.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'fade', autoClose: false,
     script: [
@@ -2455,9 +2455,9 @@ const ADV_SCENES = {
   // 第二章 Scene18（35回目）全行為が判明
   c2s18: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_06a.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_06a.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'fade', autoClose: false,
     script: [
@@ -2473,9 +2473,9 @@ const ADV_SCENES = {
   // 第二章 Scene19（36回目）対峙・逃走
   c2s19: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_06a.png',
-    bg:           'img/image_merge_bg_light.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:     'img/Chapter2/Chara/image_merge_order_chara_06a.png',
+    bg:           'img/bg/image_merge_bg_light.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'fade', autoClose: false,
     script: [
@@ -2484,7 +2484,7 @@ const ADV_SCENES = {
       { speaker: 'ヤス',  text: '...わかりました。', side: 'left' },
       { speaker: 'ジン',  text: '（立ち上がる）...少し、外の空気を吸ってきます。', side: 'right' },
       { hideAll: true, autoAdvance: true, advanceDelay: 600 },
-      { setBg: 'img/image_merge_bg_light.png', autoAdvance: true, advanceDelay: 300 },
+      { setBg: 'img/bg/image_merge_bg_light.png', autoAdvance: true, advanceDelay: 300 },
       { sound: '...', autoAdvance: true, advanceDelay: 1200 },
       { sound: '...', autoAdvance: true, advanceDelay: 1200 },
       { sound: '...', autoAdvance: true, advanceDelay: 1200 },
@@ -2494,8 +2494,8 @@ const ADV_SCENES = {
   // 第二章 Scene20（37回目）エピローグ・ヤスの伏線④
   c2s20: {
     title:        '',
-    leftImg:      'img/image_merge_order_chara_00.png',
-    bg:           'img/image_merge_bg_hiruma.png',
+    leftImg:      'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    bg:           'img/bg/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     autoClose:    false,
     script: [
@@ -2508,9 +2508,9 @@ const ADV_SCENES = {
   // ===== 第一章スライド01（2,000コインで解放）=====
   scene02: {
     title:         '',
-    leftImg:       'img/image_merge_order_chara_00.png',
-    rightImg:      'img/image_merge_order_chara_01a.png',
-    bg:            'img/image_merge_bg_hiruma.png',
+    leftImg:       'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:      'img/Chapter1/Chara/image_merge_order_chara_01a.png',
+    bg:            'img/bg/image_merge_bg_hiruma.png',
     rightEntrance: 'slide',   // ミユが右からスライドイン
     leftEntrance:  'none',    // ヤスは後から登場
     autoClose:     false,
@@ -2524,7 +2524,7 @@ const ADV_SCENES = {
       // [2] ヤス暗転 ミユ明転
       { speaker: 'ミユ', text: 'こっちです！', side: 'right' },
       // [3] 両キャラ消去 → 背景チェンジ（自動進行）
-      { hideAll: true, changeBg: 'img/image_merge_bg_road_light.png',
+      { hideAll: true, changeBg: 'img/bg/image_merge_bg_road_light.png',
         autoAdvance: true },
       // ─── フェーズ2: 道路 ───
       // [4] ミユが右からスライドイン（再登場）
@@ -2542,10 +2542,10 @@ const ADV_SCENES = {
   // 第一章スライド05（プレイヤーLv1・5回目のコイン支払い時）
   scene06: {
     title:         '',
-    leftImg:       'img/image_merge_order_chara_00.png',
-    rightImg:      'img/image_merge_order_chara_03.png',
-    right2Img:     'img/image_merge_order_chara_02.png',
-    bg:            'img/image_merge_bg_hiruma.png',
+    leftImg:       'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:      'img/Chapter1/Chara/image_merge_order_chara_03.png',
+    right2Img:     'img/Chapter1/Chara/image_merge_order_chara_02.png',
+    bg:            'img/bg/image_merge_bg_hiruma.png',
     leftEntrance:  'fade',   // ヤス（反転）即表示
     flipLeft:      true,
     rightEntrance: 'fade',   // ケンイチ即表示
@@ -2582,10 +2582,10 @@ const ADV_SCENES = {
   // 第一章スライド04（プレイヤーLv1・4回目のコイン支払い時）
   scene05: {
     title:         '',
-    leftImg:       'img/image_merge_order_chara_00.png',
-    rightImg:      'img/image_merge_order_chara_03.png',
-    right2Img:     'img/image_merge_order_chara_02.png',   // ナナコ
-    bg:            'img/image_merge_bg_hiruma.png',
+    leftImg:       'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:      'img/Chapter1/Chara/image_merge_order_chara_03.png',
+    right2Img:     'img/Chapter1/Chara/image_merge_order_chara_02.png',   // ナナコ
+    bg:            'img/bg/image_merge_bg_hiruma.png',
     leftEntrance:  'fade',   // ヤス（反転）即表示
     flipLeft:      true,
     rightEntrance: 'fade',   // ケンイチ即表示
@@ -2600,7 +2600,7 @@ const ADV_SCENES = {
       // [2]
       { speaker: 'ヤス', text: 'どうされました？...', side: 'left' },
       // [3] 中央にダンボールアイテム表示
-      { showCenter: 'img/image_merge_icon1_06.png' },
+      { showCenter: 'img/Chapter1/Icon/image_merge_icon1_06.png' },
       // [4]
       { speaker: 'ナナコ', text: '実は、届いた荷物に身に覚えがなくて...', side: 'right2' },
       // [5]
@@ -2624,9 +2624,9 @@ const ADV_SCENES = {
   // 第一章スライド03（プレイヤーLv1・3回目のコイン支払い時）
   scene04: {
     title:         '',
-    leftImg:       'img/image_merge_order_chara_00.png',
-    rightImg:      'img/image_merge_order_chara_03.png',
-    bg:            'img/image_merge_bg_hiruma.png',
+    leftImg:       'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:      'img/Chapter1/Chara/image_merge_order_chara_03.png',
+    bg:            'img/bg/image_merge_bg_hiruma.png',
     leftEntrance:  'slide',   // ヤス（反転）が左からスライドイン
     flipLeft:      true,
     rightEntrance: 'none',    // ケンイチは後から登場
@@ -2644,7 +2644,7 @@ const ADV_SCENES = {
       // [4]
       { speaker: 'ケンイチ', text: 'あの子にとって、とても大切な...', side: 'right' },
       // [5] スマートフォンアイコンが中央にフェードイン → 振動
-      { showCenter: 'img/image_merge_icon2_09.png', shakeCenter: true },
+      { showCenter: 'img/Chapter2/Icon/image_merge_icon2_09.png', shakeCenter: true },
       // [6] ケンイチがスマートフォンに気づく（ト書き）
       { speaker: 'ケンイチ', text: '（スマートフォンを見る）', side: 'right' },
       // [7] 最終
@@ -2654,9 +2654,9 @@ const ADV_SCENES = {
   // 第一章スライド02（プレイヤーLv1・2回目のコイン支払い時）
   scene03: {
     title:         '',
-    leftImg:       'img/image_merge_order_chara_00.png',
-    rightImg:      'img/image_merge_order_chara_01a.png',
-    bg:            'img/image_merge_bg_road_light02.png',
+    leftImg:       'img/Chapter1/Chara/image_merge_order_chara_00.png',
+    rightImg:      'img/Chapter1/Chara/image_merge_order_chara_01a.png',
+    bg:            'img/bg/image_merge_bg_road_light02.png',
     leftEntrance:  'slide',  // ヤス（反転）が左からスライドイン
     flipLeft:      true,
     rightEntrance: 'none',   // ミユは後から登場
@@ -2667,16 +2667,16 @@ const ADV_SCENES = {
       // [1]
       { speaker: 'ヤス', text: 'あの子ですね？', side: 'left' },
       // [2] ヤス暗転 + 猫が画面中央にフェードイン（タップで次へ）
-      { showCenter: 'img/image_merge_icon1_02.png' },
+      { showCenter: 'img/Chapter1/Icon/image_merge_icon1_02.png' },
       // [3] ミユが右からスライドイン
       { speaker: 'ミユ', text: 'ミケ！！', side: 'right', showRight: true, slideRight: true },
       // [4] ミユ画像を01bに切り替えてセリフ
       { speaker: 'ミユ', text: 'よかった…ありがとう…！', side: 'right',
-        changeRightImg: 'img/image_merge_order_chara_01b.png' },
+        changeRightImg: 'img/Chapter1/Chara/image_merge_order_chara_01b.png' },
       // [5] 全消去・暗転（背景も黒に）
       { hideAll: true, autoAdvance: true, advanceDelay: 600 },
       // [6] hiruma背景に切り替え
-      { setBg: 'img/image_merge_bg_hiruma.png', autoAdvance: true, advanceDelay: 300 },
+      { setBg: 'img/bg/image_merge_bg_hiruma.png', autoAdvance: true, advanceDelay: 300 },
       // [7] ヤス（反転）再スライドイン
       { speaker: 'ヤス', text: '…おかしいですね。', side: 'left',
         showLeft: true, slideLeft: true, flipLeft: true },
@@ -2750,7 +2750,7 @@ function openAdventureScene(sceneId, callback = null) {
 
   // 背景設定（全プロパティをインラインで設定してCSS競合を完全排除）
   const advScreen = document.getElementById('adventure-screen');
-  const bgSrc = scene.bg || 'img/image_merge_bg.png';
+  const bgSrc = scene.bg || 'img/bg/image_merge_bg.png';
   advScreen.style.backgroundImage    = `url('${bgSrc}')`;
   advScreen.style.backgroundSize     = 'cover';
   advScreen.style.backgroundPosition = 'center center';
@@ -3328,18 +3328,18 @@ const EVENT_CHAIN = {
   name: '第一章',
   stages: ['📝','🐱','📔','📒','📕','📗','📘','📙','📚','🗂️','🗃️','🏆'],
   stageImages: [
-    'img/image_merge_icon1_01.png', // Lv1
-    'img/image_merge_icon1_02.png', // Lv2
-    'img/image_merge_icon1_03.png', // Lv3
-    'img/image_merge_icon1_04.png', // Lv4
-    'img/image_merge_icon1_05.png', // Lv5
-    'img/image_merge_icon1_06.png', // Lv6
-    'img/image_merge_icon1_07.png', // Lv7
-    'img/image_merge_icon1_08.png', // Lv8
-    'img/image_merge_icon1_09.png', // Lv9
-    'img/image_merge_icon1_10.png', // Lv10
-    'img/image_merge_icon1_11.png', // Lv11
-    'img/image_merge_icon1_12.png', // Lv12
+    'img/Chapter1/Icon/image_merge_icon1_01.png', // Lv1
+    'img/Chapter1/Icon/image_merge_icon1_02.png', // Lv2
+    'img/Chapter1/Icon/image_merge_icon1_03.png', // Lv3
+    'img/Chapter1/Icon/image_merge_icon1_04.png', // Lv4
+    'img/Chapter1/Icon/image_merge_icon1_05.png', // Lv5
+    'img/Chapter1/Icon/image_merge_icon1_06.png', // Lv6
+    'img/Chapter1/Icon/image_merge_icon1_07.png', // Lv7
+    'img/Chapter1/Icon/image_merge_icon1_08.png', // Lv8
+    'img/Chapter1/Icon/image_merge_icon1_09.png', // Lv9
+    'img/Chapter1/Icon/image_merge_icon1_10.png', // Lv10
+    'img/Chapter1/Icon/image_merge_icon1_11.png', // Lv11
+    'img/Chapter1/Icon/image_merge_icon1_12.png', // Lv12
   ],
   stageNames: [
     'メモ帳','猫','猫のおもちゃ','足跡',
@@ -3350,10 +3350,10 @@ const EVENT_CHAIN = {
 
 // イベントマップ ジェネレーター画像（Lv別）
 const EVENT_GEN_IMAGES = [
-  'img/image_merge_gene1_01.png', // Lv1
-  'img/image_merge_gene1_02.png', // Lv2
-  'img/image_merge_gene1_03.png', // Lv3
-  'img/image_merge_gene1_04.png', // Lv4
+  'img/Chapter1/Icon/image_merge_gene1_01.png', // Lv1
+  'img/Chapter1/Icon/image_merge_gene1_02.png', // Lv2
+  'img/Chapter1/Icon/image_merge_gene1_03.png', // Lv3
+  'img/Chapter1/Icon/image_merge_gene1_04.png', // Lv4
 ];
 // 第一章ジェネレーター名（Lv1〜4）
 const EVENT_GEN_NAMES = ['メモ机', '観察キット', '調査バッグ', '調査バッグ+'];
@@ -3363,13 +3363,13 @@ const SEIZO_CHAIN_ID = 11;
 
 // 製造機ジェネレーター画像（Lv1〜7）
 const SEIZO_GEN_IMAGES = [
-  'img/image_merge_gene2_01.png', // Lv1
-  'img/image_merge_gene2_02.png', // Lv2
-  'img/image_merge_gene2_03.png', // Lv3
-  'img/image_merge_gene2_04.png', // Lv4
-  'img/image_merge_gene2_05.png', // Lv5
-  'img/image_merge_gene2_06.png', // Lv6
-  'img/image_merge_gene2_07.png', // Lv7
+  'img/Chapter2/Icon/image_merge_gene2_01.png', // Lv1
+  'img/Chapter2/Icon/image_merge_gene2_02.png', // Lv2
+  'img/Chapter2/Icon/image_merge_gene2_03.png', // Lv3
+  'img/Chapter2/Icon/image_merge_gene2_04.png', // Lv4
+  'img/Chapter2/Icon/image_merge_gene2_05.png', // Lv5
+  'img/Chapter2/Icon/image_merge_gene2_06.png', // Lv6
+  'img/Chapter2/Icon/image_merge_gene2_07.png', // Lv7
 ];
 // 第二章ジェネレーター名（Lv1〜7）
 const SEIZO_GEN_NAMES = ['鍵製造機', 'ICカード製造機', '鍛冶製造機', '監視室', 'レーダー探知機', 'マンション模型', '3Dプリンター'];
@@ -4510,7 +4510,7 @@ function renderEventRequest() {
     div.className = 'request-slot' + (completable ? ' completable' : '');
     div.innerHTML = `
       <div class="req-char-wrap">
-        <img class="req-char-img" src="img/image_merge_order_chara_01.png" alt="依頼人">
+        <img class="req-char-img" src="img/Chapter1/Chara/image_merge_order_chara_01.png" alt="依頼人">
       </div>
       <div class="req-slot-frame">
         <div class="req-items">
