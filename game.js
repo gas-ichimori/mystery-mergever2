@@ -2103,15 +2103,390 @@ const ADV_SCENES = {
       { speaker: 'ヤス',   text: '警察に連絡します。動かないでください。', side: 'left' },
       { speaker: 'シンジ', text: '...少しだけ、外の空気を吸ってきていいですか。', side: 'right' },
       { speaker: 'ヤス',   text: '...わかりました。', side: 'left' },
-      // シンジが去る・わざとらしい沈黙
-      { hideAll: true, autoAdvance: true, advanceDelay: 1200 },
-      { hideAll: true, autoAdvance: true, advanceDelay: 1200 },
-      { hideAll: true, autoAdvance: true, advanceDelay: 1200 },
-      // ヤスが静かに現れる
+      // シンジが去る
+      { hideAll: true, autoAdvance: true, advanceDelay: 600 },
+      // 背景を戻してから沈黙の「...」を表示
+      { setBg: 'img/image_merge_bg_light.png', autoAdvance: true, advanceDelay: 300 },
+      { sound: '...', autoAdvance: true, advanceDelay: 1200 },
+      { sound: '...', autoAdvance: true, advanceDelay: 1200 },
+      { sound: '...', autoAdvance: true, advanceDelay: 1200 },
+      // ヤスが静かに現れる・伏線④
       { speaker: 'ヤス', text: '...行かれましたね。', side: 'left', showLeft: true, slideLeft: true, flipLeft: true },
     ],
   },
-  // 第一章スライド01（2,000コインで解放）
+  // ===== 第二章 =====
+  // 第二章 Scene01（17回目のコイン支払い時）リナ来訪
+  c2s01: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_07.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'slide', autoClose: false,
+    script: [
+      { speaker: 'リナ',  text: 'すみません...', side: 'right' },
+      { speaker: 'ヤス',  text: 'どうされましたか？', side: 'left' },
+      { speaker: 'リナ',  text: '住んでいるマンションで...おかしなことが続いていて...', side: 'right' },
+      { speaker: 'ヤス',  text: 'おかしなこと、というのは？', side: 'left' },
+      { speaker: 'リナ',  text: '廊下に知らない荷物が置かれていたり...ドアに傷がついていたり...', side: 'right' },
+      { speaker: 'ヤス',  text: 'いつ頃から、ですか？', side: 'left' },
+      { speaker: 'リナ',  text: '先月くらいから...少しずつ...エスカレートしている気がして...', side: 'right' },
+      { speaker: 'ヤス',  text: 'わかりました...少し、調べさせてください。', side: 'left' },
+    ],
+  },
+  // 第二章 Scene02（18回目）現場へ
+  c2s02: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_07.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'fade', autoClose: false,
+    script: [
+      // 背景チェンジ→マンション外（仮: road_light）
+      { hideAll: true, changeBg: 'img/image_merge_bg_road_light.png', autoAdvance: true },
+      { speaker: 'リナ',  text: 'ここです...「サンライズ ヒルズ」というマンションです。', side: 'right', showRight: true, slideRight: true },
+      { speaker: 'ヤス',  text: '管理会社はどちらですか？', side: 'left', showLeft: true, slideLeft: true, flipLeft: true },
+      { speaker: 'リナ',  text: '「エバーグリーン不動産」さんです...担当の方は、ジンさんという方で...', side: 'right' },
+      { speaker: 'ヤス',  text: '最近、管理会社の方と何か話しましたか？', side: 'left' },
+      { speaker: 'リナ',  text: '先月、「老朽化のため建て替えを検討している」と言われました...でも、まだ何も決まっていないと...', side: 'right' },
+      { speaker: 'ヤス',  text: '...なるほど。', side: 'left' },
+    ],
+  },
+  // 第二章 Scene03（19回目）タツオと初接触
+  c2s03: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_10.png',
+    bg:           'img/image_merge_bg_road_light.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'slide', autoClose: false,
+    script: [
+      { speaker: 'タツオ', text: '...何か？', side: 'right' },
+      { speaker: 'ヤス',   text: 'こちらのマンションの警備の方ですか？', side: 'left' },
+      { speaker: 'タツオ', text: '...そうですが。', side: 'right' },
+      { speaker: 'ヤス',   text: '最近、不審な人物や出来事をご覧になりましたか？', side: 'left' },
+      { speaker: 'タツオ', text: '...何も見ていません。', side: 'right' },
+      { speaker: 'ヤス',   text: 'そうですか...何かあればご連絡ください。', side: 'left' },
+      { speaker: 'タツオ', text: '...（無言）', side: 'right' },
+    ],
+  },
+  // 第二章 Scene04（20回目）リナの部屋
+  c2s04: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_07.png',
+    bg:           'img/image_merge_bg_light.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'fade', autoClose: false,
+    script: [
+      { speaker: 'リナ',  text: 'どうぞ...散らかっていてすみません。', side: 'right' },
+      { speaker: 'ヤス',  text: 'ドアの傷、見せてもらえますか？', side: 'left' },
+      { speaker: 'リナ',  text: 'これです...引っ掻いたような跡が...', side: 'right' },
+      { speaker: 'ヤス',  text: '...鍵穴の周りですね。開けようとした跡かもしれません。', side: 'left' },
+      { speaker: 'リナ',  text: '...開けようとした、ということですか？', side: 'right' },
+      { speaker: 'ヤス',  text: '他に、気になったことは？', side: 'left' },
+      { speaker: 'リナ',  text: '管理会社から...「退去を検討してもらえないか」と手紙が来ていて...', side: 'right' },
+      { speaker: 'ヤス',  text: 'その手紙を見せてもらえますか？', side: 'left' },
+    ],
+  },
+  // 第二章 Scene05（21回目）ユウの証言①
+  c2s05: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_07.png',
+    right2Img:    'img/image_merge_order_chara_08.png',
+    bg:           'img/image_merge_bg_light.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'fade',
+    right2Entrance:'none', autoClose: false,
+    script: [
+      { speaker: 'ユウ',  text: 'ただいまー！', side: 'right2', showRight2: true, slideRight2: true, shiftRight: true },
+      { speaker: 'リナ',  text: 'お帰り。こちら、探偵さんよ。', side: 'right' },
+      { speaker: 'ユウ',  text: '探偵さん！すごい！', side: 'right2' },
+      { speaker: 'ヤス',  text: 'こんにちは。最近、変なことを見たりしなかった？', side: 'left' },
+      { speaker: 'ユウ',  text: 'うーん...この前、夜中にトイレに起きたら...廊下に知らないおじさんがいた。', side: 'right2' },
+      { speaker: 'リナ',  text: 'え...！そんなこと聞いてなかったよ？', side: 'right' },
+      { speaker: 'ユウ',  text: 'だって、怖かったんだもん...スーツのおじさんで...ずっとドアを見てた。', side: 'right2' },
+      { speaker: 'ヤス',  text: 'そのおじさん、また来たら教えてね。', side: 'left' },
+    ],
+  },
+  // 第二章 Scene06（22回目）タツオを再び訪ねる
+  c2s06: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_10.png',
+    bg:           'img/image_merge_bg_road_light.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'fade', autoClose: false,
+    script: [
+      { speaker: 'タツオ', text: '...また、あなたですか。', side: 'right' },
+      { speaker: 'ヤス',   text: '少しだけ、お時間よろしいですか。', side: 'left' },
+      { speaker: 'タツオ', text: '...何を聞きたいんですか。', side: 'right' },
+      { speaker: 'ヤス',   text: '夜中に、このマンションのドア付近にいた人物を見ませんでしたか？', side: 'left' },
+      { speaker: 'タツオ', text: '...（長い沈黙）...見ていません。', side: 'right' },
+      { speaker: 'ヤス',   text: 'そうですか...ところで、こちらの警備、長いんですか？', side: 'left' },
+      { speaker: 'タツオ', text: '...３年になります。', side: 'right' },
+      { speaker: 'ヤス',   text: '大変な仕事ですね...何か困ったことがあれば、いつでも。', side: 'left' },
+      { speaker: 'タツオ', text: '...（名刺を見つめる）...', side: 'right' },
+    ],
+  },
+  // 第二章 Scene07（23回目）ハルトと出会う
+  c2s07: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_09.png',
+    bg:           'img/image_merge_bg_road_light.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'slide', autoClose: false,
+    script: [
+      { speaker: 'ハルト', text: 'あ、すみません！ぶつかりそうになって...！', side: 'right' },
+      { speaker: 'ヤス',   text: 'いえ、大丈夫ですよ。こちらのマンションの方ですか？', side: 'left' },
+      { speaker: 'ハルト', text: 'はい！305号室です。大学生で、ここ２年住んでるんです。', side: 'right' },
+      { speaker: 'ヤス',   text: '最近、こちらで何かおかしなことはありませんでしたか？', side: 'left' },
+      { speaker: 'ハルト', text: '最近、管理会社さんがよく来るな、とは思ってましたけど。', side: 'right' },
+      { speaker: 'ヤス',   text: '管理会社の方が？', side: 'left' },
+      { speaker: 'ハルト', text: 'はい。僕、そこでバイトしてるんですよ。だから余計に気になって。', side: 'right' },
+      { speaker: 'ヤス',   text: 'バイト先で、何か気になることは？', side: 'left' },
+      { speaker: 'ハルト', text: '...それが、なんか最近、雰囲気がおかしくて。', side: 'right' },
+    ],
+  },
+  // 第二章 Scene08（24回目）ハルトが語る
+  c2s08: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_09.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'slide', autoClose: false,
+    script: [
+      { speaker: 'ハルト', text: '先日、上司のジンさんから「あのマンションの住人に退去を促す書類を配ってほしい」って頼まれたんです。', side: 'right' },
+      { speaker: 'ヤス',   text: '退去を促す書類、ですか。', side: 'left' },
+      { speaker: 'ハルト', text: 'でも、なんか様式が...公式のものじゃないみたいで...断ったんです。', side: 'right' },
+      { speaker: 'ヤス',   text: 'そうしたら？', side: 'left' },
+      { speaker: 'ハルト', text: '「余計なことを気にするな」って怒られて...。ジンさん、いつもは優しいんですけど...', side: 'right' },
+      { speaker: 'ヤス',   text: 'ジンさん、最近、様子が違いますか？', side: 'left' },
+      { speaker: 'ハルト', text: 'はい...何かに追い詰められているみたいで...僕、心配で。', side: 'right' },
+      { speaker: 'ヤス',   text: '話してくれてありがとう。', side: 'left' },
+    ],
+  },
+  // 第二章 Scene09（25回目）ジン来訪・ヤスの囁き
+  c2s09: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_06.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'slide', autoClose: false,
+    script: [
+      { speaker: 'ジン',  text: '突然すみません...こちら、探偵事務所さんですよね。', side: 'right' },
+      { speaker: 'ヤス',  text: 'どうされましたか？', side: 'left' },
+      { speaker: 'ジン',  text: '実は...会社のことで、困っていることがあって。', side: 'right' },
+      { speaker: 'ヤス',  text: '続けてください。', side: 'left' },
+      { speaker: 'ジン',  text: '上司から...「黙っていれば問題ない」と言われていることがあって...でも、それが正しいのか...', side: 'right' },
+      { speaker: 'ヤス',  text: 'どういった内容ですか？', side: 'left' },
+      { speaker: 'ジン',  text: '会社が、マンションの老朽化データを改ざんしていて...早急な建て替えが必要なように見せているんです。', side: 'right' },
+      // 伏線①：間を置き、少し微笑む
+      { speaker: 'ヤス',  text: '...なるほど。', side: 'left' },
+      // ヤスの囁き
+      { speaker: 'ヤス',  text: 'それは...直接、動いた方が早いかもしれませんね。', side: 'left' },
+      { speaker: 'ジン',  text: '直接...？', side: 'right' },
+    ],
+  },
+  // 第二章 Scene10（26回目）ジンが去った後・ヤス独り言
+  c2s10: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade', flipLeft: true,
+    autoClose:    false,
+    script: [
+      // 伏線②
+      { speaker: 'ヤス', text: '...順調ですね。', side: 'left' },
+      { speaker: 'ヤス', text: 'あとは...どう動くか、でしょうか。', side: 'left' },
+    ],
+  },
+  // 第二章 Scene11（27回目）リナが過去を語る
+  c2s11: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_07.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'fade', autoClose: false,
+    script: [
+      { speaker: 'リナ',  text: '...実は、前の夫が...ユウが小さい頃に、家を出て行ったんです。', side: 'right' },
+      { speaker: 'ヤス',  text: 'そうでしたか...', side: 'left' },
+      { speaker: 'リナ',  text: '色々あって...やっと、ユウと安心して暮らせる場所を見つけたと思ったのに...', side: 'right' },
+      { speaker: 'ヤス',  text: 'このマンションが、大切な場所なんですね。', side: 'left' },
+      { speaker: 'リナ',  text: 'はい...だから、絶対に追い出されたくなくて。', side: 'right' },
+      { speaker: 'ヤス',  text: '必ず、何とかしましょう。', side: 'left' },
+    ],
+  },
+  // 第二章 Scene12（28回目）タツオが重い口を開く
+  c2s12: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_10.png',
+    bg:           'img/image_merge_bg_road_light.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'fade', autoClose: false,
+    script: [
+      { speaker: 'タツオ', text: '...少し、話せますか。', side: 'right' },
+      { speaker: 'ヤス',   text: 'もちろんです。', side: 'left' },
+      { speaker: 'タツオ', text: '私は...昔、仕事中に事故があって...冤罪で訴えられたことがあって。', side: 'right' },
+      { speaker: 'ヤス',   text: 'それは...大変でしたね。', side: 'left' },
+      { speaker: 'タツオ', text: '無罪にはなりましたが...その後、仕事を見つけるのが大変で。やっとここに落ち着いたんです。', side: 'right' },
+      { speaker: 'ヤス',   text: 'ジンさんに、その話を...？', side: 'left' },
+      { speaker: 'タツオ', text: '...履歴書に書いてあったんでしょう。「また問題を起こしたくなければ黙っていろ」と言われました。', side: 'right' },
+      { speaker: 'ヤス',   text: 'ひどい話ですね...', side: 'left' },
+      { speaker: 'タツオ', text: '...夜中に来ていたのは、ジンさんです。私は...見ていました。', side: 'right' },
+    ],
+  },
+  // 第二章 Scene13（29回目）ハルトが内情を暴露
+  c2s13: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_09.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'fade', autoClose: false,
+    script: [
+      { speaker: 'ハルト', text: '...やっぱり、話します。', side: 'right' },
+      { speaker: 'ヤス',   text: '聞かせてください。', side: 'left' },
+      { speaker: 'ハルト', text: 'ジンさんから先週、「3号室と5号室の前に、これを置いてきてほしい」って頼まれました。', side: 'right' },
+      { speaker: 'ヤス',   text: '何を置くように？', side: 'left' },
+      { speaker: 'ハルト', text: '封筒です。中身は見せてもらえなかったんですが...「住んでいられなくなるようなこと」って言ってて。', side: 'right' },
+      { speaker: 'ヤス',   text: '置きましたか？', side: 'left' },
+      { speaker: 'ハルト', text: '...置きました。怖かったけど、断れなくて...僕も、悪いことしたと思ってます。', side: 'right' },
+      { speaker: 'ヤス',   text: '正直に話してくれてありがとう。あなたのことは守ります。', side: 'left' },
+    ],
+  },
+  // 第二章 Scene14（30回目）ユウの証言②
+  c2s14: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_07.png',
+    right2Img:    'img/image_merge_order_chara_08.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'fade',
+    right2Entrance:'fade',
+    rightShifted:  true, autoClose: false,
+    script: [
+      { speaker: 'ユウ',  text: 'この前のおじさん、また来てた。', side: 'right2' },
+      { speaker: 'リナ',  text: 'えっ！？いつ？', side: 'right' },
+      { speaker: 'ユウ',  text: '昨日の夜...同じスーツのおじさん。', side: 'right2' },
+      { speaker: 'ヤス',  text: 'どんな顔だったか、覚えてる？', side: 'left' },
+      { speaker: 'ユウ',  text: 'うーん...眼鏡はしてなくて...ちょっと疲れた顔のおじさん。', side: 'right2' },
+      { speaker: 'ヤス',  text: '（写真を見せる）この人？', side: 'left' },
+      { speaker: 'ユウ',  text: '...うん！このおじさん！', side: 'right2' },
+      { speaker: 'リナ',  text: '...ジンさん？', side: 'right' },
+    ],
+  },
+  // 第二章 Scene15（31回目）証拠が揃う・ヤス独り言
+  c2s15: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade', flipLeft: true,
+    autoClose:    false,
+    script: [
+      { speaker: 'ヤス', text: 'タツオさんの証言...ハルトさんの証言...ユウちゃんの目撃...', side: 'left' },
+      { speaker: 'ヤス', text: 'そして、ジンさん自身の言葉...。', side: 'left' },
+      // 伏線③：静かな満足感
+      { speaker: 'ヤス', text: '...全て、揃いました。', side: 'left' },
+    ],
+  },
+  // 第二章 Scene16（32回目）ジンに問い詰める①
+  c2s16: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_06.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'slide', autoClose: false,
+    script: [
+      { speaker: 'ヤス',  text: 'ジンさん...少し、お話いいですか。', side: 'left' },
+      { speaker: 'ジン',  text: 'はい、どうされましたか？', side: 'right' },
+      { speaker: 'ヤス',  text: '「サンライズ ヒルズ」の住人への嫌がらせ...心当たりはありますか？', side: 'left' },
+      { speaker: 'ジン',  text: '...え？何のことですか？', side: 'right' },
+      { speaker: 'ヤス',  text: 'ドアへの細工、不審な封筒、深夜の訪問...。', side: 'left' },
+      { speaker: 'ジン',  text: '私は...何も...', side: 'right' },
+      { speaker: 'ヤス',  text: '今日はここまでにしましょう。', side: 'left' },
+    ],
+  },
+  // 第二章 Scene17（33回目）ジンが吐露
+  c2s17: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_06.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'fade', autoClose: false,
+    script: [
+      { speaker: 'ジン',  text: '...わかりました。話します。', side: 'right' },
+      { speaker: 'ヤス',  text: '聞かせてください。', side: 'left' },
+      { speaker: 'ジン',  text: '上司から「あのマンションを半年で空にしろ」と言われて...断れば、私の過去の失敗を会社中に広める、と。', side: 'right' },
+      { speaker: 'ヤス',  text: '過去の失敗...？', side: 'left' },
+      { speaker: 'ジン',  text: '数年前に、業務上のミスで会社に損害を出したことがあって...上司はずっとそれを握っていたんです。', side: 'right' },
+      { speaker: 'ヤス',  text: 'それで...やるしかなかった、と。', side: 'left' },
+      { speaker: 'ジン',  text: '...はい。でも、もう、限界で...', side: 'right' },
+    ],
+  },
+  // 第二章 Scene18（34回目）全行為が判明
+  c2s18: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_06.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'fade', autoClose: false,
+    script: [
+      { speaker: 'ヤス',  text: '確認させてください...深夜の訪問も、封筒も、全てジンさんが？', side: 'left' },
+      { speaker: 'ジン',  text: '...はい。全て、私がやりました。', side: 'right' },
+      { speaker: 'ヤス',  text: 'ハルトさんにも、指示を出しましたか？', side: 'left' },
+      { speaker: 'ジン',  text: '...出しました。あの子を巻き込んだことが、一番...後悔しています。', side: 'right' },
+      { speaker: 'ヤス',  text: 'タツオさんを脅したことも？', side: 'left' },
+      { speaker: 'ジン',  text: '...はい。最低なことをしました。', side: 'right' },
+    ],
+  },
+  // 第二章 Scene19（35回目）対峙・逃走
+  c2s19: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_06.png',
+    bg:           'img/image_merge_bg_light.png',
+    leftEntrance: 'fade', flipLeft: true,
+    rightEntrance:'fade', autoClose: false,
+    script: [
+      { speaker: 'ヤス',  text: '警察に話しましょう。私も同行します。', side: 'left' },
+      { speaker: 'ジン',  text: '...そうですね。でも、その前に...会社に連絡してもいいですか？', side: 'right' },
+      { speaker: 'ヤス',  text: '...わかりました。', side: 'left' },
+      { speaker: 'ジン',  text: '（立ち上がる）...少し、外の空気を吸ってきます。', side: 'right' },
+      { hideAll: true, autoAdvance: true, advanceDelay: 600 },
+      { setBg: 'img/image_merge_bg_light.png', autoAdvance: true, advanceDelay: 300 },
+      { sound: '...', autoAdvance: true, advanceDelay: 1200 },
+      { sound: '...', autoAdvance: true, advanceDelay: 1200 },
+      { sound: '...', autoAdvance: true, advanceDelay: 1200 },
+      { speaker: 'ヤス', text: '...行かれましたね。', side: 'left', showLeft: true, slideLeft: true, flipLeft: true },
+    ],
+  },
+  // 第二章 Scene20（36回目）エピローグ・ヤスの伏線④
+  c2s20: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade', flipLeft: true,
+    autoClose:    false,
+    script: [
+      { speaker: 'ヤス', text: 'リナさんとユウちゃんの暮らしは...守れましたね。', side: 'left' },
+      { speaker: 'ヤス', text: 'ジンさんも...ようやく楽になれたでしょう。', side: 'left' },
+      // 伏線④：すでに「次」を知っているような口調
+      { speaker: 'ヤス', text: '...次は、どんな依頼が来るでしょうか。', side: 'left' },
+    ],
+  },
+  // ===== 第一章スライド01（2,000コインで解放）=====
   scene02: {
     title:         '',
     leftImg:       'img/image_merge_order_chara_00.png',
@@ -2513,7 +2888,11 @@ function showAdvMessage(idx) {
   if (msg.sound !== undefined) {
     document.getElementById('adv-speaker').textContent  = '';
     document.getElementById('adv-text').textContent     = msg.sound;
-    document.getElementById('adv-tap-hint').textContent = '▼ タップで続ける';
+    document.getElementById('adv-tap-hint').textContent = msg.autoAdvance ? '' : '▼ タップで続ける';
+    if (msg.autoAdvance) {
+      advTextPending = true;
+      setTimeout(() => { advTextPending = false; advMsgIdx++; showAdvMessage(advMsgIdx); }, msg.advanceDelay ?? 800);
+    }
     return;
   }
 
@@ -2765,6 +3144,15 @@ document.getElementById('debug-adv-scene16').addEventListener('click', () => {
 document.getElementById('debug-adv-scene17').addEventListener('click', () => {
   document.getElementById('debug-screen').classList.add('hidden');
   openAdventureScene('scene17');
+});
+// 第二章デバッグボタン
+['c2s01','c2s02','c2s03','c2s04','c2s05','c2s06','c2s07','c2s08','c2s09','c2s10',
+ 'c2s11','c2s12','c2s13','c2s14','c2s15','c2s16','c2s17','c2s18','c2s19','c2s20'
+].forEach(id => {
+  document.getElementById(`debug-adv-${id}`).addEventListener('click', () => {
+    document.getElementById('debug-screen').classList.add('hidden');
+    openAdventureScene(id);
+  });
 });
 
 document.getElementById('story-btn').addEventListener('click', () => {
@@ -3864,7 +4252,28 @@ function progressStory() {
   else if (state.storyCount === 14) sceneId = 'scene15';
   else if (state.storyCount === 15) sceneId = 'scene16';
   else if (state.storyCount === 16) sceneId = 'scene17';
-  else sceneId = 'scene02'; // 未実装分はフォールバック
+  // ===== 第二章 =====
+  else if (state.storyCount === 17) sceneId = 'c2s01';
+  else if (state.storyCount === 18) sceneId = 'c2s02';
+  else if (state.storyCount === 19) sceneId = 'c2s03';
+  else if (state.storyCount === 20) sceneId = 'c2s04';
+  else if (state.storyCount === 21) sceneId = 'c2s05';
+  else if (state.storyCount === 22) sceneId = 'c2s06';
+  else if (state.storyCount === 23) sceneId = 'c2s07';
+  else if (state.storyCount === 24) sceneId = 'c2s08';
+  else if (state.storyCount === 25) sceneId = 'c2s09';
+  else if (state.storyCount === 26) sceneId = 'c2s10';
+  else if (state.storyCount === 27) sceneId = 'c2s11';
+  else if (state.storyCount === 28) sceneId = 'c2s12';
+  else if (state.storyCount === 29) sceneId = 'c2s13';
+  else if (state.storyCount === 30) sceneId = 'c2s14';
+  else if (state.storyCount === 31) sceneId = 'c2s15';
+  else if (state.storyCount === 32) sceneId = 'c2s16';
+  else if (state.storyCount === 33) sceneId = 'c2s17';
+  else if (state.storyCount === 34) sceneId = 'c2s18';
+  else if (state.storyCount === 35) sceneId = 'c2s19';
+  else if (state.storyCount === 36) sceneId = 'c2s20';
+  else sceneId = 'c2s01'; // 未実装分はフォールバック
   openAdventureScene(sceneId);
 }
 
