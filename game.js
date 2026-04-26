@@ -1929,8 +1929,8 @@ const ADV_SCENES = {
     rightEntrance:'slide',
     autoClose:    false,
     script: [
-      { speaker: 'ミサキ', text: 'すみません...こちら、探偵事務所ですよね。', side: 'right' },
-      { speaker: 'ヤス',   text: 'はい。どうされましたか？', side: 'left' },
+      { speaker: 'ミサキ', text: 'すみません...', side: 'right' },
+      { speaker: 'ヤス',   text: 'どうされましたか？', side: 'left' },
       { speaker: 'ミサキ', text: '元彼に...つけ回されていて...。警察に相談したんですが、証拠がないと言われてしまって。', side: 'right' },
       { speaker: 'ヤス',   text: 'いつ頃から、ですか？', side: 'left' },
       { speaker: 'ミサキ', text: '別れてから３ヶ月くらい...最初は偶然かと思っていたんですけど...明らかに、追いかけてきてて。', side: 'right' },
@@ -1951,19 +1951,55 @@ const ADV_SCENES = {
     rightEntrance:'fade',
     autoClose:    false,
     script: [
-      { speaker: 'ミサキ', text: '他にも...シンジが最近、妙な行動をとっていて...。', side: 'right' },
-      { speaker: 'ヤス',   text: '妙な行動、というのは？', side: 'left' },
-      { speaker: 'ミサキ', text: '私の知り合いに嫌がらせをしているみたいで...猫が好きな子なんですけど、その子の猫が突然いなくなって。', side: 'right' },
-      // 伏線②：すでに答えを知っているような「間」
-      { speaker: 'ヤス',   text: '...その方のお名前は？', side: 'left' },
-      { speaker: 'ミサキ', text: 'ミユちゃんといいます。小学生の子で...。', side: 'right' },
-      { speaker: 'ヤス',   text: '...そうですか。', side: 'left' },
-      { speaker: 'ミサキ', text: '関係あると思いますか？', side: 'right' },
-      { speaker: 'ヤス',   text: '...大いに、あると思います。', side: 'left' },
+      { speaker: 'ミサキ', text: 'シンジが...私以外の誰かにも、何かしているような気がしていて...。', side: 'right' },
+      { speaker: 'ヤス',   text: '少し、調べてみました。', side: 'left' },
+      { speaker: 'ミサキ', text: '...何かわかりましたか？', side: 'right' },
+      // 伏線②：調べればわかることをすでに知っているような口調
+      { speaker: 'ヤス',   text: 'シンジさんの行動を辿ると...通常の配達以外に、特定の住所へ繰り返し足を運んでいる記録がありました。', side: 'left' },
+      { speaker: 'ミサキ', text: '...誰の家ですか？', side: 'right' },
+      { speaker: 'ヤス',   text: 'まだ確認中です。もう少し調べさせてください。', side: 'left' },
+      { speaker: 'ミサキ', text: '...お願いします。', side: 'right' },
     ],
   },
   // 第一章スライド10（10回目のコイン支払い時）
   scene11: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    rightImg:     'img/image_merge_order_chara_03.png',
+    bg:           'img/image_merge_bg_hiruma.png',
+    leftEntrance: 'fade',
+    flipLeft:     true,
+    rightEntrance:'slide',
+    autoClose:    false,
+    script: [
+      { speaker: 'ヤス',     text: 'ケンイチさん、少し気になることがあって。', side: 'left' },
+      { speaker: 'ケンイチ', text: '...何でしょうか。', side: 'right' },
+      { speaker: 'ヤス',     text: '最近、見知らぬ人物につけられていると感じることはありませんか？', side: 'left' },
+      { speaker: 'ケンイチ', text: '...いえ、特には...。', side: 'right' },
+      { speaker: 'ヤス',     text: '外出先で、不審なことは？', side: 'left' },
+      { speaker: 'ケンイチ', text: '...何もないです。', side: 'right' },
+      { speaker: 'ヤス',     text: '...そうですか。失礼しました。', side: 'left' },
+      // ヤス独り言・伏線
+      { speaker: 'ヤス',     text: '（独り言）...やはり、何かある。', side: 'left' },
+    ],
+  },
+  // 第一章スライド11（11回目のコイン支払い時）不倫現場を目撃
+  scene12: {
+    title:        '',
+    leftImg:      'img/image_merge_order_chara_00.png',
+    bg:           'img/image_merge_bg_road_night.png',
+    leftEntrance: 'fade',
+    flipLeft:     true,
+    autoClose:    false,
+    script: [
+      { speaker: 'ヤス', text: '（独り言）...いた。', side: 'left' },
+      { speaker: 'ヤス', text: '...ケンイチさんと、あの女性は...。', side: 'left' },
+      { speaker: 'ヤス', text: '（しばらく観察する）...', side: 'left' },
+      { speaker: 'ヤス', text: '...なるほど。シンジさんが怒るのも、無理はない。', side: 'left' },
+    ],
+  },
+  // 第一章スライド12（12回目のコイン支払い時）ミサキに突きつける
+  scene13: {
     title:        '',
     leftImg:      'img/image_merge_order_chara_00.png',
     rightImg:     'img/image_merge_order_chara_04.png',
@@ -1973,20 +2009,18 @@ const ADV_SCENES = {
     rightEntrance:'fade',
     autoClose:    false,
     script: [
-      { speaker: 'ヤス',   text: 'ひとつ、聞いてもよろしいですか。', side: 'left' },
-      { speaker: 'ミサキ', text: '...はい。', side: 'right' },
-      { speaker: 'ヤス',   text: 'シンジさんが嫌がらせをしているのは、ミユちゃんの家族に対してですよね。なぜ、そちらの家族を？', side: 'left' },
-      { speaker: 'ミサキ', text: '...それは...。', side: 'right' },
-      { speaker: 'ヤス',   text: '話していただかないと、動けません。', side: 'left' },
-      { speaker: 'ミサキ', text: '...ミユちゃんのお父さんと...私、付き合っているんです。', side: 'right' },
-      { speaker: 'ヤス',   text: 'ケンイチさんと、ですか。', side: 'left' },
-      { speaker: 'ミサキ', text: 'はい...シンジはそれを知って...逆上して...。私への嫌がらせだけじゃなくて、ケンイチさんへも...。', side: 'right' },
-      // 伏線③：静かすぎる確信
-      { speaker: 'ヤス',   text: '全て、繋がりましたね。', side: 'left' },
+      { speaker: 'ヤス',   text: '昨夜、ケンイチさんとご一緒でしたよね。', side: 'left' },
+      { speaker: 'ミサキ', text: '...（沈黙）', side: 'right' },
+      { speaker: 'ヤス',   text: '正直に話していただけますか。', side: 'left' },
+      { speaker: 'ミサキ', text: '...（長い沈黙）...はい。', side: 'right' },
+      { speaker: 'ヤス',   text: 'シンジさんは、それを知っている。', side: 'left' },
+      { speaker: 'ミサキ', text: '...おそらく。だから、ケンイチさんの家族にも...。', side: 'right' },
+      { speaker: 'ヤス',   text: '...なぜ、もっと早く話してくれなかったのですか。', side: 'left' },
+      { speaker: 'ミサキ', text: '...言えなかったんです。ケンイチさんは、奥さんもいるから...。', side: 'right' },
     ],
   },
-  // 第一章スライド11（11回目のコイン支払い時）
-  scene12: {
+  // 第一章スライド13（13回目のコイン支払い時）夜のシンジ尾行
+  scene14: {
     title:        '',
     leftImg:      'img/image_merge_order_chara_00.png',
     bg:           'img/image_merge_bg_road_night.png',
@@ -1994,16 +2028,15 @@ const ADV_SCENES = {
     flipLeft:     true,
     autoClose:    false,
     script: [
-      { speaker: 'ヤス', text: '（独り言）...見えました。', side: 'left' },
-      { speaker: 'ヤス', text: 'ハヤブサ便の配達を装って...この時間に動いているのか。', side: 'left' },
+      { speaker: 'ヤス', text: '...また、この時間に動いている。', side: 'left' },
+      { speaker: 'ヤス', text: 'ハヤブサ便の制服を着て...それでも、配達ではないな。', side: 'left' },
       { speaker: 'ヤス', text: '（しばらく観察する）...', side: 'left' },
       // シンジの裏の顔の片鱗
-      { speaker: 'ヤス', text: '...あの子の目つき。昼間とは、まるで違う。', side: 'left' },
-      { speaker: 'ヤス', text: '証拠は、揃いました。', side: 'left' },
+      { speaker: 'ヤス', text: '...昼間とは、まるで別の顔だ。', side: 'left' },
     ],
   },
-  // 第一章スライド12（12回目のコイン支払い時）
-  scene13: {
+  // 第一章スライド14（14回目のコイン支払い時）シンジ対峙・豹変
+  scene15: {
     title:        '',
     leftImg:      'img/image_merge_order_chara_00.png',
     rightImg:     'img/image_merge_order_chara_05aa.png',
@@ -2014,20 +2047,22 @@ const ADV_SCENES = {
     autoClose:    false,
     script: [
       { speaker: 'シンジ', text: '...呼びましたか？', side: 'right' },
-      { speaker: 'ヤス',   text: 'はい。少し、確認させてください。', side: 'left' },
-      { speaker: 'シンジ', text: '...何でしょう。', side: 'right' },
-      { speaker: 'ヤス',   text: 'ミケを連れ去ったのは、あなたですか。', side: 'left' },
-      { speaker: 'シンジ', text: '...何の話ですか。', side: 'right' },
-      { speaker: 'ヤス',   text: 'ナナコさんへの荷物。ケンイチさんへの嫌がらせ。ミサキさんへのストーカー行為。全て、あなたですね。', side: 'left' },
+      { speaker: 'ヤス',   text: 'はい。確認したいことがあって。', side: 'left' },
+      { speaker: 'シンジ', text: '何でしょう？', side: 'right' },
+      { speaker: 'ヤス',   text: 'ナナコさんに届けた荷物...中身は何ですか？', side: 'left' },
+      { speaker: 'シンジ', text: '...荷物、ですか？配達の仕事ですから、色々と運びますよ。', side: 'right' },
+      { speaker: 'ヤス',   text: '差出人不明で届けた荷物です。それから、ケンイチさんへの嫌がらせ。ミサキさんへのストーカー行為。', side: 'left' },
+      { speaker: 'シンジ', text: '...（沈黙）...それが、何か？', side: 'right' },
+      { speaker: 'ヤス',   text: 'あなたがやったことです。', side: 'left' },
       // 豹変：表の顔→裏の顔に画像切り替え
       { speaker: 'シンジ', text: '...（長い沈黙）...ハ。', side: 'right', changeRightImg: 'img/image_merge_order_chara_05a.png' },
-      { speaker: 'シンジ', text: '全部バレてたんですか。まあ、いいですけど。ミサキが浮気するのが悪いんで。', side: 'right' },
-      { speaker: 'ヤス',   text: '猫は、どこにいますか。', side: 'left' },
-      { speaker: 'シンジ', text: '安全なところに置いてありますよ。...もう、用はないですけどね。', side: 'right' },
+      { speaker: 'シンジ', text: '全部わかってるんですか。...別にいいですよ。ミサキが裏切るのが悪いんで。', side: 'right' },
+      { speaker: 'ヤス',   text: 'ケンイチさんの家族まで巻き込んだのは、なぜですか。', side: 'left' },
+      { speaker: 'シンジ', text: 'あの男に、ちゃんと痛い目を見てもらいたかったんで。それだけです。', side: 'right' },
     ],
   },
-  // 第一章スライド13・完結（13回目のコイン支払い時）
-  scene14: {
+  // 第一章スライド15・完結（15回目のコイン支払い時）逃走
+  scene16: {
     title:        '',
     leftImg:      'img/image_merge_order_chara_00.png',
     rightImg:     'img/image_merge_order_chara_05a.png',
@@ -2038,17 +2073,15 @@ const ADV_SCENES = {
     autoClose:    false,
     script: [
       { speaker: 'ヤス',   text: '警察に連絡します。動かないでください。', side: 'left' },
-      { speaker: 'シンジ', text: '...ちょっとだけ、電話していいですか。上司に連絡しないといけないんで。', side: 'right' },
-      { speaker: 'ヤス',   text: '...わかりました。', side: 'left' },
-      { speaker: 'シンジ', text: '（立ち上がり、ドアへ向かう）...あ、そうだ。猫はあの道沿いの公園にいますよ。ケージに入れてあるんで。', side: 'right' },
+      { speaker: 'シンジ', text: '...少しだけ、外の空気を吸っていいですか。', side: 'right' },
+      { speaker: 'ヤス',   text: '...（間）...わかりました。', side: 'left' },
       // シンジが去る
-      { hideAll: true, autoAdvance: true, advanceDelay: 800 },
+      { hideAll: true, autoAdvance: true, advanceDelay: 1000 },
       // ヤスが独り言
       { speaker: 'ヤス', text: '...行きましたか。', side: 'left', showLeft: true, slideLeft: true, flipLeft: true },
-      { speaker: 'ヤス', text: 'ミユちゃんのところに、連絡を入れましょう。', side: 'left' },
-      { speaker: 'ヤス', text: '...それにしても。', side: 'left' },
-      // 伏線④：意味深な微笑み
-      { speaker: 'ヤス', text: '全てが、綺麗に繋がりましたね。', side: 'left' },
+      // 伏線④：短く、静かに
+      { speaker: 'ヤス', text: 'ミサキさん、ケンイチさん...それぞれに、連絡を入れましょう。', side: 'left' },
+      { speaker: 'ヤス', text: '...さて。', side: 'left' },
     ],
   },
   // 第一章スライド01（2,000コインで解放）
@@ -2693,6 +2726,14 @@ document.getElementById('debug-adv-scene13').addEventListener('click', () => {
 document.getElementById('debug-adv-scene14').addEventListener('click', () => {
   document.getElementById('debug-screen').classList.add('hidden');
   openAdventureScene('scene14');
+});
+document.getElementById('debug-adv-scene15').addEventListener('click', () => {
+  document.getElementById('debug-screen').classList.add('hidden');
+  openAdventureScene('scene15');
+});
+document.getElementById('debug-adv-scene16').addEventListener('click', () => {
+  document.getElementById('debug-screen').classList.add('hidden');
+  openAdventureScene('scene16');
 });
 
 document.getElementById('story-btn').addEventListener('click', () => {
@@ -3789,6 +3830,8 @@ function progressStory() {
   else if (state.storyCount === 11) sceneId = 'scene12';
   else if (state.storyCount === 12) sceneId = 'scene13';
   else if (state.storyCount === 13) sceneId = 'scene14';
+  else if (state.storyCount === 14) sceneId = 'scene15';
+  else if (state.storyCount === 15) sceneId = 'scene16';
   else sceneId = 'scene02'; // 未実装分はフォールバック
   openAdventureScene(sceneId);
 }
