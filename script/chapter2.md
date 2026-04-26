@@ -14,10 +14,10 @@
 
 | 名前 | 年齢 | 属性 | 画像 |
 |------|------|------|------|
-| ジン | 39歳 | 不動産管理会社勤務・犯人・ヤスの被害者 | `image_merge_order_chara_06.png` |
+| ジン | 39歳 | 不動産管理会社勤務・犯人・ヤスの被害者 | `image_merge_order_chara_06a.png` |
 | リナ | 37歳 | シングルマザー・依頼人 | `image_merge_order_chara_07.png` |
 | ユウ | 10歳 | リナの子・目撃者 | `image_merge_order_chara_08.png` |
-| ハルト | 20歳 | 大学生・ジンの会社でバイト | `image_merge_order_chara_09.png` |
+| ハルト | 20歳 | 大学生・ジンの会社でバイト | `image_merge_order_chara_09a.png` |
 | タツオ | 44歳 | マンション警備員・冤罪の過去 | `image_merge_order_chara_10.png` |
 
 ---

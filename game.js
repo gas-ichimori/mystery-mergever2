@@ -995,10 +995,10 @@ const REQUESTERS = [
   { id: 4, name: '依頼人⑤', img: 'img/image_merge_order_chara_04.png' },
   { id: 5, name: '依頼人⑥', img: 'img/image_merge_order_chara_05.png' },
   // 第二章（id: 6-10）
-  { id: 6,  name: 'ジン',   img: 'img/image_merge_order_chara_06.png' },
+  { id: 6,  name: 'ジン',   img: 'img/image_merge_order_chara_06a.png' },
   { id: 7,  name: 'リナ',   img: 'img/image_merge_order_chara_07.png' },
   { id: 8,  name: 'ユウ',   img: 'img/image_merge_order_chara_08.png' },
-  { id: 9,  name: 'ハルト', img: 'img/image_merge_order_chara_09.png' },
+  { id: 9,  name: 'ハルト', img: 'img/image_merge_order_chara_09a.png' },
   { id: 10, name: 'タツオ', img: 'img/image_merge_order_chara_10.png' },
 ];
 
@@ -1719,10 +1719,10 @@ const CHARACTERS = [
   { img: 'img/image_merge_order_chara_03.png',  name: 'ケンイチ', age: '34歳', desc: 'ナナコの夫' },
   { img: 'img/image_merge_order_chara_04.png',  name: 'ミサキ',   age: '27歳', desc: '会社員' },
   { img: 'img/image_merge_order_chara_05.png',  name: 'シンジ',   age: '27歳', desc: '配達員' },
-  { img: 'img/image_merge_order_chara_06.png',  name: 'ジン',     age: '39歳', desc: '不動産管理会社勤務' },
+  { img: 'img/image_merge_order_chara_06a.png',  name: 'ジン',     age: '39歳', desc: '不動産管理会社勤務' },
   { img: 'img/image_merge_order_chara_07.png',  name: 'リナ',     age: '37歳', desc: 'シングルマザー' },
   { img: 'img/image_merge_order_chara_08.png',  name: 'ユウ',     age: '10歳', desc: 'リナの子供' },
-  { img: 'img/image_merge_order_chara_09.png',  name: 'ハルト',   age: '20歳', desc: '大学生' },
+  { img: 'img/image_merge_order_chara_09a.png',  name: 'ハルト',   age: '20歳', desc: '大学生' },
   { img: 'img/image_merge_order_chara_10.png',  name: 'タツオ',   age: '44歳', desc: '警備員' },
 ];
 
@@ -2235,7 +2235,7 @@ const ADV_SCENES = {
   c2s07: {
     title:        '',
     leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_09.png',
+    rightImg:     'img/image_merge_order_chara_09a.png',
     bg:           'img/image_merge_bg_road_light.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'slide', autoClose: false,
@@ -2255,7 +2255,7 @@ const ADV_SCENES = {
   c2s08: {
     title:        '',
     leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_09.png',
+    rightImg:     'img/image_merge_order_chara_09a.png',
     bg:           'img/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'slide', autoClose: false,
@@ -2274,7 +2274,7 @@ const ADV_SCENES = {
   c2s09: {
     title:        '',
     leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_06.png',
+    rightImg:     'img/image_merge_order_chara_06a.png',
     bg:           'img/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'slide', autoClose: false,
@@ -2348,7 +2348,7 @@ const ADV_SCENES = {
   c2s13: {
     title:        '',
     leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_09.png',
+    rightImg:     'img/image_merge_order_chara_09a.png',
     bg:           'img/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'fade', autoClose: false,
@@ -2420,7 +2420,7 @@ const ADV_SCENES = {
   c2s16: {
     title:        '',
     leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_06.png',
+    rightImg:     'img/image_merge_order_chara_06a.png',
     bg:           'img/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'slide', autoClose: false,
@@ -2438,7 +2438,7 @@ const ADV_SCENES = {
   c2s17: {
     title:        '',
     leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_06.png',
+    rightImg:     'img/image_merge_order_chara_06a.png',
     bg:           'img/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'fade', autoClose: false,
@@ -2456,7 +2456,7 @@ const ADV_SCENES = {
   c2s18: {
     title:        '',
     leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_06.png',
+    rightImg:     'img/image_merge_order_chara_06a.png',
     bg:           'img/image_merge_bg_hiruma.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'fade', autoClose: false,
@@ -2474,7 +2474,7 @@ const ADV_SCENES = {
   c2s19: {
     title:        '',
     leftImg:      'img/image_merge_order_chara_00.png',
-    rightImg:     'img/image_merge_order_chara_06.png',
+    rightImg:     'img/image_merge_order_chara_06a.png',
     bg:           'img/image_merge_bg_light.png',
     leftEntrance: 'fade', flipLeft: true,
     rightEntrance:'fade', autoClose: false,
